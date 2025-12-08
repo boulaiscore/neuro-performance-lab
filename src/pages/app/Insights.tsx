@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/contexts/SessionContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { BarChart3, Flame, Brain, Scale, TrendingUp, Clock, Lightbulb, Crown, Lock } from "lucide-react";
+import { BarChart3, FlaskConical, Target, Workflow, TrendingUp, Clock, Lightbulb, Crown, Lock } from "lucide-react";
 
 const Insights = () => {
   const { sessions, getSessionsByType } = useSession();
   const { user } = useAuth();
   const isPremium = user?.subscriptionStatus === "premium";
 
-  const stressSessions = getSessionsByType("stress").length;
+  const reasoningSessions = getSessionsByType("reasoning").length;
   const claritySessions = getSessionsByType("clarity").length;
   const decisionSessions = getSessionsByType("decision").length;
   const totalSessions = sessions.length;
@@ -43,14 +43,14 @@ const Insights = () => {
   // Generate insights
   const freeInsights = [
     totalSessions > 0 && `You've completed ${totalSessions} session${totalSessions !== 1 ? "s" : ""} so far. Keep building the habit!`,
-    mostUsedDuration && `Your preferred session length is ${mostUsedDuration}. ${mostUsedDuration === "30s" ? "Quick resets work well for you." : mostUsedDuration === "5min" ? "You value deep sessions." : "A balanced approach."}`,
+    mostUsedDuration && `Your preferred session length is ${mostUsedDuration}. ${mostUsedDuration === "30s" ? "Quick drills work well for you." : mostUsedDuration === "5min" ? "You value deep sessions." : "A balanced approach."}`,
   ].filter(Boolean);
 
   const premiumInsights = [
-    peakTime && `Your peak performance time is in the ${peakTime}. Consider scheduling important work then.`,
-    stressSessions > claritySessions && "You use stress protocols more often. Try starting your day with a clarity session for proactive mental prep.",
-    claritySessions > stressSessions && "You're proactive about clarity. Great habit for high performers!",
-    decisionSessions > 0 && "You're using Decision Pro. This is correlated with better outcomes in high-stakes situations.",
+    peakTime && `Your peak performance time is in the ${peakTime}. Consider scheduling important cognitive work then.`,
+    reasoningSessions > claritySessions && "You favor Reasoning Workouts. Consider adding Clarity Lab sessions for balanced cognitive development.",
+    claritySessions > reasoningSessions && "You're proactive about conceptual clarity. Excellent cognitive hygiene!",
+    decisionSessions > 0 && "You're using Decision Studio. This compounds into better strategic thinking over time.",
   ].filter(Boolean);
 
   return (
@@ -86,21 +86,21 @@ const Insights = () => {
                 </Card>
                 <Card variant="elevated" className="p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <Flame className="w-5 h-5 text-red-400" />
-                    <span className="text-2xl font-bold">{stressSessions}</span>
+                    <FlaskConical className="w-5 h-5 text-violet-400" />
+                    <span className="text-2xl font-bold">{reasoningSessions}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">Stress</p>
+                  <p className="text-sm text-muted-foreground">Reasoning</p>
                 </Card>
                 <Card variant="elevated" className="p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <Brain className="w-5 h-5 text-blue-400" />
+                    <Target className="w-5 h-5 text-blue-400" />
                     <span className="text-2xl font-bold">{claritySessions}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">Clarity</p>
                 </Card>
                 <Card variant="elevated" className="p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-1">
-                    <Scale className="w-5 h-5 text-purple-400" />
+                    <Workflow className="w-5 h-5 text-purple-400" />
                     <span className="text-2xl font-bold">{decisionSessions}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">Decision</p>
@@ -148,10 +148,10 @@ const Insights = () => {
                       </div>
                       <p className="text-muted-foreground text-sm">
                         {totalSessions} sessions completed. Your focus is on {
-                          stressSessions >= claritySessions && stressSessions >= decisionSessions
-                            ? "stress management"
-                            : claritySessions >= stressSessions && claritySessions >= decisionSessions
-                            ? "mental clarity"
+                          reasoningSessions >= claritySessions && reasoningSessions >= decisionSessions
+                            ? "critical thinking"
+                            : claritySessions >= reasoningSessions && claritySessions >= decisionSessions
+                            ? "conceptual clarity"
                             : "decision making"
                         }. Consider diversifying your protocols for balanced mental fitness.
                       </p>

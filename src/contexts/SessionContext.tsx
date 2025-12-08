@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import type { ProtocolType, DurationOption, FeelingOption } from "@/lib/protocols";
+import type { ProtocolType, DurationOption, MindsetOption } from "@/lib/protocols";
 
 export interface Session {
   id: string;
   userId: string;
   type: ProtocolType;
   durationOption: DurationOption;
-  feelingBefore: FeelingOption;
+  feelingBefore: MindsetOption;
   feelingAfterRating?: number;
   createdAt: Date;
   completedAt?: Date;
@@ -17,10 +17,10 @@ interface SessionContextType {
   currentSession: {
     type?: ProtocolType;
     durationOption?: DurationOption;
-    feelingBefore?: FeelingOption;
+    feelingBefore?: MindsetOption;
   } | null;
   startSession: (type: ProtocolType) => void;
-  setSessionParams: (params: { durationOption?: DurationOption; feelingBefore?: FeelingOption }) => void;
+  setSessionParams: (params: { durationOption?: DurationOption; feelingBefore?: MindsetOption }) => void;
   completeSession: (userId: string, feelingAfterRating?: number) => void;
   clearCurrentSession: () => void;
   getSessionsByType: (type: ProtocolType) => Session[];
@@ -51,7 +51,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [currentSession, setCurrentSession] = useState<{
     type?: ProtocolType;
     durationOption?: DurationOption;
-    feelingBefore?: FeelingOption;
+    feelingBefore?: MindsetOption;
   } | null>(null);
 
   const saveSessions = (newSessions: Session[]) => {
@@ -63,7 +63,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setCurrentSession({ type });
   };
 
-  const setSessionParams = (params: { durationOption?: DurationOption; feelingBefore?: FeelingOption }) => {
+  const setSessionParams = (params: { durationOption?: DurationOption; feelingBefore?: MindsetOption }) => {
     setCurrentSession((prev) => (prev ? { ...prev, ...params } : null));
   };
 
