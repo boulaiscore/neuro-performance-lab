@@ -32,7 +32,6 @@ export function SessionStartModal({ open, onOpenChange, onStart }: SessionStartM
   const handleStart = () => {
     if (selectedMindset && selectedDuration) {
       onStart();
-      // Reset for next time
       setStep("mindset");
       setSelectedMindset(null);
       setSelectedDuration(null);
@@ -52,9 +51,9 @@ export function SessionStartModal({ open, onOpenChange, onStart }: SessionStartM
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-card border-border">
+      <DialogContent className="sm:max-w-md bg-card border-border rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-xl">{moduleInfo?.title || "Start Session"}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{moduleInfo?.title || "Start Session"}</DialogTitle>
           {moduleInfo && (
             <p className="text-sm text-muted-foreground mt-1">{moduleInfo.subtitle}</p>
           )}
@@ -118,7 +117,7 @@ export function SessionStartModal({ open, onOpenChange, onStart }: SessionStartM
                 onClick={handleStart}
                 disabled={!selectedDuration}
                 variant="hero"
-                className="w-full mt-4 min-h-[52px]"
+                className="w-full mt-4 min-h-[52px] rounded-xl"
               >
                 Begin Training
                 <ArrowRight className="w-4 h-4" />
