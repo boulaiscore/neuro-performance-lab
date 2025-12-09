@@ -83,7 +83,15 @@ export interface UserCognitiveMetrics {
   critical_thinking_score: number;
   creativity: number;
   philosophical_reasoning: number;
+  focus_stability: number;
+  reaction_speed: number;
+  visual_processing: number;
+  spatial_reasoning: number;
   total_sessions: number;
+  cognitive_performance_score: number | null;
+  cognitive_readiness_score: number | null;
+  physio_component_score: number | null;
+  readiness_classification: string | null;
   updated_at: string;
   created_at: string;
 }
