@@ -63,23 +63,24 @@ export const NEURO_ACTIVATION_SEQUENCE = [
   "REASON_ANALOG_001",// Reasoning - Analogy
 ];
 
-// Exercise count configuration for Neuro Gym sessions based on user preference
+// Exercise count configuration for Neuro Gym sessions
+// All exercises are 30s, so count = total session time / 30s
 export function getNeuroGymExerciseCount(duration: NeuroGymDuration): { min: number; max: number } {
   switch (duration) {
     case "30s":
-      return { min: 1, max: 1 };
+      return { min: 1, max: 1 };     // 1 × 30s = 30s
     case "1min":
-      return { min: 1, max: 2 };
+      return { min: 2, max: 2 };     // 2 × 30s = 1min
     case "2min":
-      return { min: 2, max: 3 };
+      return { min: 4, max: 4 };     // 4 × 30s = 2min
     case "3min":
-      return { min: 2, max: 3 };
+      return { min: 6, max: 6 };     // 6 × 30s = 3min
     case "5min":
-      return { min: 3, max: 4 };
+      return { min: 10, max: 10 };   // 10 × 30s = 5min
     case "7min":
-      return { min: 4, max: 5 };
+      return { min: 14, max: 14 };   // 14 × 30s = 7min
     default:
-      return { min: 2, max: 3 };
+      return { min: 4, max: 4 };
   }
 }
 
