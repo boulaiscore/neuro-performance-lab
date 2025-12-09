@@ -218,7 +218,7 @@ export default function NeuroGymSessionRunner() {
     );
   }
 
-  if (exercisesLoading || sessionExercises.length === 0) {
+  if (exercisesLoading || sessionExercises.length === 0 || !currentExercise) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
