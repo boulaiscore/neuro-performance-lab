@@ -48,8 +48,8 @@ export function useCognitiveReadiness() {
     enabled: !!user?.id,
   });
 
-  // Calculate readiness
-  const calculateReadiness = () => {
+  // Get readiness from database (already calculated) or calculate if missing
+  const getReadiness = () => {
     if (!cognitiveMetrics) {
       return {
         cognitivePerformanceScore: null,
@@ -60,6 +60,18 @@ export function useCognitiveReadiness() {
       };
     }
 
+    // Use pre-calculated values from database if available
+    if (cognitiveMetrics.cognitive_readiness_score != null) {
+      return {
+        cognitivePerformanceScore: Number(cognitiveMetrics.cognitive_performance_score) || null,
+        physioComponentScore: Number(cognitiveMetrics.physio_component_score) || null,
+        cognitiveReadinessScore: Number(cognitiveMetrics.cognitive_readiness_score),
+        readinessClassification: cognitiveMetrics.readiness_classification || "MEDIUM",
+        hasWearableData: !!wearableSnapshot,
+      };
+    }
+
+    // Fallback: calculate locally if database values are missing
     const cognitiveInput = {
       reasoningAccuracy: Number(cognitiveMetrics.reasoning_accuracy) || 50,
       focusIndex: Number(cognitiveMetrics.focus_stability) || 50,
@@ -94,20 +106,43 @@ export function useCognitiveReadiness() {
     };
   };
 
-  // Mutation to update readiness in database
+  // Mutation to update readiness in database (for manual refresh)
   const updateReadinessMutation = useMutation({
     mutationFn: async () => {
       if (!user?.id || !cognitiveMetrics) return;
 
-      const readiness = calculateReadiness();
+      const cognitiveInput = {
+        reasoningAccuracy: Number(cognitiveMetrics.reasoning_accuracy) || 50,
+        focusIndex: Number(cognitiveMetrics.focus_stability) || 50,
+        workingMemoryScore: Number(cognitiveMetrics.visual_processing) || 50,
+        fastThinkingScore: Number(cognitiveMetrics.fast_thinking) || 50,
+        slowThinkingScore: Number(cognitiveMetrics.slow_thinking) || 50,
+      };
+
+      const wearableData: WearableSnapshot | null = wearableSnapshot
+        ? {
+            hrvMs: wearableSnapshot.hrv_ms ? Number(wearableSnapshot.hrv_ms) : null,
+            restingHr: wearableSnapshot.resting_hr ? Number(wearableSnapshot.resting_hr) : null,
+            sleepDurationMin: wearableSnapshot.sleep_duration_min ? Number(wearableSnapshot.sleep_duration_min) : null,
+            sleepEfficiency: wearableSnapshot.sleep_efficiency ? Number(wearableSnapshot.sleep_efficiency) : null,
+          }
+        : null;
+
+      const cognitivePerformanceScore = computeCognitiveComponent(cognitiveInput);
+      const physioComponentScore = computePhysioComponent(wearableData);
+      const cognitiveReadinessScore = computeCognitiveReadiness(
+        physioComponentScore,
+        cognitivePerformanceScore
+      );
+      const readinessClassification = classifyReadiness(cognitiveReadinessScore);
 
       const { error } = await supabase
         .from("user_cognitive_metrics")
         .update({
-          cognitive_performance_score: readiness.cognitivePerformanceScore,
-          physio_component_score: readiness.physioComponentScore,
-          cognitive_readiness_score: readiness.cognitiveReadinessScore,
-          readiness_classification: readiness.readinessClassification,
+          cognitive_performance_score: cognitivePerformanceScore,
+          physio_component_score: physioComponentScore,
+          cognitive_readiness_score: cognitiveReadinessScore,
+          readiness_classification: readinessClassification,
         })
         .eq("user_id", user.id);
 
@@ -118,7 +153,7 @@ export function useCognitiveReadiness() {
     },
   });
 
-  const readiness = calculateReadiness();
+  const readiness = getReadiness();
 
   return {
     ...readiness,
