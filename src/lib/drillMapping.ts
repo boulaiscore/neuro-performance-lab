@@ -120,6 +120,18 @@ export function getDrillTypeForExercise(exerciseId: string): DrillType {
     return "category_switch";                      // 041-050: Quick category logic
   }
   
+  // Critical Reasoning Slow Thinking exercises (CR_SLOW_001 - CR_SLOW_050)
+  if (id.startsWith("CR_SLOW_")) {
+    const num = parseInt(id.split("_")[2], 10);
+    
+    // Slow critical reasoning - deliberate analysis and structured thinking
+    if (num <= 10) return "sequence_logic";       // 001-010: Complex logical sequences
+    if (num <= 20) return "analogy_match";        // 011-020: Deep analogy analysis
+    if (num <= 30) return "pattern_sequence";     // 021-030: Multi-step patterns
+    if (num <= 40) return "rule_switch";          // 031-040: Rule-based decisions
+    return "category_switch";                      // 041-050: Category logic
+  }
+  
   // Critical Reasoning legacy exercises
   if (id.startsWith("CR_") || id.startsWith("REASONING_")) {
     const num = parseInt(id.split("_").pop() || "0", 10);
