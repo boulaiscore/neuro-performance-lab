@@ -1,20 +1,41 @@
-import { FlaskConical, Target, Workflow } from "lucide-react";
+import { Zap, Brain, Target } from "lucide-react";
 
-const modules = [
+const systems = [
   {
-    icon: FlaskConical,
-    title: "Reasoning Workout™",
-    description: "Drills for critical thinking and analytical sharpness. Spot fallacies, test assumptions, and strengthen logical reasoning.",
+    icon: Zap,
+    title: "Fast Thinking",
+    subtitle: "System 1",
+    description: "Train intuitive, rapid pattern recognition. Improve reaction speed, visual processing, and automatic decision-making under pressure.",
+    color: "text-amber-400",
+    bgColor: "bg-amber-400/10",
+    borderColor: "hover:border-amber-400/25",
+  },
+  {
+    icon: Brain,
+    title: "Slow Thinking",
+    subtitle: "System 2",
+    description: "Develop deliberate, analytical reasoning. Strengthen logic, reduce cognitive biases, and make better strategic decisions.",
+    color: "text-teal-400",
+    bgColor: "bg-teal-400/10",
+    borderColor: "hover:border-teal-400/25",
+  },
+];
+
+const areas = [
+  {
+    icon: Target,
+    title: "Focus Arena",
+    description: "Attention, reaction, visual search",
   },
   {
     icon: Target,
-    title: "Clarity Lab™",
-    description: "Exercises for conceptual precision and structured thought. Decompose complexity into actionable clarity.",
+    title: "Critical Reasoning",
+    description: "Logic, bias resistance, analysis",
   },
   {
-    icon: Workflow,
-    title: "Decision Studio™",
-    description: "Frameworks for strategic decision-making under uncertainty. Reduce bias, evaluate options, act with conviction.",
+    icon: Target,
+    title: "Creativity Hub",
+    description: "Divergent thinking, patterns, insight",
   },
 ];
 
@@ -25,32 +46,55 @@ export function HowItWorks() {
       
       <div className="container px-6 relative">
         <div className="text-center mb-16">
+          <p className="text-primary text-sm font-medium tracking-wider uppercase mb-3">
+            Based on Kahneman's Dual-Process Theory
+          </p>
           <h2 className="text-3xl sm:text-4xl font-semibold mb-5">
-            How NeuroLoop <span className="text-gradient">Works</span>
+            Train Both <span className="text-gradient">Thinking Systems</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-            Three specialized modules targeting different cognitive capabilities. Each session is 30 seconds to 5 minutes.
+            Nobel laureate Daniel Kahneman identified two cognitive systems that drive all thinking. 
+            NeuroLoop trains both for complete cognitive fitness.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {modules.map((module, index) => (
+        {/* Two Systems */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
+          {systems.map((system, index) => (
             <div
-              key={module.title}
-              className="relative p-8 rounded-xl bg-card border border-border hover:border-primary/25 transition-all duration-300 animate-fade-in-up shadow-card"
+              key={system.title}
+              className={`relative p-8 rounded-xl bg-card border border-border ${system.borderColor} transition-all duration-300 animate-fade-in-up shadow-card`}
               style={{ animationDelay: `${index * 0.15}s` }}
             >
-              {/* Module number */}
-              <span className="absolute top-6 right-6 text-xs font-semibold text-primary/40 tracking-wider">
-                0{index + 1}
-              </span>
-              
-              <div className="w-14 h-14 rounded-xl bg-primary/8 flex items-center justify-center mb-6">
-                <module.icon className="w-7 h-7 text-primary" />
+              <div className={`w-14 h-14 rounded-xl ${system.bgColor} flex items-center justify-center mb-6`}>
+                <system.icon className={`w-7 h-7 ${system.color}`} />
               </div>
               
-              <h3 className="text-xl font-semibold mb-3">{module.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{module.description}</p>
+              <p className={`text-xs font-medium ${system.color} tracking-wider uppercase mb-2`}>
+                {system.subtitle}
+              </p>
+              <h3 className="text-2xl font-semibold mb-3">{system.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{system.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Three Gym Areas */}
+        <div className="text-center mb-8">
+          <h3 className="text-xl font-semibold text-muted-foreground">
+            3 Specialized Training Areas
+          </h3>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+          {areas.map((area, index) => (
+            <div
+              key={area.title}
+              className="p-5 rounded-lg bg-card/50 border border-border/50 text-center animate-fade-in-up"
+              style={{ animationDelay: `${0.3 + index * 0.1}s` }}
+            >
+              <h4 className="font-semibold mb-1">{area.title}</h4>
+              <p className="text-muted-foreground text-xs">{area.description}</p>
             </div>
           ))}
         </div>
