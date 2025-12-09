@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Check, Clock, Zap, Brain, Lightbulb, Target, FlaskConical, Workflow, Sparkles, Scale, Eye, HardDrive, ShieldOff, Sliders, SlidersHorizontal, Flame, BookOpen, Compass } from "lucide-react";
+import { ArrowLeft, Check, Clock, Zap, Brain, Lightbulb, Target, FlaskConical, Workflow, Sparkles, Scale, Eye, HardDrive, ShieldOff, Sliders, SlidersHorizontal, Flame, BookOpen, Compass, Gamepad2, Move3D, MonitorPlay, Grid3X3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGenerateTrainingSession, useSaveTrainingSession, useUpdateUserMetrics } from "@/hooks/useExercises";
@@ -35,6 +35,10 @@ const CATEGORY_ICONS: Record<ExerciseCategory, React.ElementType> = {
   insight: Flame,
   reflection: BookOpen,
   philosophical: Compass,
+  visual: MonitorPlay,
+  spatial: Move3D,
+  game: Gamepad2,
+  visual_memory: Grid3X3,
 };
 
 const DynamicTrainingRunner = () => {

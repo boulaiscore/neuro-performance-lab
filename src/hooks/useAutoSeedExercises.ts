@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import cognitiveExercisesData from "@/data/cognitive_exercises.json";
 import { newNeuroExercises } from "@/data/neuro_exercises";
+import { visualExercises } from "@/data/visual_exercises";
 import type { ExerciseCategory, ExerciseType, ExerciseDifficulty, ExerciseDuration } from "@/lib/exercises";
 
 interface ExerciseData {
@@ -84,6 +85,32 @@ export function useAutoSeedExercises() {
           console.error("Error seeding neuro exercises:", neuroError);
         } else {
           console.log(`Successfully seeded ${newNeuroExercises.length} neuro exercises`);
+        }
+
+        // Also seed visual exercises (without visual_config - stored separately)
+        const visualDbExercises = visualExercises.map((ex) => ({
+          id: ex.id,
+          category: ex.category as ExerciseCategory,
+          type: ex.type as ExerciseType,
+          difficulty: ex.difficulty as ExerciseDifficulty,
+          duration: ex.duration as ExerciseDuration,
+          title: ex.title,
+          prompt: ex.prompt,
+          options: null,
+          correct_option_index: null,
+          explanation: ex.explanation,
+          metrics_affected: ex.metrics_affected,
+          weight: ex.weight,
+        }));
+
+        const { error: visualError } = await supabase
+          .from("cognitive_exercises")
+          .upsert(visualDbExercises, { onConflict: "id" });
+
+        if (visualError) {
+          console.error("Error seeding visual exercises:", visualError);
+        } else {
+          console.log(`Successfully seeded ${visualExercises.length} visual exercises`);
         }
       } catch (err) {
         console.error("Auto-seed error:", err);

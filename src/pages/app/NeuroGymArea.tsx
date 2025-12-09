@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/app/AppShell";
 import { NEURO_GYM_AREAS, NeuroGymArea as AreaType, NeuroGymDuration } from "@/lib/neuroGym";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Target, Brain, Sliders, Lightbulb, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, Target, Brain, Sliders, Lightbulb, Sparkles, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const AREA_ICONS: Record<string, React.ElementType> = {
@@ -11,11 +11,12 @@ const AREA_ICONS: Record<string, React.ElementType> = {
   Sliders,
   Lightbulb,
   Sparkles,
+  Gamepad2,
 };
 
 const DURATION_OPTIONS: { value: NeuroGymDuration; label: string; exercises: string }[] = [
-  { value: "3min", label: "3 Minutes", exercises: "2-3 exercises" },
-  { value: "7min", label: "7 Minutes", exercises: "3-5 exercises" },
+  { value: "3min", label: "3 Minutes", exercises: "2-3 drills" },
+  { value: "7min", label: "7 Minutes", exercises: "4-5 drills" },
 ];
 
 export default function NeuroGymArea() {
