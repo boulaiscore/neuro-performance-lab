@@ -4,6 +4,12 @@ import { NEURO_GYM_AREAS, NeuroGymArea } from "@/lib/neuroGym";
 import { Target, Brain, Sliders, Lightbulb, Sparkles, Zap, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const AREA_ICONS: Record<string, React.ElementType> = {
   Target,
@@ -25,10 +31,26 @@ export default function NeuroGym() {
     const hasFast = goals.includes("fast_thinking");
     const hasSlow = goals.includes("slow_thinking");
     
-    if (hasFast && hasSlow) return { label: "Fast & Slow", color: "bg-primary/20 text-primary" };
-    if (hasFast) return { label: "Fast Thinking", color: "bg-amber-500/20 text-amber-400" };
-    if (hasSlow) return { label: "Slow Thinking", color: "bg-blue-500/20 text-blue-400" };
-    return { label: "All Types", color: "bg-muted text-muted-foreground" };
+    if (hasFast && hasSlow) return { 
+      label: "Fast & Slow", 
+      color: "bg-primary/20 text-primary",
+      description: "You're training both thinking systems: rapid intuitive responses and deliberate analytical reasoning."
+    };
+    if (hasFast) return { 
+      label: "Fast Thinking", 
+      color: "bg-amber-500/20 text-amber-400",
+      description: "System 1: Quick, intuitive decisions. Pattern recognition and rapid responses under time pressure."
+    };
+    if (hasSlow) return { 
+      label: "Slow Thinking", 
+      color: "bg-blue-500/20 text-blue-400",
+      description: "System 2: Deliberate, analytical reasoning. Deep analysis and careful decision-making."
+    };
+    return { 
+      label: "All Types", 
+      color: "bg-muted text-muted-foreground",
+      description: "Set your thinking preference in onboarding to focus your training."
+    };
   };
 
   const thinkingType = getThinkingTypeLabel();
@@ -111,9 +133,21 @@ export default function NeuroGym() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold">{area.title}</h3>
-                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", thinkingType.color)}>
-                        {thinkingType.label}
-                      </span>
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span 
+                              className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium cursor-help", thinkingType.color)}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {thinkingType.label}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[250px] text-center">
+                            <p className="text-xs">{thinkingType.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                     <p className="text-xs text-primary/70 mt-0.5">{area.subtitle}</p>
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
