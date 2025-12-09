@@ -3,52 +3,98 @@ import { Link } from "react-router-dom";
 import { AppShell } from "@/components/app/AppShell";
 import { CognitiveAgeSphere } from "@/components/dashboard/CognitiveAgeSphere";
 import { NeuralGrowthAnimation } from "@/components/dashboard/NeuralGrowthAnimation";
-import { ThinkingPerformanceCircle } from "@/components/dashboard/ThinkingPerformanceCircle";
 import { FastSlowBrainMap } from "@/components/dashboard/FastSlowBrainMap";
 import { ThinkingSystemSources } from "@/components/dashboard/ThinkingSystemSources";
 import { CognitiveCoach } from "@/components/dashboard/CognitiveCoach";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Info, Zap, Brain, BarChart3, MessageCircle } from "lucide-react";
-import {
-  generateMockSnapshot,
-  generateMockBaseline,
-  calculateCognitivePerformanceScore,
-  calculateBrainAgeIndex,
-  calculateCriticalThinkingScore,
-  calculateCreativeScore,
-  calculateFocusIndex,
-  calculateDecisionQualityScore,
-  calculatePhilosophicalIndex,
-} from "@/lib/cognitiveMetrics";
+import { Info, Zap, Brain, BarChart3, MessageCircle, Loader2 } from "lucide-react";
+import { calculateBrainAgeIndex, CognitiveMetricsSnapshot } from "@/lib/cognitiveMetrics";
 import { computeFastSlowSystems } from "@/lib/thinkingSystems";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserMetrics } from "@/hooks/useExercises";
+import { useNeuroGymSessions } from "@/hooks/useNeuroGym";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const userId = "user-1";
-  const chronologicalAge = 35;
-
-  const snapshot = useMemo(() => generateMockSnapshot(userId), []);
-  const baseline = useMemo(() => generateMockBaseline(userId), []);
-  const previousSnapshot = useMemo(() => generateMockSnapshot(userId), []);
-
-  const cps = calculateCognitivePerformanceScore(snapshot, baseline);
-  const { brainAge, delta } = calculateBrainAgeIndex(chronologicalAge, cps);
-  const criticalThinking = calculateCriticalThinkingScore(snapshot);
-  const creativity = calculateCreativeScore(snapshot);
-  const focus = calculateFocusIndex(snapshot);
-  const decisionQuality = calculateDecisionQualityScore(snapshot);
-  const philosophicalIndex = calculatePhilosophicalIndex(snapshot);
-
-  const thinkingSystems = useMemo(
-    () => computeFastSlowSystems(snapshot, previousSnapshot),
-    [snapshot, previousSnapshot]
+  const { user } = useAuth();
+  
+  // Fetch real metrics from database
+  const { data: metrics, isLoading: metricsLoading } = useUserMetrics(user?.id);
+  
+  // Fetch sessions to count this week
+  const { data: sessions } = useNeuroGymSessions(user?.id);
+  
+  // Calculate sessions this week
+  const sessionsThisWeek = useMemo(() => {
+    if (!sessions) return 0;
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return sessions.filter(s => new Date(s.completed_at) >= oneWeekAgo).length;
+  }, [sessions]);
+  
+  // User's chronological age (default 35 if not set)
+  const chronologicalAge = user?.age || 35;
+  
+  // Build CognitiveMetricsSnapshot from real database metrics
+  const snapshot: CognitiveMetricsSnapshot = useMemo(() => ({
+    id: user?.id || "unknown",
+    userId: user?.id || "unknown",
+    date: new Date().toISOString(),
+    reactionTimeAvgMs: metrics?.reaction_speed ? (100 - metrics.reaction_speed) * 3 + 200 : 300,
+    reasoningAccuracy: (metrics?.reasoning_accuracy || 50) / 100,
+    clarityScoreRaw: metrics?.clarity_score || 50,
+    decisionQualityRaw: metrics?.decision_quality || 50,
+    creativityRaw: metrics?.creativity || 50,
+    focusStabilityRaw: metrics?.focus_stability || 50,
+    philosophicalDepthRaw: metrics?.philosophical_reasoning || 50,
+    fastThinkingScoreRaw: metrics?.fast_thinking || 50,
+    slowThinkingScoreRaw: metrics?.slow_thinking || 50,
+    sessionsCompleted: metrics?.total_sessions || 0,
+  }), [metrics, user?.id]);
+  
+  // Calculate Cognitive Performance Score from real metrics
+  const cps = useMemo(() => {
+    const reasoning = (metrics?.reasoning_accuracy || 50) / 100;
+    const clarity = (metrics?.clarity_score || 50) / 100;
+    const decision = (metrics?.decision_quality || 50) / 100;
+    const focus = (metrics?.focus_stability || 50) / 100;
+    // Weighted average
+    return 0.25 * reasoning + 0.25 * clarity + 0.25 * decision + 0.25 * focus;
+  }, [metrics]);
+  
+  // Calculate Brain Age from real data
+  const { brainAge, delta } = useMemo(() => 
+    calculateBrainAgeIndex(chronologicalAge, cps),
+    [chronologicalAge, cps]
   );
-
-  const overallScore = Math.round(
-    (criticalThinking + focus + decisionQuality + creativity) / 4
+  
+  // Calculate Thinking Systems from real data
+  const thinkingSystems = useMemo(() => 
+    computeFastSlowSystems(snapshot),
+    [snapshot]
   );
+  
+  // Overall score for neural animation
+  const overallScore = useMemo(() => {
+    return Math.round(
+      ((metrics?.reasoning_accuracy || 50) + 
+       (metrics?.focus_stability || 50) + 
+       (metrics?.decision_quality || 50) + 
+       (metrics?.creativity || 50)) / 4
+    );
+  }, [metrics]);
+
+  if (metricsLoading) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
@@ -126,16 +172,6 @@ const Dashboard = () => {
               </Link>
             </div>
 
-            {/* Thinking Performance Circle */}
-            <ThinkingPerformanceCircle
-              criticalThinking={criticalThinking}
-              clarity={Math.round(snapshot.clarityScoreRaw)}
-              focus={focus}
-              decisionQuality={decisionQuality}
-              creativity={creativity}
-              philosophicalReasoning={philosophicalIndex}
-            />
-
             {/* Thinking Systems Overview */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
@@ -162,10 +198,10 @@ const Dashboard = () => {
             <CognitiveCoach
               fastScore={thinkingSystems.fast.score}
               slowScore={thinkingSystems.slow.score}
-              focusScore={focus}
-              reasoningScore={criticalThinking}
-              creativityScore={creativity}
-              sessionsThisWeek={4}
+              focusScore={Math.round(metrics?.focus_stability || 50)}
+              reasoningScore={Math.round(metrics?.reasoning_accuracy || 50)}
+              creativityScore={Math.round(metrics?.creativity || 50)}
+              sessionsThisWeek={sessionsThisWeek}
             />
           </TabsContent>
         </Tabs>
