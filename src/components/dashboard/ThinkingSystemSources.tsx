@@ -36,14 +36,14 @@ export function ThinkingSystemSources() {
             {/* Dual bar visualization */}
             <div className="mb-2">
               <div className="flex h-2 rounded-full overflow-hidden bg-muted/30">
-                {/* Fast contribution */}
+                {/* Fast contribution - amber to match Thinking Systems */}
                 <div 
-                  className="bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-500"
+                  className="bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500"
                   style={{ width: `${area.fastContribution}%` }}
                 />
-                {/* Slow contribution */}
+                {/* Slow contribution - cyan to match Thinking Systems */}
                 <div 
-                  className="bg-gradient-to-r from-violet-500 to-violet-400 transition-all duration-500"
+                  className="bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-500"
                   style={{ width: `${area.slowContribution}%` }}
                 />
               </div>
@@ -51,12 +51,12 @@ export function ThinkingSystemSources() {
               {/* Labels */}
               <div className="flex justify-between mt-1">
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-cyan-500" />
-                  <span className="text-[10px] text-cyan-400">{area.fastContribution}% Fast</span>
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-[10px] text-amber-400">{area.fastContribution}% Fast</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-violet-400">{area.slowContribution}% Slow</span>
-                  <div className="w-2 h-2 rounded-full bg-violet-500" />
+                  <span className="text-[10px] text-cyan-400">{area.slowContribution}% Slow</span>
+                  <div className="w-2 h-2 rounded-full bg-cyan-500" />
                 </div>
               </div>
             </div>
@@ -69,12 +69,12 @@ export function ThinkingSystemSources() {
             {/* Example exercises */}
             <div className="flex gap-4">
               <div className="flex-1">
-                <span className="text-[9px] text-cyan-400/70 uppercase tracking-wider">Fast drills</span>
+                <span className="text-[9px] text-amber-400/70 uppercase tracking-wider">Fast drills</span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {area.fastExamples.slice(0, 2).map((ex) => (
                     <span 
                       key={ex} 
-                      className="px-1.5 py-0.5 rounded text-[9px] bg-cyan-500/10 text-cyan-400/80"
+                      className="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/10 text-amber-400/80"
                     >
                       {ex}
                     </span>
@@ -82,12 +82,12 @@ export function ThinkingSystemSources() {
                 </div>
               </div>
               <div className="flex-1">
-                <span className="text-[9px] text-violet-400/70 uppercase tracking-wider">Slow drills</span>
+                <span className="text-[9px] text-cyan-400/70 uppercase tracking-wider">Slow drills</span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {area.slowExamples.slice(0, 2).map((ex) => (
                     <span 
                       key={ex} 
-                      className="px-1.5 py-0.5 rounded text-[9px] bg-violet-500/10 text-violet-400/80"
+                      className="px-1.5 py-0.5 rounded text-[9px] bg-cyan-500/10 text-cyan-400/80"
                     >
                       {ex}
                     </span>
