@@ -10,6 +10,12 @@ import { MentalRotationDrill } from "./MentalRotationDrill";
 import { DigitSpanDrill } from "./DigitSpanDrill";
 import { GoNoGoDrill } from "./GoNoGoDrill";
 import { LocationMatchDrill } from "./LocationMatchDrill";
+import { OddOneOutDrill } from "./OddOneOutDrill";
+import { SequenceLogicDrill } from "./SequenceLogicDrill";
+import { AnalogyMatchDrill } from "./AnalogyMatchDrill";
+import { CategorySwitchDrill } from "./CategorySwitchDrill";
+import { WordAssociationDrill } from "./WordAssociationDrill";
+import { RuleSwitchDrill } from "./RuleSwitchDrill";
 import { VisualExerciseConfig } from "@/data/visual_exercises";
 
 interface VisualDrillRendererProps {
@@ -41,6 +47,18 @@ export function VisualDrillRenderer({ config, onComplete }: VisualDrillRendererP
       return <GoNoGoDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
     case "location_match":
       return <LocationMatchDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
+    case "odd_one_out":
+      return <OddOneOutDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
+    case "sequence_logic":
+      return <SequenceLogicDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
+    case "analogy_match":
+      return <AnalogyMatchDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
+    case "category_switch":
+      return <CategorySwitchDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
+    case "word_association":
+      return <WordAssociationDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
+    case "rule_switch":
+      return <RuleSwitchDrill config={config.config as any} timeLimit={config.timeLimit} onComplete={onComplete} />;
     default:
       return <div className="p-8 text-center text-muted-foreground">Drill type not implemented yet</div>;
   }

@@ -35,7 +35,8 @@ export type ExerciseType =
 export type ExerciseDifficulty = "easy" | "medium" | "hard";
 export type ExerciseDuration = "30s" | "90s" | "1min" | "2min" | "3min" | "5min" | "7min";
 
-export type GymArea = "focus" | "memory" | "control" | "reasoning" | "creativity" | "visual_game";
+// Removed visual_game - now only 5 core areas
+export type GymArea = "focus" | "memory" | "control" | "reasoning" | "creativity";
 export type ThinkingMode = "fast" | "slow";
 
 export interface CognitiveExercise {
@@ -217,7 +218,7 @@ export function shuffleArray<T>(array: T[]): T[] {
 
 // Check if exercise type has a correct answer
 export function hasCorrectAnswer(type: ExerciseType): boolean {
-  return ["multiple_choice", "detect_fallacy", "logic_puzzle", "scenario_choice", "visual_task"].includes(type);
+  return ["multiple_choice", "detect_fallacy", "logic_puzzle", "scenario_choice", "visual_task", "visual_drill"].includes(type);
 }
 
 // Check if exercise is a visual/interactive task
@@ -244,16 +245,6 @@ export function calculateSessionScore(
   });
 
   const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-  
-  // Bonus for completing reflections
-  exercises.forEach((exercise) => {
-    if (exercise.type === "open_reflection") {
-      const response = responses.get(exercise.id);
-      if (response?.text && response.text.trim().length > 10) {
-        // Add small bonus for completing reflections
-      }
-    }
-  });
 
   return { score, correctAnswers, totalQuestions };
 }
@@ -276,12 +267,6 @@ export function getMetricUpdates(
         earnedPoints = 2 * weight; // Correct answer
       } else {
         earnedPoints = 0.5 * weight; // Attempted but wrong
-      }
-    } else if (exercise.type === "open_reflection") {
-      if (response?.text && response.text.trim().length > 20) {
-        earnedPoints = 2 * weight; // Meaningful reflection
-      } else if (response?.text && response.text.trim().length > 5) {
-        earnedPoints = 1 * weight; // Brief reflection
       }
     }
     

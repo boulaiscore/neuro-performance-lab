@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/app/AppShell";
 import { NEURO_GYM_AREAS, NeuroGymArea } from "@/lib/neuroGym";
-import { Target, Brain, Sliders, Lightbulb, Sparkles, Zap, Gamepad2 } from "lucide-react";
+import { Target, Brain, Sliders, Lightbulb, Sparkles, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -17,7 +17,6 @@ const AREA_ICONS: Record<string, React.ElementType> = {
   Sliders,
   Lightbulb,
   Sparkles,
-  Gamepad2,
   Zap,
 };
 

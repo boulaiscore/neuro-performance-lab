@@ -50,24 +50,17 @@ export const NEURO_GYM_AREAS: NeuroGymAreaConfig[] = [
     description: "Boost divergent thinking, analogies, and high-level reframing.",
     icon: "Sparkles",
   },
-  {
-    id: "visual_game",
-    title: "Visual & Game Drills",
-    subtitle: "Interactive Cognitive Games",
-    description: "Train visual processing, spatial reasoning, and reaction speed with interactive drills.",
-    icon: "Gamepad2",
-  },
 ];
 
 // Neuro Activation Session - Fixed sequence of exercise IDs
 export const NEURO_ACTIVATION_SEQUENCE = [
-  "FA_FAST_001", // Focus - Green Dot Reaction
-  "CL_FAST_001", // Control - Go / No-Go Flash
-  "MC_FAST_001", // Memory - Quick Digit Span
-  "RS_FAST_001", // Reasoning - Fallacy Snap
-  "CH_FAST_001", // Creativity - Alternative Uses Burst
-  "FA_SLOW_001", // Focus - Distraction Mapping
-  "RS_SLOW_001", // Reasoning - Argument Breakdown
+  "FOCUS_DOT_001",    // Focus - Green Dot Reaction
+  "CONTROL_GONO_001", // Control - Go / No-Go Flash
+  "MEMORY_DIGIT_001", // Memory - Quick Digit Span
+  "REASON_SEQ_001",   // Reasoning - Sequence Logic
+  "CREATE_ODD_001",   // Creativity - Odd One Out
+  "FOCUS_SEARCH_001", // Focus - Visual Search
+  "REASON_ANALOG_001",// Reasoning - Analogy
 ];
 
 // Exercise count configuration for Neuro Gym sessions based on user preference
