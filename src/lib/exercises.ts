@@ -250,9 +250,10 @@ export function calculateSessionScore(
 }
 
 // Get metric updates based on exercise performance
+// Supports both old format (selectedIndex/text) and new format (score/correct)
 export function getMetricUpdates(
   exercises: CognitiveExercise[],
-  responses: Map<string, { selectedIndex?: number; text?: string }>
+  responses: Map<string, { selectedIndex?: number; text?: string; score?: number; correct?: number }>
 ): Record<string, number> {
   const updates: Record<string, number> = {};
   
@@ -262,7 +263,13 @@ export function getMetricUpdates(
     
     let earnedPoints = 0;
     
-    if (hasCorrectAnswer(exercise.type) && exercise.correct_option_index !== undefined) {
+    // New format: visual tasks with score/correct
+    if (response?.score !== undefined) {
+      // Normalize score (0-100) to points
+      earnedPoints = (response.score / 100) * 2 * weight;
+    }
+    // Old format: multiple choice with selectedIndex
+    else if (hasCorrectAnswer(exercise.type) && exercise.correct_option_index !== undefined) {
       if (response?.selectedIndex === exercise.correct_option_index) {
         earnedPoints = 2 * weight; // Correct answer
       } else {

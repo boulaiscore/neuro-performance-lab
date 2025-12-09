@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, X, Trophy, Brain, Gamepad2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X, Trophy, Brain, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExercises, useUpdateUserMetrics } from "@/hooks/useExercises";
@@ -13,13 +12,7 @@ import {
   NEURO_GYM_AREAS,
   generateNeuroGymSession,
 } from "@/lib/neuroGym";
-import { 
-  CognitiveExercise, 
-  hasCorrectAnswer, 
-  getMetricUpdates 
-} from "@/lib/exercises";
-import { getVisualConfig, isVisualDrill } from "@/data/visual_exercises";
-import { VisualDrillRenderer } from "@/components/drills/VisualDrillRenderer";
+import { CognitiveExercise, getMetricUpdates } from "@/lib/exercises";
 import { toast } from "sonner";
 
 export default function NeuroGymSessionRunner() {
@@ -36,9 +29,11 @@ export default function NeuroGymSessionRunner() {
   
   const [sessionExercises, setSessionExercises] = useState<CognitiveExercise[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [responses, setResponses] = useState<Map<string, { selectedIndex?: number; text?: string; visualResult?: any }>>(new Map());
+  const [responses, setResponses] = useState<Map<string, { score: number; correct: number }>>(new Map());
   const [isComplete, setIsComplete] = useState(false);
   const [sessionScore, setSessionScore] = useState({ score: 0, correctAnswers: 0, totalQuestions: 0 });
+  const [isExerciseActive, setIsExerciseActive] = useState(false);
+  const [exerciseTimeLeft, setExerciseTimeLeft] = useState(30);
 
   // Generate session exercises with trainingGoals filtering
   useEffect(() => {
@@ -47,11 +42,29 @@ export default function NeuroGymSessionRunner() {
         area, 
         duration || "2min", 
         allExercises,
-        user?.trainingGoals // Pass user's training goals for filtering
+        user?.trainingGoals
       );
       setSessionExercises(exercises);
     }
   }, [allExercises, area, duration, user?.trainingGoals]);
+
+  // Exercise timer
+  useEffect(() => {
+    if (!isExerciseActive || exerciseTimeLeft <= 0) return;
+    
+    const timer = setInterval(() => {
+      setExerciseTimeLeft(prev => {
+        if (prev <= 1) {
+          // Time's up - auto complete with 0 score
+          handleExerciseComplete(0, 0);
+          return 30;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [isExerciseActive, exerciseTimeLeft]);
 
   const areaConfig = useMemo(() => {
     if (area === "neuro-activation") {
@@ -61,10 +74,7 @@ export default function NeuroGymSessionRunner() {
         description: "A complete cognitive warm-up protocol"
       };
     }
-    // Find matching area config
     const found = NEURO_GYM_AREAS.find(a => a.id === area);
-    
-    // Fallback for unknown areas
     if (!found) {
       return {
         title: "Cognitive Training",
@@ -78,102 +88,71 @@ export default function NeuroGymSessionRunner() {
   const currentExercise = sessionExercises[currentIndex];
   const progress = sessionExercises.length > 0 ? ((currentIndex + 1) / sessionExercises.length) * 100 : 0;
 
-  // Check if current exercise is a visual drill
-  const isCurrentVisualDrill = currentExercise && isVisualDrill(currentExercise.id);
-  const visualConfig = isCurrentVisualDrill ? getVisualConfig(currentExercise.id) : null;
-
-  const handleSelectOption = (optionIndex: number) => {
-    if (!currentExercise) return;
-    
-    setResponses(prev => {
-      const updated = new Map(prev);
-      updated.set(currentExercise.id, { 
-        ...updated.get(currentExercise.id), 
-        selectedIndex: optionIndex 
-      });
-      return updated;
-    });
+  const handleStartExercise = () => {
+    setIsExerciseActive(true);
+    setExerciseTimeLeft(30);
   };
 
-  const handleTextChange = (text: string) => {
+  const handleExerciseComplete = (score: number, correct: number) => {
     if (!currentExercise) return;
     
     setResponses(prev => {
       const updated = new Map(prev);
-      updated.set(currentExercise.id, { 
-        ...updated.get(currentExercise.id), 
-        text 
-      });
-      return updated;
-    });
-  };
-
-  const handleVisualDrillComplete = (result: any) => {
-    if (!currentExercise) return;
-    
-    setResponses(prev => {
-      const updated = new Map(prev);
-      updated.set(currentExercise.id, { 
-        visualResult: result 
-      });
+      updated.set(currentExercise.id, { score, correct });
       return updated;
     });
     
-    // Auto-advance after visual drill
+    setIsExerciseActive(false);
+    
+    // Auto advance after brief delay
     setTimeout(() => {
       handleNext();
-    }, 500);
+    }, 800);
   };
 
-  const canProceed = () => {
-    if (!currentExercise) return false;
+  // Simple tap response for visual tasks
+  const handleTap = () => {
+    if (!isExerciseActive) return;
     
-    const response = responses.get(currentExercise.id);
-    
-    // Visual drills auto-complete
-    if (isCurrentVisualDrill) {
-      return response?.visualResult !== undefined;
-    }
-    
-    if (currentExercise.type === "open_reflection") {
-      return response?.text && response.text.trim().length > 5;
-    }
-    
-    return response?.selectedIndex !== undefined;
+    // For now, simulate a correct tap (this will be replaced with actual drill logic)
+    const response = responses.get(currentExercise?.id || "") || { score: 0, correct: 0 };
+    setResponses(prev => {
+      const updated = new Map(prev);
+      updated.set(currentExercise?.id || "", { 
+        score: response.score + 10, 
+        correct: response.correct + 1 
+      });
+      return updated;
+    });
   };
 
   const handleNext = async () => {
     if (currentIndex < sessionExercises.length - 1) {
       setCurrentIndex(prev => prev + 1);
+      setIsExerciseActive(false);
+      setExerciseTimeLeft(30);
     } else {
-      // Complete session - calculate score including visual drills
+      // Complete session
       let totalScore = 0;
       let totalCorrect = 0;
-      let totalQuestions = 0;
       
-      sessionExercises.forEach(ex => {
-        const response = responses.get(ex.id);
-        
-        if (isVisualDrill(ex.id) && response?.visualResult) {
-          // Use visual drill result
-          const vr = response.visualResult;
-          if (vr.score !== undefined) totalScore += vr.score;
-          if (vr.correct !== undefined) totalCorrect += vr.correct;
-          if (vr.totalCorrect !== undefined) totalCorrect += vr.totalCorrect;
-          totalQuestions += 1;
-        } else if (hasCorrectAnswer(ex.type) && response?.selectedIndex !== undefined) {
-          totalQuestions++;
-          if (response.selectedIndex === ex.correct_option_index) {
-            totalCorrect++;
-          }
-        }
+      responses.forEach(response => {
+        totalScore += response.score;
+        totalCorrect += response.correct;
       });
       
-      const finalScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : totalScore;
-      setSessionScore({ score: finalScore, correctAnswers: totalCorrect, totalQuestions });
+      const averageScore = sessionExercises.length > 0 
+        ? Math.round(totalScore / sessionExercises.length) 
+        : 0;
+      
+      setSessionScore({ 
+        score: averageScore, 
+        correctAnswers: totalCorrect, 
+        totalQuestions: sessionExercises.length 
+      });
       setIsComplete(true);
       
-      // Save session and update metrics
+      // Save session
       if (user) {
         try {
           await saveSession.mutateAsync({
@@ -181,16 +160,16 @@ export default function NeuroGymSessionRunner() {
             area: area,
             duration_option: duration || "2min",
             exercises_used: sessionExercises.map(e => e.id),
-            score: finalScore,
+            score: averageScore,
             correct_answers: totalCorrect,
-            total_questions: totalQuestions,
+            total_questions: sessionExercises.length,
             completed_at: new Date().toISOString(),
           });
           
           const metricUpdates = getMetricUpdates(sessionExercises, responses);
           await updateMetrics.mutateAsync({ userId: user.id, metricUpdates });
           
-          toast.success("Session completed! Metrics updated.");
+          toast.success("Session completed!");
         } catch (error) {
           console.error("Error saving session:", error);
           toast.error("Failed to save session");
@@ -202,6 +181,8 @@ export default function NeuroGymSessionRunner() {
   const handleBack = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
+      setIsExerciseActive(false);
+      setExerciseTimeLeft(30);
     }
   };
 
@@ -218,10 +199,13 @@ export default function NeuroGymSessionRunner() {
     );
   }
 
-  if (exercisesLoading || sessionExercises.length === 0 || !currentExercise) {
+  if (exercisesLoading || sessionExercises.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto mb-4" />
+          <p className="text-sm text-muted-foreground">Loading exercises...</p>
+        </div>
       </div>
     );
   }
@@ -236,34 +220,19 @@ export default function NeuroGymSessionRunner() {
         <h1 className="text-2xl font-bold mb-2">Session Complete!</h1>
         <p className="text-muted-foreground text-center mb-6">
           {area === "neuro-activation" 
-            ? "You've completed a full Neuro Activation Session. Your brain is primed for deep work and high-stakes decisions."
-            : `Great work training your ${areaConfig?.title || "cognitive abilities"}!`
+            ? "Your brain is primed for deep work."
+            : `Great work training your ${areaConfig?.title}!`
           }
         </p>
         
-        {sessionScore.totalQuestions > 0 && (
-          <div className="p-6 rounded-xl bg-card/50 border border-border/50 mb-6 w-full max-w-sm">
-            <div className="text-center">
-              <p className="text-4xl font-bold text-primary">{sessionScore.score}%</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {sessionScore.correctAnswers} of {sessionScore.totalQuestions} correct
-              </p>
-            </div>
-          </div>
-        )}
-
-        {area === "neuro-activation" && (
-          <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 mb-6 w-full max-w-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Brain className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-sm">Cognitive Activation</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Focus, Working Memory, Executive Control, Creativity, and Reasoning 
-              have all been activated in this session.
+        <div className="p-6 rounded-xl bg-card/50 border border-border/50 mb-6 w-full max-w-sm">
+          <div className="text-center">
+            <p className="text-4xl font-bold text-primary">{sessionScore.score}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {sessionScore.totalQuestions} exercises completed
             </p>
           </div>
-        )}
+        </div>
         
         <div className="flex flex-col gap-3 w-full max-w-sm">
           <Button onClick={() => navigate("/app/dashboard")} className="w-full">
@@ -277,45 +246,14 @@ export default function NeuroGymSessionRunner() {
     );
   }
 
-  // Render Visual Drill
-  if (isCurrentVisualDrill && visualConfig) {
+  if (!currentExercise) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/30 px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={() => navigate("/neuro-gym")} className="text-muted-foreground">
-              <X className="w-5 h-5" />
-            </button>
-            <span className="text-sm font-medium">
-              {currentExercise.title}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {currentIndex + 1}/{sessionExercises.length}
-            </span>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="h-1 bg-border/30 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </header>
-
-        {/* Visual Drill Content */}
-        <main className="flex-1 flex flex-col">
-          <VisualDrillRenderer 
-            config={visualConfig} 
-            onComplete={handleVisualDrillComplete} 
-          />
-        </main>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">No exercise found</p>
       </div>
     );
   }
 
-  // Render Standard Exercise
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -325,7 +263,7 @@ export default function NeuroGymSessionRunner() {
             <X className="w-5 h-5" />
           </button>
           <span className="text-sm font-medium">
-            {areaConfig?.title} – {duration || "2min"}
+            {areaConfig?.title}
           </span>
           <span className="text-xs text-muted-foreground">
             {currentIndex + 1}/{sessionExercises.length}
@@ -342,43 +280,49 @@ export default function NeuroGymSessionRunner() {
       </header>
 
       {/* Exercise Content */}
-      <main className="flex-1 px-4 py-6 overflow-y-auto">
-        <div className="max-w-lg mx-auto">
-          <h2 className="text-lg font-semibold mb-2">{currentExercise.title}</h2>
-          <p className="text-muted-foreground mb-6">{currentExercise.prompt}</p>
-          
-          {/* Multiple Choice Options */}
-          {currentExercise.options && currentExercise.options.length > 0 && (
-            <div className="grid gap-3">
-              {currentExercise.options.map((option, idx) => {
-                const isSelected = responses.get(currentExercise.id)?.selectedIndex === idx;
-                
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelectOption(idx)}
-                    className={cn(
-                      "w-full p-4 rounded-xl border text-left transition-all duration-200",
-                      isSelected 
-                        ? "bg-primary/20 border-primary text-foreground" 
-                        : "bg-card/50 border-border/50 hover:border-primary/40"
-                    )}
-                  >
-                    <span className="text-sm">{option}</span>
-                  </button>
-                );
-              })}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6">
+        <div className="max-w-lg mx-auto w-full text-center">
+          {/* Timer */}
+          {isExerciseActive && (
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border-4 border-primary">
+                <span className="text-2xl font-bold">{exerciseTimeLeft}</span>
+              </div>
             </div>
           )}
           
-          {/* Open Reflection */}
-          {currentExercise.type === "open_reflection" && (
-            <Textarea
-              placeholder="Write your reflection here..."
-              value={responses.get(currentExercise.id)?.text || ""}
-              onChange={(e) => handleTextChange(e.target.value)}
-              className="min-h-[150px] bg-card/50 border-border/50"
-            />
+          <h2 className="text-xl font-semibold mb-3">{currentExercise.title}</h2>
+          <p className="text-muted-foreground mb-8">{currentExercise.prompt}</p>
+          
+          {/* Exercise Area */}
+          {!isExerciseActive ? (
+            <Button 
+              size="lg" 
+              onClick={handleStartExercise}
+              className="w-full max-w-xs mx-auto"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Start Exercise (30s)
+            </Button>
+          ) : (
+            <div 
+              className="w-full aspect-square max-w-sm mx-auto rounded-2xl bg-card/50 border border-border/50 flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+              onClick={handleTap}
+            >
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-full bg-green-500 mx-auto mb-4 animate-pulse" />
+                <p className="text-sm text-muted-foreground">Tap when ready!</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Response indicator */}
+          {responses.has(currentExercise.id) && !isExerciseActive && (
+            <div className="mt-6 p-4 rounded-xl bg-primary/10 border border-primary/20">
+              <p className="text-sm text-primary font-medium">
+                Score: {responses.get(currentExercise.id)?.score || 0}
+              </p>
+            </div>
           )}
         </div>
       </main>
@@ -389,7 +333,7 @@ export default function NeuroGymSessionRunner() {
           <Button 
             variant="outline" 
             onClick={handleBack}
-            disabled={currentIndex === 0}
+            disabled={currentIndex === 0 || isExerciseActive}
             className="flex-1"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -397,7 +341,7 @@ export default function NeuroGymSessionRunner() {
           </Button>
           <Button 
             onClick={handleNext}
-            disabled={!canProceed()}
+            disabled={isExerciseActive || !responses.has(currentExercise.id)}
             className="flex-1"
           >
             {currentIndex === sessionExercises.length - 1 ? (
