@@ -16,7 +16,11 @@ export type ExerciseCategory =
   | "executive_control"
   | "insight"
   | "reflection"
-  | "philosophical";
+  | "philosophical"
+  | "visual"
+  | "spatial"
+  | "game"
+  | "visual_memory";
 
 export type ExerciseType = 
   | "multiple_choice"
@@ -24,10 +28,11 @@ export type ExerciseType =
   | "open_reflection"
   | "logic_puzzle"
   | "scenario_choice"
-  | "probability_estimation";
+  | "probability_estimation"
+  | "visual_drill";
 
 export type ExerciseDifficulty = "easy" | "medium" | "hard";
-export type ExerciseDuration = "30s" | "2min" | "5min" | "3min" | "7min";
+export type ExerciseDuration = "30s" | "90s" | "2min" | "3min" | "5min" | "7min";
 
 export interface CognitiveExercise {
   id: string;
@@ -157,6 +162,26 @@ export const CATEGORY_INFO: Record<ExerciseCategory, { title: string; subtitle: 
     title: "Philosophical Reasoning",
     subtitle: "Value Alignment & Abstract Thought",
     description: "Engage with high-level abstract reasoning and value-based decision making.",
+  },
+  visual: {
+    title: "Visual Drills",
+    subtitle: "Visual Processing & Attention",
+    description: "Train visual attention, pattern recognition, and processing speed with interactive games.",
+  },
+  spatial: {
+    title: "Spatial Reasoning",
+    subtitle: "Mental Rotation & Navigation",
+    description: "Develop spatial reasoning through rotation puzzles and mental manipulation tasks.",
+  },
+  game: {
+    title: "Cognitive Games",
+    subtitle: "Interactive Challenges",
+    description: "Engage with gamified cognitive tasks combining multiple skills.",
+  },
+  visual_memory: {
+    title: "Visual Memory",
+    subtitle: "Visual Working Memory",
+    description: "Strengthen visual working memory with pattern and sequence tasks.",
   },
 };
 

@@ -21,7 +21,11 @@ import {
   SlidersHorizontal,
   Flame,
   BookOpen,
-  Compass
+  Compass,
+  Gamepad2,
+  Move3D,
+  MonitorPlay,
+  Grid3X3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExerciseCategory, ExerciseDuration, CATEGORY_INFO } from "@/lib/exercises";
@@ -45,6 +49,10 @@ const CATEGORY_ICONS: Record<ExerciseCategory, React.ElementType> = {
   insight: Flame,
   reflection: BookOpen,
   philosophical: Compass,
+  visual: MonitorPlay,
+  spatial: Move3D,
+  game: Gamepad2,
+  visual_memory: Grid3X3,
 };
 
 const DURATION_OPTIONS: { value: ExerciseDuration; label: string; description: string }[] = [
