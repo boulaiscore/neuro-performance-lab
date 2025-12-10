@@ -15,7 +15,9 @@ interface AssessmentDrillRendererProps {
 
 // ============ EXERCISE 1: Dot Target (Focus Fast) ============
 function DotTargetAssessment({ onComplete }: { onComplete: (result: AssessmentDrillResult) => void }) {
-  const [dots, setDots] = useState<{ id: number; x: number; y: number; color: "green" | "red"; createdAt: number }[]>([]);
+  const [dots, setDots] = useState<{ id: number; x: number; y: number; color: "green" | "red"; createdAt: number }[]>(
+    [],
+  );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
   const [timeLeft, setTimeLeft] = useState(15);
@@ -39,8 +41,8 @@ function DotTargetAssessment({ onComplete }: { onComplete: (result: AssessmentDr
       const y = 40 + Math.random() * (rect.height - 80);
       const color = Math.random() < 0.7 ? "green" : "red";
       const newDot = { id: dotIdRef.current++, x, y, color: color as "green" | "red", createdAt: Date.now() };
-      setDots(prev => [...prev, newDot]);
-      setTimeout(() => setDots(prev => prev.filter(d => d.id !== newDot.id)), 1200);
+      setDots((prev) => [...prev, newDot]);
+      setTimeout(() => setDots((prev) => prev.filter((d) => d.id !== newDot.id)), 1200);
     }, 600);
     return () => clearInterval(interval);
   }, [isRunning]);
@@ -48,7 +50,7 @@ function DotTargetAssessment({ onComplete }: { onComplete: (result: AssessmentDr
   useEffect(() => {
     if (!isRunning) return;
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
           setIsRunning(false);
           return 0;
@@ -72,12 +74,12 @@ function DotTargetAssessment({ onComplete }: { onComplete: (result: AssessmentDr
   const handleDotTap = (dot: { id: number; color: "green" | "red"; createdAt: number }) => {
     const rt = Date.now() - dot.createdAt;
     if (dot.color === "green") {
-      setCorrect(c => c + 1);
-      setReactionTimes(prev => [...prev, rt]);
+      setCorrect((c) => c + 1);
+      setReactionTimes((prev) => [...prev, rt]);
     } else {
-      setIncorrect(i => i + 1);
+      setIncorrect((i) => i + 1);
     }
-    setDots(prev => prev.filter(d => d.id !== dot.id));
+    setDots((prev) => prev.filter((d) => d.id !== dot.id));
   };
 
   return (
@@ -88,15 +90,17 @@ function DotTargetAssessment({ onComplete }: { onComplete: (result: AssessmentDr
       </div>
       <div ref={containerRef} className="flex-1 relative bg-background/30 min-h-[280px]">
         {!isRunning && timeLeft === 15 && (
-          <div className="absolute inset-0 flex items-center justify-center text-lg text-primary animate-pulse">Tap GREEN dots!</div>
+          <div className="absolute inset-0 flex items-center justify-center text-lg text-primary animate-pulse">
+            Tap GREEN dots!
+          </div>
         )}
-        {dots.map(dot => (
+        {dots.map((dot) => (
           <button
             key={dot.id}
             onClick={() => handleDotTap(dot)}
             className={cn(
               "absolute w-12 h-12 rounded-full animate-in zoom-in-50 duration-100",
-              dot.color === "green" ? "bg-green-500" : "bg-red-500"
+              dot.color === "green" ? "bg-green-500" : "bg-red-500",
             )}
             style={{ left: dot.x - 24, top: dot.y - 24 }}
           />
@@ -123,7 +127,7 @@ function GoNoGoAssessment({ onComplete }: { onComplete: (result: AssessmentDrill
     if (trial >= TRIALS) {
       if (!completedRef.current) {
         completedRef.current = true;
-        const score = Math.round(((hits) / TRIALS) * 100);
+        const score = Math.round((hits / TRIALS) * 100);
         const avgRT = reactionTimes.length > 0 ? reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length : 0;
         onComplete({ score, correct: hits, avgReactionTime: avgRT });
       }
@@ -142,7 +146,7 @@ function GoNoGoAssessment({ onComplete }: { onComplete: (result: AssessmentDrill
         if (!responded.current && isGo) setFeedback("Miss!");
         setTimeout(() => {
           setStimulus(null);
-          setTrial(t => t + 1);
+          setTrial((t) => t + 1);
         }, 300);
       }, 800);
     }, delay);
@@ -155,31 +159,37 @@ function GoNoGoAssessment({ onComplete }: { onComplete: (result: AssessmentDrill
     responded.current = true;
     const rt = Date.now() - stimulusTime.current;
     if (stimulus === "go") {
-      setHits(h => h + 1);
-      setReactionTimes(prev => [...prev, rt]);
+      setHits((h) => h + 1);
+      setReactionTimes((prev) => [...prev, rt]);
       setFeedback("✓");
     } else {
-      setFalseAlarms(f => f + 1);
+      setFalseAlarms((f) => f + 1);
       setFeedback("✗");
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4" onClick={handleTap}>
-      <div className="text-sm text-muted-foreground mb-4">{Math.min(trial + 1, TRIALS)}/{TRIALS}</div>
+      <div className="text-sm text-muted-foreground mb-4">
+        {Math.min(trial + 1, TRIALS)}/{TRIALS}
+      </div>
       <div
         className={cn(
           "w-32 h-32 rounded-full flex items-center justify-center text-4xl transition-all",
           stimulus === "go" && "bg-green-500",
           stimulus === "nogo" && "bg-red-500",
-          !stimulus && "bg-card/30 border-2 border-dashed border-border"
+          !stimulus && "bg-card/30 border-2 border-dashed border-border",
         )}
       >
         {stimulus === "go" && "→"}
         {stimulus === "nogo" && "×"}
         {!stimulus && !feedback && "..."}
       </div>
-      {feedback && <div className={cn("mt-4 text-lg font-bold", feedback === "✓" ? "text-green-500" : "text-red-500")}>{feedback}</div>}
+      {feedback && (
+        <div className={cn("mt-4 text-lg font-bold", feedback === "✓" ? "text-green-500" : "text-red-500")}>
+          {feedback}
+        </div>
+      )}
       <div className="mt-6 text-xs text-muted-foreground">
         <span className="text-green-500">TAP</span> green • <span className="text-red-500">IGNORE</span> red
       </div>
@@ -189,25 +199,59 @@ function GoNoGoAssessment({ onComplete }: { onComplete: (result: AssessmentDrill
 
 // ============ EXERCISE 3: Odd One Out (Reasoning Fast) ============
 function OddOneOutAssessment({ onComplete }: { onComplete: (result: AssessmentDrillResult) => void }) {
-  const PATTERNS = [
-    { items: ["🍎", "🍊", "🍋", "🚗"], oddIndex: 3 },
-    { items: ["⬛", "⬛", "⬜", "⬛"], oddIndex: 2 },
-    { items: ["🔵", "🔴", "🔵", "🔵"], oddIndex: 1 },
-    { items: ["🐕", "🐈", "🌳", "🐁"], oddIndex: 2 },
-    { items: ["😀", "😊", "😢", "😁"], oddIndex: 2 },
+  PATTERNS = [
+    {
+      items: ["🟥", "🔺", "❤️", "♦️"],
+      oddIndex: 1,
+      // Tutti rappresentano "rosso come riempimento", tranne 🔺 che è outline/shape senza fill uniforme
+    },
+    {
+      items: ["⚙️", "🧩", "🪢", "🧵"],
+      oddIndex: 0,
+      // Tutti richiedono manipolazione fisica con le mani (puzzle, nodo, filo),
+      // tranne l’ingranaggio che appartiene a sistemi meccanici non manuali.
+    },
+    {
+      items: ["🌡️", "📈", "📉", "📊"],
+      oddIndex: 0,
+      // Tutti sono strumenti *astratti* per visualizzare dati,
+      // tranne 🌡️ che misura una grandezza fisica reale.
+    },
+    {
+      items: ["🦠", "🧬", "🧫", "💉"],
+      oddIndex: 3,
+      // I primi tre rappresentano "biologia osservata" (microrganismi, DNA, coltura),
+      // 💉 invece è "intervento", non osservazione.
+    },
+    {
+      items: ["🔄", "🔁", "🔃", "↔️"],
+      oddIndex: 3,
+      // Tutti rappresentano cicli o rotazioni,
+      // ↔️ è bidirezionale ma NON ciclico né rotazionale.
+    },
+    {
+      items: ["♠️", "♥️", "♣️", "🟥"],
+      oddIndex: 3,
+      // Tre sono *semi* delle carte,
+      // 🟥 è un simbolo generico, non un seme.
+    },
   ];
 
   const [trial, setTrial] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<number | null>(null);
-  const [puzzles] = useState(() => PATTERNS.sort(() => Math.random() - 0.5).slice(0, 5).map(p => {
-    const oddIdx = Math.floor(Math.random() * 4);
-    const items = [...p.items];
-    const oddItem = items.splice(p.oddIndex, 1)[0];
-    items.splice(oddIdx, 0, oddItem);
-    return { items, oddIndex: oddIdx };
-  }));
+  const [puzzles] = useState(() =>
+    PATTERNS.sort(() => Math.random() - 0.5)
+      .slice(0, 5)
+      .map((p) => {
+        const oddIdx = Math.floor(Math.random() * 4);
+        const items = [...p.items];
+        const oddItem = items.splice(p.oddIndex, 1)[0];
+        items.splice(oddIdx, 0, oddItem);
+        return { items, oddIndex: oddIdx };
+      }),
+  );
   const trialStart = useRef(Date.now());
   const completedRef = useRef(false);
 
@@ -218,20 +262,20 @@ function OddOneOutAssessment({ onComplete }: { onComplete: (result: AssessmentDr
   const handleSelect = (index: number) => {
     if (feedback !== null) return;
     const rt = Date.now() - trialStart.current;
-    setReactionTimes(prev => [...prev, rt]);
+    setReactionTimes((prev) => [...prev, rt]);
     setFeedback(index);
-    if (index === puzzles[trial].oddIndex) setCorrect(c => c + 1);
+    if (index === puzzles[trial].oddIndex) setCorrect((c) => c + 1);
 
     setTimeout(() => {
       if (trial + 1 >= puzzles.length) {
         if (!completedRef.current) {
           completedRef.current = true;
-          const score = Math.round((correct + (index === puzzles[trial].oddIndex ? 1 : 0)) / puzzles.length * 100);
+          const score = Math.round(((correct + (index === puzzles[trial].oddIndex ? 1 : 0)) / puzzles.length) * 100);
           const avgRT = reactionTimes.length > 0 ? reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length : 0;
           onComplete({ score, correct: correct + (index === puzzles[trial].oddIndex ? 1 : 0), avgReactionTime: avgRT });
         }
       } else {
-        setTrial(t => t + 1);
+        setTrial((t) => t + 1);
         setFeedback(null);
       }
     }, 600);
@@ -239,7 +283,9 @@ function OddOneOutAssessment({ onComplete }: { onComplete: (result: AssessmentDr
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
-      <div className="text-sm text-muted-foreground mb-4">{trial + 1}/{puzzles.length}</div>
+      <div className="text-sm text-muted-foreground mb-4">
+        {trial + 1}/{puzzles.length}
+      </div>
       <p className="text-sm text-muted-foreground mb-6">Tap the odd one</p>
       <div className="grid grid-cols-2 gap-3">
         {puzzles[trial].items.map((item, i) => (
@@ -251,7 +297,7 @@ function OddOneOutAssessment({ onComplete }: { onComplete: (result: AssessmentDr
               "w-20 h-20 rounded-xl text-4xl flex items-center justify-center border-2 transition-all",
               feedback !== null && i === puzzles[trial].oddIndex && "bg-green-500/20 border-green-500",
               feedback !== null && i !== puzzles[trial].oddIndex && "opacity-40",
-              feedback === null && "bg-card border-border hover:border-primary"
+              feedback === null && "bg-card border-border hover:border-primary",
             )}
           >
             {item}
@@ -266,9 +312,20 @@ function OddOneOutAssessment({ onComplete }: { onComplete: (result: AssessmentDr
 function SequenceAssessment({ onComplete }: { onComplete: (result: AssessmentDrillResult) => void }) {
   const generatePuzzle = () => {
     const patterns = [
-      () => { const s = Math.floor(Math.random() * 5) + 1; const step = 2; return { seq: [s, s + step, s + step * 2], answer: s + step * 3 }; },
-      () => { const s = Math.floor(Math.random() * 3) + 1; return { seq: [s, s * 2, s * 4], answer: s * 8 }; },
-      () => { const s = Math.floor(Math.random() * 5) + 2; const step = 3; return { seq: [s, s + step, s + step * 2], answer: s + step * 3 }; },
+      () => {
+        const s = Math.floor(Math.random() * 5) + 1;
+        const step = 2;
+        return { seq: [s, s + step, s + step * 2], answer: s + step * 3 };
+      },
+      () => {
+        const s = Math.floor(Math.random() * 3) + 1;
+        return { seq: [s, s * 2, s * 4], answer: s * 8 };
+      },
+      () => {
+        const s = Math.floor(Math.random() * 5) + 2;
+        const step = 3;
+        return { seq: [s, s + step, s + step * 2], answer: s + step * 3 };
+      },
     ];
     const { seq, answer } = patterns[Math.floor(Math.random() * patterns.length)]();
     const correctIdx = Math.floor(Math.random() * 4);
@@ -292,10 +349,10 @@ function SequenceAssessment({ onComplete }: { onComplete: (result: AssessmentDri
   const handleSelect = (index: number) => {
     if (feedback !== null) return;
     const rt = Date.now() - trialStart.current;
-    setReactionTimes(prev => [...prev, rt]);
+    setReactionTimes((prev) => [...prev, rt]);
     setFeedback(index);
     const isCorrect = index === puzzles[trial].correctIndex;
-    if (isCorrect) setCorrect(c => c + 1);
+    if (isCorrect) setCorrect((c) => c + 1);
 
     setTimeout(() => {
       if (trial + 1 >= puzzles.length) {
@@ -307,7 +364,7 @@ function SequenceAssessment({ onComplete }: { onComplete: (result: AssessmentDri
           onComplete({ score, correct: finalCorrect, avgReactionTime: avgRT });
         }
       } else {
-        setTrial(t => t + 1);
+        setTrial((t) => t + 1);
         setFeedback(null);
       }
     }, 800);
@@ -317,13 +374,22 @@ function SequenceAssessment({ onComplete }: { onComplete: (result: AssessmentDri
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
-      <div className="text-sm text-muted-foreground mb-4">{trial + 1}/{puzzles.length}</div>
+      <div className="text-sm text-muted-foreground mb-4">
+        {trial + 1}/{puzzles.length}
+      </div>
       <p className="text-sm text-muted-foreground mb-4">What comes next?</p>
       <div className="flex items-center gap-2 mb-6">
         {puzzle.sequence.map((n, i) => (
-          <div key={i} className="w-12 h-12 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-lg font-bold">{n}</div>
+          <div
+            key={i}
+            className="w-12 h-12 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-lg font-bold"
+          >
+            {n}
+          </div>
         ))}
-        <div className="w-12 h-12 rounded-lg border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">?</div>
+        <div className="w-12 h-12 rounded-lg border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">
+          ?
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {puzzle.options.map((opt, i) => (
@@ -335,7 +401,7 @@ function SequenceAssessment({ onComplete }: { onComplete: (result: AssessmentDri
               "w-16 h-12 rounded-lg text-lg font-bold border-2 transition-all",
               feedback !== null && i === puzzle.correctIndex && "bg-green-500/20 border-green-500",
               feedback !== null && i !== puzzle.correctIndex && "opacity-40",
-              feedback === null && "bg-card border-border hover:border-primary"
+              feedback === null && "bg-card border-border hover:border-primary",
             )}
           >
             {opt}
@@ -349,22 +415,119 @@ function SequenceAssessment({ onComplete }: { onComplete: (result: AssessmentDri
 // ============ EXERCISE 5: Rapid Association (Creativity Fast) ============
 function RapidAssocAssessment({ onComplete }: { onComplete: (result: AssessmentDrillResult) => void }) {
   const SETS = [
-    { trigger: "🔥", match: "🌶️", distractors: ["🧊", "💧", "❄️"] },
-    { trigger: "💤", match: "🌙", distractors: ["☀️", "⚡", "🏃"] },
-    { trigger: "⚡", match: "🏃", distractors: ["🐢", "🛋️", "😴"] },
-    { trigger: "☀️", match: "😊", distractors: ["😢", "😴", "😡"] },
-    { trigger: "🎵", match: "💃", distractors: ["📚", "💼", "🔧"] },
-    { trigger: "💪", match: "🏆", distractors: ["🛋️", "😴", "📚"] },
-    { trigger: "🌊", match: "🏄", distractors: ["🏔️", "🌵", "❄️"] },
-    { trigger: "🍕", match: "😋", distractors: ["🤢", "😴", "😢"] },
+    // ------------------------------------
+    // DIFFICOLTÀ 1 — Associazioni intuitive base
+    // ------------------------------------
+    {
+      trigger: "🌱",
+      match: "🌿", // crescita → sviluppo
+      distractors: ["🧊", "💤", "🪨"],
+      // semplice progressione naturale
+    },
+
+    {
+      trigger: "💡",
+      match: "✨", // insight → spark
+      distractors: ["🕳️", "🛑", "⚫"],
+      // correlazione creativa immediata: idea → scintilla
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 2 — Relazioni concettuali più astratte
+    // ------------------------------------
+    {
+      trigger: "🔥",
+      match: "⚡", // energia → impulso
+      distractors: ["🌧️", "🪵", "🎒"],
+      // ignizione → energia attiva (non banale ma rapida)
+    },
+
+    {
+      trigger: "🏗️",
+      match: "🧩", // costruzione → incastro logico
+      distractors: ["🪙", "🍷", "🎷"],
+      // gestalt: costruire = comporre pezzi
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 3 — Metafore laterali, contesto astratto
+    // ------------------------------------
+    {
+      trigger: "🚀",
+      match: "🌌", // lancio → spazio delle possibilità
+      distractors: ["🌋", "🏜️", "🏠"],
+      // salto concettuale: rocket → infinite horizon
+    },
+
+    {
+      trigger: "🔍",
+      match: "🧠", // analisi → mente
+      distractors: ["🗿", "🎒", "🪟"],
+      // connessione concettuale (osservazione → elaborazione)
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 4 — Pensiero analogico creativo a doppio livello
+    // ------------------------------------
+    {
+      trigger: "🌪️",
+      match: "⚙️", // caos → meccanismo che lo ordina
+      distractors: ["🌈", "📞", "🎁"],
+      // mapping creativo: turbulence → need for structure
+    },
+
+    {
+      trigger: "🧬",
+      match: "🌀", // DNA → pattern ricorrente
+      distractors: ["🪞", "🧱", "🩻"],
+      // metafora: spirale genetica ↔ spirale dinamica
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 5 — Astrazione elevata e metamapping
+    // ------------------------------------
+    {
+      trigger: "🎭",
+      match: "🕸️", // identità/facciata → trama di relazioni nascoste
+      distractors: ["📺", "🍭", "🪩"],
+      // relazione concettuale verticale (superficie ↔ struttura)
+    },
+
+    {
+      trigger: "📡",
+      match: "🧲", // segnali → attrazione → pattern unseen
+      distractors: ["🎤", "📚", "🚿"],
+      // analogia complessa: percepire → attrarre / selezionare
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 5+ — Metafore di secondo ordine, connessioni astratte multilivello
+    // ------------------------------------
+    {
+      trigger: "⏳",
+      match: "♾️", // tempo → continuità/eterno ritorno
+      distractors: ["🪫", "🎲", "🩸"],
+      // salto metafisico: finito ↔ infinito
+    },
+
+    {
+      trigger: "🧠",
+      match: "🔮", // mente → previsione/immaginazione futura
+      distractors: ["🧊", "🚪", "🍽️"],
+      // creative foresight mapping: cognition → possibility space
+    },
   ];
 
-  const [puzzles] = useState(() => SETS.sort(() => Math.random() - 0.5).slice(0, 8).map(s => {
-    const idx = Math.floor(Math.random() * 4);
-    const opts = [...s.distractors];
-    opts.splice(idx, 0, s.match);
-    return { trigger: s.trigger, options: opts, correctIndex: idx };
-  }));
+  const [puzzles] = useState(() =>
+    SETS.sort(() => Math.random() - 0.5)
+      .slice(0, 8)
+      .map((s) => {
+        const idx = Math.floor(Math.random() * 4);
+        const opts = [...s.distractors];
+        opts.splice(idx, 0, s.match);
+        return { trigger: s.trigger, options: opts, correctIndex: idx };
+      }),
+  );
   const [trial, setTrial] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
@@ -379,10 +542,10 @@ function RapidAssocAssessment({ onComplete }: { onComplete: (result: AssessmentD
   const handleSelect = (index: number) => {
     if (feedback !== null) return;
     const rt = Date.now() - trialStart.current;
-    setReactionTimes(prev => [...prev, rt]);
+    setReactionTimes((prev) => [...prev, rt]);
     setFeedback(index);
     const isCorrect = index === puzzles[trial].correctIndex;
-    if (isCorrect) setCorrect(c => c + 1);
+    if (isCorrect) setCorrect((c) => c + 1);
 
     setTimeout(() => {
       if (trial + 1 >= puzzles.length) {
@@ -394,7 +557,7 @@ function RapidAssocAssessment({ onComplete }: { onComplete: (result: AssessmentD
           onComplete({ score, correct: finalCorrect, avgReactionTime: avgRT });
         }
       } else {
-        setTrial(t => t + 1);
+        setTrial((t) => t + 1);
         setFeedback(null);
       }
     }, 350);
@@ -404,7 +567,9 @@ function RapidAssocAssessment({ onComplete }: { onComplete: (result: AssessmentD
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
-      <div className="text-sm text-muted-foreground mb-2">{trial + 1}/{puzzles.length}</div>
+      <div className="text-sm text-muted-foreground mb-2">
+        {trial + 1}/{puzzles.length}
+      </div>
       <p className="text-xs text-muted-foreground mb-4">Quick! What fits?</p>
       <div className="text-7xl mb-6 animate-pulse">{puzzle.trigger}</div>
       <div className="grid grid-cols-2 gap-3">
@@ -417,7 +582,7 @@ function RapidAssocAssessment({ onComplete }: { onComplete: (result: AssessmentD
               "w-16 h-16 rounded-xl text-3xl flex items-center justify-center border-2 transition-all",
               feedback !== null && i === puzzle.correctIndex && "bg-green-500/20 border-green-500",
               feedback !== null && i !== puzzle.correctIndex && "opacity-30",
-              feedback === null && "bg-card border-border hover:border-primary active:scale-95"
+              feedback === null && "bg-card border-border hover:border-primary active:scale-95",
             )}
           >
             {opt}
@@ -431,17 +596,117 @@ function RapidAssocAssessment({ onComplete }: { onComplete: (result: AssessmentD
 // ============ EXERCISE 6: Analogy Match (Creativity Slow) ============
 function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDrillResult) => void }) {
   const ANALOGIES = [
-    { a: "🐕", b: "🦴", c: "🐈", correct: "🐟", distractors: ["🌳", "🚗", "🎸"] },
-    { a: "☀️", b: "🌅", c: "🌙", correct: "🌃", distractors: ["🌻", "🔥", "⭐"] },
-    { a: "✏️", b: "📝", c: "🖌️", correct: "🎨", distractors: ["📚", "💻", "🔧"] },
+    // ------------------------------------
+    // DIFFICOLTÀ 1 — Associazioni intuitive base
+    // ------------------------------------
+    {
+      trigger: "🌱",
+      match: "🌿", // crescita → sviluppo
+      distractors: ["🧊", "💤", "🪨"],
+      // semplice progressione naturale
+    },
+
+    {
+      trigger: "💡",
+      match: "✨", // insight → spark
+      distractors: ["🕳️", "🛑", "⚫"],
+      // correlazione creativa immediata: idea → scintilla
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 2 — Relazioni concettuali più astratte
+    // ------------------------------------
+    {
+      trigger: "🔥",
+      match: "⚡", // energia → impulso
+      distractors: ["🌧️", "🪵", "🎒"],
+      // ignizione → energia attiva (non banale ma rapida)
+    },
+
+    {
+      trigger: "🏗️",
+      match: "🧩", // costruzione → incastro logico
+      distractors: ["🪙", "🍷", "🎷"],
+      // gestalt: costruire = comporre pezzi
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 3 — Metafore laterali, contesto astratto
+    // ------------------------------------
+    {
+      trigger: "🚀",
+      match: "🌌", // lancio → spazio delle possibilità
+      distractors: ["🌋", "🏜️", "🏠"],
+      // salto concettuale: rocket → infinite horizon
+    },
+
+    {
+      trigger: "🔍",
+      match: "🧠", // analisi → mente
+      distractors: ["🗿", "🎒", "🪟"],
+      // connessione concettuale (osservazione → elaborazione)
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 4 — Pensiero analogico creativo a doppio livello
+    // ------------------------------------
+    {
+      trigger: "🌪️",
+      match: "⚙️", // caos → meccanismo che lo ordina
+      distractors: ["🌈", "📞", "🎁"],
+      // mapping creativo: turbulence → need for structure
+    },
+
+    {
+      trigger: "🧬",
+      match: "🌀", // DNA → pattern ricorrente
+      distractors: ["🪞", "🧱", "🩻"],
+      // metafora: spirale genetica ↔ spirale dinamica
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 5 — Astrazione elevata e metamapping
+    // ------------------------------------
+    {
+      trigger: "🎭",
+      match: "🕸️", // identità/facciata → trama di relazioni nascoste
+      distractors: ["📺", "🍭", "🪩"],
+      // relazione concettuale verticale (superficie ↔ struttura)
+    },
+
+    {
+      trigger: "📡",
+      match: "🧲", // segnali → attrazione → pattern unseen
+      distractors: ["🎤", "📚", "🚿"],
+      // analogia complessa: percepire → attrarre / selezionare
+    },
+
+    // ------------------------------------
+    // DIFFICOLTÀ 5+ — Metafore di secondo ordine, connessioni astratte multilivello
+    // ------------------------------------
+    {
+      trigger: "⏳",
+      match: "♾️", // tempo → continuità/eterno ritorno
+      distractors: ["🪫", "🎲", "🩸"],
+      // salto metafisico: finito ↔ infinito
+    },
+
+    {
+      trigger: "🧠",
+      match: "🔮", // mente → previsione/immaginazione futura
+      distractors: ["🧊", "🚪", "🍽️"],
+      // creative foresight mapping: cognition → possibility space
+    },
   ];
 
-  const [puzzles] = useState(() => ANALOGIES.map(a => {
-    const idx = Math.floor(Math.random() * 4);
-    const opts = [...a.distractors];
-    opts.splice(idx, 0, a.correct);
-    return { ...a, options: opts, correctIndex: idx };
-  }));
+  const [puzzles] = useState(() =>
+    ANALOGIES.map((a) => {
+      const idx = Math.floor(Math.random() * 4);
+      const opts = [...a.distractors];
+      opts.splice(idx, 0, a.correct);
+      return { ...a, options: opts, correctIndex: idx };
+    }),
+  );
   const [trial, setTrial] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
@@ -456,10 +721,10 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
   const handleSelect = (index: number) => {
     if (feedback !== null) return;
     const rt = Date.now() - trialStart.current;
-    setReactionTimes(prev => [...prev, rt]);
+    setReactionTimes((prev) => [...prev, rt]);
     setFeedback(index);
     const isCorrect = index === puzzles[trial].correctIndex;
-    if (isCorrect) setCorrect(c => c + 1);
+    if (isCorrect) setCorrect((c) => c + 1);
 
     setTimeout(() => {
       if (trial + 1 >= puzzles.length) {
@@ -471,7 +736,7 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
           onComplete({ score, correct: finalCorrect, avgReactionTime: avgRT });
         }
       } else {
-        setTrial(t => t + 1);
+        setTrial((t) => t + 1);
         setFeedback(null);
       }
     }, 800);
@@ -481,7 +746,9 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
-      <div className="text-sm text-muted-foreground mb-4">{trial + 1}/{puzzles.length}</div>
+      <div className="text-sm text-muted-foreground mb-4">
+        {trial + 1}/{puzzles.length}
+      </div>
       <p className="text-xs text-muted-foreground mb-4">Complete the analogy</p>
       <div className="flex items-center gap-1 text-2xl mb-6 flex-wrap justify-center">
         <span>{puzzle.a}</span>
@@ -490,7 +757,9 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
         <span className="text-sm text-primary mx-2">::</span>
         <span>{puzzle.c}</span>
         <span className="text-sm text-muted-foreground">→</span>
-        <span className="w-10 h-10 rounded border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">?</span>
+        <span className="w-10 h-10 rounded border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">
+          ?
+        </span>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {puzzle.options.map((opt, i) => (
@@ -502,7 +771,7 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
               "w-14 h-14 rounded-xl text-2xl flex items-center justify-center border-2 transition-all",
               feedback !== null && i === puzzle.correctIndex && "bg-green-500/20 border-green-500",
               feedback !== null && i !== puzzle.correctIndex && "opacity-40",
-              feedback === null && "bg-card border-border hover:border-primary"
+              feedback === null && "bg-card border-border hover:border-primary",
             )}
           >
             {opt}
@@ -516,12 +785,19 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
 // ============ MAIN RENDERER ============
 export function AssessmentDrillRenderer({ exerciseIndex, onComplete }: AssessmentDrillRendererProps) {
   switch (exerciseIndex) {
-    case 0: return <DotTargetAssessment onComplete={onComplete} />;
-    case 1: return <GoNoGoAssessment onComplete={onComplete} />;
-    case 2: return <OddOneOutAssessment onComplete={onComplete} />;
-    case 3: return <SequenceAssessment onComplete={onComplete} />;
-    case 4: return <RapidAssocAssessment onComplete={onComplete} />;
-    case 5: return <AnalogyAssessment onComplete={onComplete} />;
-    default: return null;
+    case 0:
+      return <DotTargetAssessment onComplete={onComplete} />;
+    case 1:
+      return <GoNoGoAssessment onComplete={onComplete} />;
+    case 2:
+      return <OddOneOutAssessment onComplete={onComplete} />;
+    case 3:
+      return <SequenceAssessment onComplete={onComplete} />;
+    case 4:
+      return <RapidAssocAssessment onComplete={onComplete} />;
+    case 5:
+      return <AnalogyAssessment onComplete={onComplete} />;
+    default:
+      return null;
   }
 }
