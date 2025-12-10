@@ -79,38 +79,6 @@ const CognitiveAgeExplained = () => {
           </div>
         </section>
 
-        {/* Section 3 */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-semibold text-foreground">How to Improve</h3>
-          </div>
-          <div className="p-4 rounded-xl bg-card border border-border/30 space-y-3">
-            {[
-              { num: "1", title: "Reasoning Workout", desc: "3-4x weekly" },
-              { num: "2", title: "Clarity Lab", desc: "Structured thinking" },
-              { num: "3", title: "Decision Studio", desc: "Better judgment" },
-            ].map((item) => (
-              <div key={item.num} className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-[10px] font-semibold text-primary">{item.num}</span>
-                </div>
-                <div>
-                  <span className="text-[11px] font-medium text-foreground">{item.title}</span>
-                  <span className="text-[10px] text-muted-foreground ml-1.5">{item.desc}</span>
-                </div>
-              </div>
-            ))}
-            
-            <div className="pt-2 border-t border-border/30 flex items-start gap-2">
-              <Moon className="w-3 h-3 text-muted-foreground mt-0.5" />
-              <p className="text-[10px] text-muted-foreground">
-                Quality sleep and movement support cognitive performance.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
         <div className="pt-2 pb-6">
           <Link to="/app/dashboard">
