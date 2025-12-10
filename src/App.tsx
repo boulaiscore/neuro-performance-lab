@@ -24,6 +24,7 @@ import InstallPage from "./pages/app/Install";
 import NeuroLab from "./pages/app/NeuroLab";
 import NeuroLabArea from "./pages/app/NeuroLabArea";
 import NeuroLabSessionRunner from "./pages/app/NeuroLabSessionRunner";
+import NeuroActivationRunner from "./pages/app/NeuroActivationRunner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -189,6 +190,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <NeuroLabSessionRunner />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/neuro-lab/neuro-activation"
+        element={
+          <ProtectedRoute>
+            <NeuroActivationRunner />
           </ProtectedRoute>
         }
       />
