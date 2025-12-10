@@ -207,6 +207,17 @@ const Account = () => {
               Sign Out
             </Button>
           </div>
+
+          {/* SuperHuman Labs Footer */}
+          <div className="mt-12 pt-6 border-t border-border/50 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-muted-foreground/60 hover:text-muted-foreground/80 transition-colors">
+              <Zap className="w-3 h-3" />
+              <span className="text-xs font-medium tracking-wide">SuperHuman Labs</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground/40 mt-1">
+              Cognitive Performance Engineering
+            </p>
+          </div>
         </div>
       </div>
     </AppShell>

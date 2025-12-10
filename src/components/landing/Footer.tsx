@@ -25,7 +25,7 @@ export function Footer() {
           </nav>
 
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} NeuroLoop Pro
+            © {new Date().getFullYear()} SuperHuman Labs
           </p>
         </div>
         
