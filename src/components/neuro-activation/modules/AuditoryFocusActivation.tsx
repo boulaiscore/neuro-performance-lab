@@ -241,13 +241,10 @@ const AuditoryFocusActivation: React.FC<AuditoryFocusActivationProps> = ({ onCom
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
-    <motion.div
-      className="fixed inset-0 bg-[#06070A] flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
+    <div
+      className="relative min-h-screen w-full bg-background flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
       onClick={handleTap}
       onTouchStart={handleTap}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
     >
       {/* Subtle pulsing background */}
       <div className="absolute inset-0 overflow-hidden">
@@ -453,7 +450,7 @@ const AuditoryFocusActivation: React.FC<AuditoryFocusActivationProps> = ({ onCom
           </>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
