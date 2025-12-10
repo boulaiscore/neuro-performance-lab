@@ -16,6 +16,22 @@ const ASSESSMENT_EXERCISES = [
   { id: 6, area: "creativity", thinkingMode: "slow", label: "Creativity Hub", name: "Analogy Match" },
 ] as const;
 
+// Training weights by area and system (from design)
+// Focus: 70% Fast / 30% Slow
+// Reasoning: 20% Fast / 80% Slow
+// Creativity: 50% Fast / 50% Slow
+const AREA_FAST_WEIGHTS = {
+  focus: 0.7,
+  reasoning: 0.2,
+  creativity: 0.5,
+} as const;
+
+const AREA_SLOW_WEIGHTS = {
+  focus: 0.3,
+  reasoning: 0.8,
+  creativity: 0.5,
+} as const;
+
 interface ExerciseResult {
   exerciseId: number;
   area: string;
@@ -42,10 +58,14 @@ interface InitialAssessmentProps {
 
 const getAreaIcon = (area: string) => {
   switch (area) {
-    case "focus": return Target;
-    case "reasoning": return Lightbulb;
-    case "creativity": return Sparkles;
-    default: return Brain;
+    case "focus":
+      return Target;
+    case "reasoning":
+      return Lightbulb;
+    case "creativity":
+      return Sparkles;
+    default:
+      return Brain;
   }
 };
 
@@ -55,31 +75,33 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
   const [results, setResults] = useState<ExerciseResult[]>([]);
 
   const currentExercise = ASSESSMENT_EXERCISES[currentIndex];
-  const progress = ((currentIndex) / ASSESSMENT_EXERCISES.length) * 100;
+  const progress = (currentIndex / ASSESSMENT_EXERCISES.length) * 100;
 
-  const handleExerciseComplete = useCallback((result: { score: number; correct: number; avgReactionTime?: number }) => {
-    const exercise = ASSESSMENT_EXERCISES[currentIndex];
-    
-    const exerciseResult: ExerciseResult = {
-      exerciseId: exercise.id,
-      area: exercise.area,
-      thinkingMode: exercise.thinkingMode,
-      score: result.score,
-      correct: result.correct,
-      avgReactionTime: result.avgReactionTime,
-    };
+  const handleExerciseComplete = useCallback(
+    (result: { score: number; correct: number; avgReactionTime?: number }) => {
+      const exercise = ASSESSMENT_EXERCISES[currentIndex];
 
-    setResults(prev => [...prev, exerciseResult]);
+      const exerciseResult: ExerciseResult = {
+        exerciseId: exercise.id,
+        area: exercise.area,
+        thinkingMode: exercise.thinkingMode,
+        score: result.score,
+        correct: result.correct,
+        avgReactionTime: result.avgReactionTime,
+      };
 
-    // Move to next exercise or complete
-    if (currentIndex + 1 < ASSESSMENT_EXERCISES.length) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      setPhase("results");
-    }
-  }, [currentIndex]);
+      setResults((prev) => [...prev, exerciseResult]);
 
-  // Calculate final results
+      // Move to next exercise or complete
+      if (currentIndex + 1 < ASSESSMENT_EXERCISES.length) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        setPhase("results");
+      }
+    },
+    [currentIndex],
+  );
+
   const calculateResults = useMemo((): AssessmentResults => {
     if (results.length === 0) {
       return {
@@ -93,40 +115,65 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
       };
     }
 
-    // Calculate thinking mode scores
-    const fastResults = results.filter(r => r.thinkingMode === "fast");
-    const slowResults = results.filter(r => r.thinkingMode === "slow");
-    
-    const fastScore = fastResults.length > 0 
-      ? Math.round(fastResults.reduce((sum, r) => sum + r.score, 0) / fastResults.length)
-      : 50;
-    const slowScore = slowResults.length > 0
-      ? Math.round(slowResults.reduce((sum, r) => sum + r.score, 0) / slowResults.length)
-      : 50;
+    // --- 1) Raggruppa risultati per area + thinkingMode ---
+    const focusFast = results.filter((r) => r.area === "focus" && r.thinkingMode === "fast");
+    const focusSlow = results.filter((r) => r.area === "focus" && r.thinkingMode === "slow");
+    const reasoningFast = results.filter((r) => r.area === "reasoning" && r.thinkingMode === "fast");
+    const reasoningSlow = results.filter((r) => r.area === "reasoning" && r.thinkingMode === "slow");
+    const creativityFast = results.filter((r) => r.area === "creativity" && r.thinkingMode === "fast");
+    const creativitySlow = results.filter((r) => r.area === "creativity" && r.thinkingMode === "slow");
 
-    // Calculate area scores
-    const focusResults = results.filter(r => r.area === "focus");
-    const reasoningResults = results.filter(r => r.area === "reasoning");
-    const creativityResults = results.filter(r => r.area === "creativity");
+    const avg = (arr: ExerciseResult[]) =>
+      arr.length > 0 ? arr.reduce((sum, r) => sum + r.score, 0) / arr.length : 50;
 
-    const focusScore = focusResults.length > 0
-      ? Math.round(focusResults.reduce((sum, r) => sum + r.score, 0) / focusResults.length)
-      : 50;
-    const reasoningScore = reasoningResults.length > 0
-      ? Math.round(reasoningResults.reduce((sum, r) => sum + r.score, 0) / reasoningResults.length)
-      : 50;
-    const creativityScore = creativityResults.length > 0
-      ? Math.round(creativityResults.reduce((sum, r) => sum + r.score, 0) / creativityResults.length)
-      : 50;
+    // Punteggi per area + sistema
+    const focusFastScore = avg(focusFast);
+    const focusSlowScore = avg(focusSlow);
+    const reasoningFastScore = avg(reasoningFast);
+    const reasoningSlowScore = avg(reasoningSlow);
+    const creativityFastScore = avg(creativityFast);
+    const creativitySlowScore = avg(creativitySlow);
 
-    // Overall score
+    // --- 2) Fast / Slow globali come medie PESATE per area ---
+    const fastNumerator =
+      focusFastScore * AREA_FAST_WEIGHTS.focus +
+      reasoningFastScore * AREA_FAST_WEIGHTS.reasoning +
+      creativityFastScore * AREA_FAST_WEIGHTS.creativity;
+    const fastDenominator = AREA_FAST_WEIGHTS.focus + AREA_FAST_WEIGHTS.reasoning + AREA_FAST_WEIGHTS.creativity;
+    const fastScore = Math.round(fastNumerator / fastDenominator);
+
+    const slowNumerator =
+      focusSlowScore * AREA_SLOW_WEIGHTS.focus +
+      reasoningSlowScore * AREA_SLOW_WEIGHTS.reasoning +
+      creativitySlowScore * AREA_SLOW_WEIGHTS.creativity;
+    const slowDenominator = AREA_SLOW_WEIGHTS.focus + AREA_SLOW_WEIGHTS.reasoning + AREA_SLOW_WEIGHTS.creativity;
+    const slowScore = Math.round(slowNumerator / slowDenominator);
+
+    // --- 3) Area scores = media dei drill dell’area (fast + slow) ---
+    const focusResults = results.filter((r) => r.area === "focus");
+    const reasoningResults = results.filter((r) => r.area === "reasoning");
+    const creativityResults = results.filter((r) => r.area === "creativity");
+
+    const focusScore =
+      focusResults.length > 0
+        ? Math.round(focusResults.reduce((sum, r) => sum + r.score, 0) / focusResults.length)
+        : 50;
+
+    const reasoningScore =
+      reasoningResults.length > 0
+        ? Math.round(reasoningResults.reduce((sum, r) => sum + r.score, 0) / reasoningResults.length)
+        : 50;
+
+    const creativityScore =
+      creativityResults.length > 0
+        ? Math.round(creativityResults.reduce((sum, r) => sum + r.score, 0) / creativityResults.length)
+        : 50;
+
+    // --- 4) Overall score = media di tutti i drill (come prima) ---
     const overallScore = Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length);
 
-    // Calculate cognitive age
-    // Score of 50 = age equals chronological age
-    // Score > 50 = younger cognitive age
-    // Score < 50 = older cognitive age
-    const performanceDelta = (overallScore - 50) / 10; // -5 to +5 range
+    // --- 5) Cognitive age (stessa logica, basata su overallScore) ---
+    const performanceDelta = (overallScore - 50) / 10; // -5 .. +5
     const cognitiveAge = Math.max(18, Math.round(userAge - performanceDelta));
 
     return {
@@ -151,9 +198,7 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6">
           <Brain className="w-7 h-7 text-primary" />
         </div>
-        <h1 className="text-xl font-semibold mb-2 tracking-tight">
-          Cognitive Assessment
-        </h1>
+        <h1 className="text-xl font-semibold mb-2 tracking-tight">Cognitive Assessment</h1>
         <p className="text-muted-foreground text-[13px] mb-6 leading-relaxed max-w-[280px] mx-auto">
           Quick test to establish your baseline cognitive scores. 6 exercises, ~15 seconds each.
         </p>
@@ -181,11 +226,7 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
           <span>Slow Thinking</span>
         </div>
 
-        <Button 
-          onClick={() => setPhase("testing")} 
-          variant="hero" 
-          className="w-full h-[52px] text-[15px] font-medium"
-        >
+        <Button onClick={() => setPhase("testing")} variant="hero" className="w-full h-[52px] text-[15px] font-medium">
           Start Assessment
           <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
@@ -204,24 +245,23 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
         <div className="mb-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center",
-                isFast ? "bg-amber-500/15" : "bg-teal-500/15"
-              )}>
-                <AreaIcon className={cn(
-                  "w-4 h-4",
-                  isFast ? "text-amber-400" : "text-teal-400"
-                )} />
+              <div
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  isFast ? "bg-amber-500/15" : "bg-teal-500/15",
+                )}
+              >
+                <AreaIcon className={cn("w-4 h-4", isFast ? "text-amber-400" : "text-teal-400")} />
               </div>
               <div>
                 <span className="text-[13px] font-medium">{currentExercise.name}</span>
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className={cn(
                     "ml-2 text-[10px] px-1.5 py-0",
-                    isFast 
+                    isFast
                       ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
-                      : "border-teal-500/30 text-teal-400 bg-teal-500/10"
+                      : "border-teal-500/30 text-teal-400 bg-teal-500/10",
                   )}
                 >
                   {isFast ? "Fast" : "Slow"}
@@ -237,9 +277,9 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
 
         {/* Exercise */}
         <div className="flex-1 min-h-[320px]">
-          <AssessmentDrillRenderer 
+          <AssessmentDrillRenderer
             key={currentIndex}
-            exerciseIndex={currentIndex} 
+            exerciseIndex={currentIndex}
             onComplete={handleExerciseComplete}
           />
         </div>
@@ -257,12 +297,8 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
           <Brain className="w-7 h-7 text-primary" />
         </div>
-        <h1 className="text-xl font-semibold mb-1 tracking-tight">
-          Assessment Complete
-        </h1>
-        <p className="text-muted-foreground text-[13px] mb-6">
-          Your baseline cognitive profile
-        </p>
+        <h1 className="text-xl font-semibold mb-1 tracking-tight">Assessment Complete</h1>
+        <p className="text-muted-foreground text-[13px] mb-6">Your baseline cognitive profile</p>
 
         {/* Cognitive Age */}
         <div className="p-4 rounded-xl bg-card/50 border border-border/60 mb-4">
@@ -272,10 +308,7 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
             <span className="text-lg font-normal text-muted-foreground ml-1">years</span>
           </div>
           {ageDiff !== 0 && (
-            <span className={cn(
-              "text-[12px]",
-              ageDiff > 0 ? "text-emerald-400" : "text-amber-400"
-            )}>
+            <span className={cn("text-[12px]", ageDiff > 0 ? "text-emerald-400" : "text-amber-400")}>
               {ageDiff > 0 ? `${ageDiff} years younger` : `${Math.abs(ageDiff)} years older`} than actual
             </span>
           )}
@@ -315,11 +348,7 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
           </div>
         </div>
 
-        <Button 
-          onClick={handleComplete} 
-          variant="hero" 
-          className="w-full h-[52px] text-[15px] font-medium"
-        >
+        <Button onClick={handleComplete} variant="hero" className="w-full h-[52px] text-[15px] font-medium">
           Continue
           <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
