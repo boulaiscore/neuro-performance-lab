@@ -750,14 +750,10 @@ function AnalogyAssessment({ onComplete }: { onComplete: (result: AssessmentDril
         {trial + 1}/{puzzles.length}
       </div>
       <p className="text-xs text-muted-foreground mb-4">Complete the analogy</p>
-      <div className="flex items-center gap-1 text-2xl mb-6 flex-wrap justify-center">
+      <div className="flex items-center gap-2 text-2xl mb-6 flex-wrap justify-center">
         <span>{puzzle.trigger}</span>
         <span className="text-sm text-muted-foreground">→</span>
-        <span className="w-10 h-10 rounded border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">
-          ?
-        </span>
-        <span className="text-sm text-muted-foreground">→</span>
-        <span className="w-10 h-10 rounded border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">
+        <span className="w-12 h-12 rounded-xl border-2 border-dashed border-primary/60 flex items-center justify-center text-lg font-bold text-primary">
           ?
         </span>
       </div>
