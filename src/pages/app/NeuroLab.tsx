@@ -73,7 +73,7 @@ export default function NeuroLab() {
             <div className="flex-1 text-left">
               <h3 className="font-semibold text-[14px]">Neuro Activation</h3>
               <p className="text-[11px] text-muted-foreground">
-                7-min complete protocol
+                5-min cognitive warm-up
               </p>
             </div>
             <div className="flex items-center gap-1.5">
