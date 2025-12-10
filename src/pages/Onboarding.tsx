@@ -31,6 +31,7 @@ const Onboarding = () => {
   const [trainingGoals, setTrainingGoals] = useState<TrainingGoal[]>([]);
   const [sessionDuration, setSessionDuration] = useState<SessionDuration | undefined>(undefined);
   const [dailyTimeCommitment, setDailyTimeCommitment] = useState<DailyTimeCommitment | undefined>(undefined);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Calculate age from birth date
   const calculatedAge = birthDate ? differenceInYears(new Date(), birthDate) : undefined;
@@ -227,7 +228,7 @@ const Onboarding = () => {
               {/* Birth Date */}
               <div className="mb-5">
                 <label className="text-[13px] font-medium text-muted-foreground mb-2.5 block">Date of Birth</label>
-                <Popover>
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -247,12 +248,13 @@ const Onboarding = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50" align="center" sideOffset={8}>
+                  <PopoverContent className="w-auto p-0 z-50 bg-card border border-border shadow-xl" align="center" sideOffset={8}>
                     <Calendar
                       mode="single"
                       selected={birthDate}
                       onSelect={(date) => {
                         setBirthDate(date);
+                        setCalendarOpen(false);
                       }}
                       disabled={(date) =>
                         date > new Date() || date < new Date("1920-01-01")
