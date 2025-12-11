@@ -27,8 +27,8 @@ import {
   CRITICAL_REASONING_SLOW_DRILLS,
 } from "./critical-reasoning-slow";
 import { 
-  FOCUS_SLOW_DRILLS,
-} from "./focus-slow";
+  SocraticFocusGamifiedSession,
+} from "./focus-slow/SocraticFocusGamifiedSession";
 
 interface DrillRendererProps {
   exercise: CognitiveExercise;
@@ -48,14 +48,6 @@ export function DrillRenderer({ exercise, onComplete }: DrillRendererProps) {
     return null;
   }, [exercise.id, drillType]);
 
-  // Memoize the focus slow drill selection based on exercise ID
-  const focusSlowDrill = useMemo(() => {
-    if (drillType === "focus_slow") {
-      const index = Math.abs(exercise.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % FOCUS_SLOW_DRILLS.length;
-      return FOCUS_SLOW_DRILLS[index];
-    }
-    return null;
-  }, [exercise.id, drillType]);
   
   // Normalize the completion result
   const handleComplete = (result: { 
@@ -497,14 +489,12 @@ export function DrillRenderer({ exercise, onComplete }: DrillRendererProps) {
     }
 
     case "focus_slow": {
-      // Use memoized drill selection for Focus Arena Slow
-      if (!focusSlowDrill) return null;
-      const FocusDrillComponent = focusSlowDrill.component;
       return (
-        <FocusDrillComponent
+        <SocraticFocusGamifiedSession
+          exerciseCount={1}
           onComplete={(r) => handleComplete({ 
             score: r.score, 
-            correct: r.correct
+            correct: r.correct ? 1 : 0
           })}
         />
       );
