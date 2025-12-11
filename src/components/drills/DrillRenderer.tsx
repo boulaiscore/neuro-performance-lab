@@ -22,6 +22,10 @@ import { ColorHarmonyDrill } from "./ColorHarmonyDrill";
 import { GestaltCompletionDrill } from "./GestaltCompletionDrill";
 import { RapidAssociationDrill } from "./RapidAssociationDrill";
 import { OpenReflectionDrill } from "./OpenReflectionDrill";
+import { 
+  CRITICAL_REASONING_SLOW_DRILLS,
+  getRandomCriticalReasoningSlowDrill 
+} from "./critical-reasoning-slow";
 
 interface DrillRendererProps {
   exercise: CognitiveExercise;
@@ -456,6 +460,20 @@ export function DrillRenderer({ exercise, onComplete }: DrillRendererProps) {
           })}
         />
       );
+
+    case "critical_reasoning_slow": {
+      // Pick a random Socratic drill from the set
+      const drill = getRandomCriticalReasoningSlowDrill();
+      const DrillComponent = drill.component;
+      return (
+        <DrillComponent
+          onComplete={(r) => handleComplete({ 
+            score: r.score, 
+            correct: r.correct
+          })}
+        />
+      );
+    }
 
     default:
       return (
