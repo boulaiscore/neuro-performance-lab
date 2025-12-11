@@ -199,9 +199,15 @@ export function InitialAssessment({ userAge, onComplete }: InitialAssessmentProp
           <Brain className="w-7 h-7 text-primary" />
         </div>
         <h1 className="text-xl font-semibold mb-2 tracking-tight">Cognitive Assessment</h1>
-        <p className="text-muted-foreground text-[13px] mb-6 leading-relaxed max-w-[280px] mx-auto">
-          Quick test to establish your baseline cognitive scores. 6 exercises, ~15 seconds each.
+        <p className="text-muted-foreground text-[13px] mb-4 leading-relaxed max-w-[280px] mx-auto">
+          Quick test to establish your baseline cognitive scores. 6 exercises, ~20 seconds each.
         </p>
+        
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-6 max-w-[300px] mx-auto">
+          <p className="text-[12px] text-primary/80 leading-relaxed">
+            💡 This is an assessment to calibrate your starting point. Don't worry if exercises feel too easy, too hard, or too fast — just do your best.
+          </p>
+        </div>
 
         <div className="grid grid-cols-3 gap-3 mb-8">
           <div className="p-3 rounded-xl bg-card/50 border border-border/60">

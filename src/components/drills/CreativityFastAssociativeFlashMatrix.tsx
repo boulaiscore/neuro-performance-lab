@@ -65,8 +65,8 @@ const CONCEPT_ICON_MAP: Record<string, number> = {
   'fragmentation': 8,
 };
 
-const DURATION = 60000;
-const TIME_PER_TRIAL = 2000;
+const DURATION = 25000; // 25 seconds total
+const TIME_PER_TRIAL = 5000; // 5 seconds per question
 
 const IconDisplay: React.FC<{ pathIndex: number; size?: number }> = ({ pathIndex, size = 40 }) => (
   <svg width={size} height={size} viewBox="0 0 40 40">
@@ -222,11 +222,11 @@ export const CreativityFastAssociativeFlashMatrix: React.FC<CreativityFastAssoci
           <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-400">
             <IconDisplay pathIndex={1} size={32} />
           </div>
-          <h2 className="text-2xl font-semibold text-foreground mb-3">Associative Flash Matrix</h2>
-          <p className="text-muted-foreground mb-2">Creativity Hub • Fast Thinking</p>
+          <h2 className="text-xl font-semibold text-foreground mb-3">Symbol Matching</h2>
+          <p className="text-muted-foreground mb-2 text-sm">Creativity Hub • Fast Thinking</p>
           <p className="text-sm text-muted-foreground mb-8">
-            Match abstract concepts to visual symbols. Tap the icon that best represents each word.
-            You have 2 seconds per trial.
+            A concept word will appear. Tap the abstract symbol that best represents it.
+            Trust your intuition — you have 5 seconds per word.
           </p>
           <motion.button
             className="w-full py-4 bg-purple-500 text-white rounded-xl font-medium"
