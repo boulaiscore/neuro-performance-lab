@@ -255,13 +255,13 @@ export const ReasoningFastCognitiveWhiplash: React.FC<ReasoningFastCognitiveWhip
             {currentIndex + 1} / {shuffledScenarios.length}
           </span>
           <span className="text-sm text-muted-foreground">
-            {Math.ceil(totalTimeLeft / 1000)}s
+            {Math.ceil(itemTimeLeft / 1000)}s
           </span>
         </div>
         <div className="h-1 bg-muted rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-primary"
-            style={{ width: `${totalProgress * 100}%` }}
+            style={{ width: `${itemProgress * 100}%` }}
           />
         </div>
       </div>
