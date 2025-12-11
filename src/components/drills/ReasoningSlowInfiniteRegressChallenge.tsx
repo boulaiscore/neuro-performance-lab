@@ -299,8 +299,9 @@ export const ReasoningSlowInfiniteRegressChallenge: React.FC<ReasoningSlowInfini
               const perpX = -ny * (arrowSize * 0.6);
               const perpY = nx * (arrowSize * 0.6);
               
+              // Show correct answer color for answered edges
               const arrowColor = isAnswered 
-                ? STRENGTH_INFO[answer].color 
+                ? STRENGTH_INFO[edge.correctAnswer].color 
                 : isCurrent 
                   ? highlightColor
                   : 'hsl(var(--muted-foreground))';
