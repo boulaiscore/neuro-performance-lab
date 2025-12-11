@@ -90,23 +90,21 @@ export const ReversalSimulationGame = ({ prompt, options, correctIndex, explanat
           return (
             <motion.div
               key={index}
-              className="perspective-1000"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
             >
-              <motion.div
+              {/* Card container with proper 3D flip */}
+              <div
                 className={`relative w-full h-28 cursor-pointer rounded-xl ${
                   isSelected && !showResult ? "ring-2 ring-primary" : ""
                 } ${isCorrectAndRevealed ? "ring-2 ring-green-500" : ""}
                   ${isWrongAndSelected ? "ring-2 ring-destructive" : ""}`}
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                style={{ transformStyle: "preserve-3d" }}
+                style={{ perspective: "1000px" }}
                 onClick={() => handleFlip(index)}
               >
-                {/* Front */}
-                <div
+                {/* Front - visible when not flipped */}
+                <motion.div
                   className={`absolute inset-0 flex flex-col items-center justify-center p-3 rounded-xl border transition-colors ${
                     isSelected && !showResult
                       ? "bg-primary/20 border-primary"
@@ -114,39 +112,49 @@ export const ReversalSimulationGame = ({ prompt, options, correctIndex, explanat
                       ? "bg-green-500/20 border-green-500"
                       : isWrongAndSelected
                       ? "bg-destructive/20 border-destructive"
-                      : "bg-card/50 border-border/50 hover:border-border"
+                      : "bg-card border-border/50 hover:border-border"
                   }`}
+                  initial={false}
+                  animate={{ 
+                    rotateY: isFlipped ? 180 : 0,
+                    opacity: isFlipped ? 0 : 1,
+                    zIndex: isFlipped ? 0 : 1
+                  }}
+                  transition={{ duration: 0.3 }}
                   style={{ backfaceVisibility: "hidden" }}
                 >
                   <span className="text-xs text-center text-foreground">{option}</span>
                   <span className="text-[10px] text-muted-foreground mt-2">Tap to flip</span>
-                </div>
+                </motion.div>
 
-                {/* Back - all cards show similar reversal consequences */}
-                <div
+                {/* Back - visible when flipped, neutral color */}
+                <motion.div
                   className={`absolute inset-0 flex flex-col items-center justify-center p-3 rounded-xl border ${
                     isCorrectAndRevealed
                       ? "bg-green-500/20 border-green-500"
                       : isWrongAndSelected
                       ? "bg-destructive/20 border-destructive"
-                      : "bg-primary/10 border-primary/30"
+                      : "bg-muted/80 border-border"
                   }`}
-                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                  initial={false}
+                  animate={{ 
+                    rotateY: isFlipped ? 0 : -180,
+                    opacity: isFlipped ? 1 : 0,
+                    zIndex: isFlipped ? 1 : 0
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{ backfaceVisibility: "hidden" }}
                 >
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center"
-                  >
+                  <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <RotateCcw className="w-3 h-3 text-primary" />
-                      <span className="text-primary text-[10px] font-medium">If reversed:</span>
+                      <RotateCcw className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-muted-foreground text-[10px] font-medium">If reversed:</span>
                     </div>
                     <span className="text-foreground text-xs">{consequence.impact}</span>
                     <div className="text-[10px] text-muted-foreground mt-1">{consequence.detail}</div>
-                  </motion.div>
-                </div>
-              </motion.div>
+                  </div>
+                </motion.div>
+              </div>
               
               {/* Select button */}
               {!showResult && (
