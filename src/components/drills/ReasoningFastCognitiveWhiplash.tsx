@@ -43,8 +43,8 @@ const SCENARIOS: Scenario[] = [
   { text: "Implementing caching reduced load times by 60%.", correct: 'causal', difficulty: 2 },
 ];
 
-const DURATION = 60000;
-const TIME_PER_ITEM = 2500;
+const DURATION = 25000; // 25 seconds total
+const TIME_PER_ITEM = 6000; // 6 seconds per question
 
 export const ReasoningFastCognitiveWhiplash: React.FC<ReasoningFastCognitiveWhiplashProps> = ({ onComplete }) => {
   const [phase, setPhase] = useState<'intro' | 'active' | 'complete'>('intro');
@@ -168,11 +168,11 @@ export const ReasoningFastCognitiveWhiplash: React.FC<ReasoningFastCognitiveWhip
               <div className="w-2 h-2 bg-amber-500 rounded-full" />
             </div>
           </div>
-          <h2 className="text-2xl font-semibold text-foreground mb-3">Cognitive Whiplash</h2>
-          <p className="text-muted-foreground mb-2">Critical Reasoning • Fast Thinking</p>
+          <h2 className="text-xl font-semibold text-foreground mb-3">Causal Classification</h2>
+          <p className="text-muted-foreground mb-2 text-sm">Critical Reasoning • Fast Thinking</p>
           <p className="text-sm text-muted-foreground mb-8">
-            Classify each scenario as Causal, Correlational, or Noise. 
-            You have 2.5 seconds per item.
+            Read each scenario and classify it as: <strong>Causal</strong> (direct cause), <strong>Correlational</strong> (linked but not causal), or <strong>Noise</strong> (irrelevant).
+            You have 6 seconds per question.
           </p>
           <motion.button
             className="w-full py-4 bg-amber-500 text-black rounded-xl font-medium"

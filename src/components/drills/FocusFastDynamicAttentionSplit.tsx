@@ -32,8 +32,8 @@ interface Rule {
 
 const SHAPES: Shape[] = ['triangle', 'circle', 'square', 'diamond'];
 const COLORS: Color[] = ['blue', 'red', 'green', 'yellow'];
-const DURATION = 50000; // 50 seconds
-const RULE_CHANGE_INTERVAL = 12000; // 12 seconds
+const DURATION = 20000; // 20 seconds for assessment
+const RULE_CHANGE_INTERVAL = 10000; // 10 seconds
 
 const COLOR_MAP: Record<Color, string> = {
   blue: 'hsl(210, 100%, 60%)',
@@ -248,11 +248,11 @@ export const FocusFastDynamicAttentionSplit: React.FC<FocusFastDynamicAttentionS
           <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/20 flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-primary rounded-lg" />
           </div>
-          <h2 className="text-2xl font-semibold text-foreground mb-3">Dynamic Attention Split</h2>
-          <p className="text-muted-foreground mb-2">Focus Arena • Fast Thinking</p>
+          <h2 className="text-xl font-semibold text-foreground mb-3">Attention Split</h2>
+          <p className="text-muted-foreground mb-2 text-sm">Focus Arena • Fast Thinking</p>
           <p className="text-sm text-muted-foreground mb-8">
-            Two lanes stream symbols. Tap only targets matching the current rule. 
-            Rule changes every ~12 seconds.
+            Symbols stream down two lanes. The rule bar shows which shape+color to tap and in which lane. 
+            Tap only matching targets. The rule changes mid-exercise.
           </p>
           <motion.button
             className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-medium"
