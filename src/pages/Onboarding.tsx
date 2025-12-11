@@ -31,9 +31,7 @@ const Onboarding = () => {
   const [educationLevel, setEducationLevel] = useState<EducationLevel | undefined>(undefined);
   const [degreeDiscipline, setDegreeDiscipline] = useState<DegreeDiscipline | undefined>(undefined);
   
-  // Training preferences
   const [trainingGoals, setTrainingGoals] = useState<TrainingGoal[]>([]);
-  const [sessionDuration, setSessionDuration] = useState<SessionDuration | undefined>(undefined);
   const [dailyTimeCommitment, setDailyTimeCommitment] = useState<DailyTimeCommitment | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -97,7 +95,7 @@ const Onboarding = () => {
       educationLevel,
       degreeDiscipline,
       trainingGoals,
-      sessionDuration,
+      sessionDuration: "2min", // Default value
       dailyTimeCommitment,
       onboardingCompleted: true,
     });
@@ -167,12 +165,6 @@ const Onboarding = () => {
     },
   ];
 
-  const durationOptions: { value: SessionDuration; label: string; description: string }[] = [
-    { value: "30s", label: "30 sec", description: "Quick drill" },
-    { value: "2min", label: "2 min", description: "Focused" },
-    { value: "5min", label: "5 min", description: "Deep work" },
-    { value: "7min", label: "7 min", description: "Comprehensive" },
-  ];
 
   const dailyTimeOptions: { value: DailyTimeCommitment; label: string; description: string }[] = [
     { value: "3min", label: "3 min", description: "Micro-drills" },
@@ -517,28 +509,6 @@ const Onboarding = () => {
                 </p>
               </div>
               
-              {/* Session Duration */}
-              <div className="mb-5">
-                <label className="text-[13px] font-medium text-muted-foreground mb-2.5 block">Drill length</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {durationOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setSessionDuration(option.value)}
-                      className={cn(
-                        "py-3 px-3 rounded-xl border text-center transition-all",
-                        sessionDuration === option.value
-                          ? "border-primary bg-primary/10"
-                          : "border-border/60 bg-card/50 hover:border-primary/40"
-                      )}
-                    >
-                      <span className="font-semibold text-[14px] block mb-0.5">{option.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{option.description}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
               {/* Daily Commitment */}
               <div className="mb-6">
                 <label className="text-[13px] font-medium text-muted-foreground mb-2.5 block">Daily commitment</label>
@@ -565,7 +535,7 @@ const Onboarding = () => {
                 onClick={handleComplete}
                 variant="hero"
                 className="w-full h-[52px] text-[15px] font-medium"
-                disabled={!sessionDuration || !dailyTimeCommitment}
+                disabled={!dailyTimeCommitment}
               >
                 Continue to Assessment
                 <ArrowRight className="w-4 h-4 ml-1" />
