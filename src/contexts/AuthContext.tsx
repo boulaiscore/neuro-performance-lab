@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
+import { sendWelcomeEmail } from "@/lib/emailService";
 export type TrainingGoal = "fast_thinking" | "slow_thinking";
 export type SessionDuration = "30s" | "2min" | "5min" | "7min";
 export type DailyTimeCommitment = "3min" | "10min" | "30min";
@@ -182,6 +182,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       return { success: false, error: error.message };
     }
+
+    // Send welcome email (fire and forget, don't block signup)
+    sendWelcomeEmail(email, name).catch((err) => {
+      console.error("Failed to send welcome email:", err);
+    });
 
     return { success: true };
   };

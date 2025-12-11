@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { Check, Crown, Sparkles, Loader2, Rocket, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { sendPremiumUpgradeEmail } from "@/lib/emailService";
 
 const features = [
   "All 3 Neuro Lab training areas",
@@ -71,9 +72,16 @@ const Premium = () => {
       // Update local state
       await upgradeToPremium();
       
+      // Send premium upgrade confirmation email
+      if (user.email) {
+        sendPremiumUpgradeEmail(user.email, user.name || undefined).catch((err) => {
+          console.error("Failed to send premium upgrade email:", err);
+        });
+      }
+      
       toast({
         title: "Welcome to the Beta! 🎉",
-        description: "You now have full access to all premium features.",
+        description: "You now have full access to all premium features. Check your email for confirmation.",
       });
 
       // Refresh beta count
