@@ -29,13 +29,15 @@ const Account = () => {
   const [name, setName] = useState(user?.name || "");
   const [trainingGoals, setTrainingGoals] = useState<TrainingGoal[]>(user?.trainingGoals || []);
   const [sessionDuration, setSessionDuration] = useState<SessionDuration | undefined>(user?.sessionDuration);
-  const [dailyTimeCommitment, setDailyTimeCommitment] = useState<DailyTimeCommitment | undefined>(user?.dailyTimeCommitment);
+  const [dailyTimeCommitment, setDailyTimeCommitment] = useState<DailyTimeCommitment | undefined>(
+    user?.dailyTimeCommitment,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
   const handleResetAssessment = async () => {
     if (!user?.id) return;
-    
+
     setIsResetting(true);
     try {
       // Reset baseline metrics in database
@@ -83,11 +85,7 @@ const Account = () => {
   }, [user]);
 
   const toggleGoal = (goal: TrainingGoal) => {
-    setTrainingGoals(prev => 
-      prev.includes(goal) 
-        ? prev.filter(g => g !== goal)
-        : [...prev, goal]
-    );
+    setTrainingGoals((prev) => (prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]));
   };
 
   const handleSave = async () => {
@@ -103,11 +101,10 @@ const Account = () => {
     setIsSaving(false);
   };
 
-
   const dailyTimeOptions: { value: DailyTimeCommitment; label: string }[] = [
     { value: "3min", label: "3 min" },
     { value: "10min", label: "10 min" },
-    { value: "30min", label: "30 min" },
+    { value: "15min", label: "15 min" },
   ];
 
   return (
@@ -127,10 +124,12 @@ const Account = () => {
           <div className="p-6 rounded-xl bg-card border border-border mb-6 shadow-card">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-10 h-10 rounded-lg flex items-center justify-center",
-                  isPremium ? "bg-primary/15" : "bg-muted/50"
-                )}>
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-lg flex items-center justify-center",
+                    isPremium ? "bg-primary/15" : "bg-muted/50",
+                  )}
+                >
                   <Crown className={cn("w-5 h-5", isPremium ? "text-primary" : "text-muted-foreground")} />
                 </div>
                 <div>
@@ -146,19 +145,21 @@ const Account = () => {
                 </Button>
               )}
             </div>
-            
+
             {/* Daily Sessions (Free users only) */}
             {!isPremium && (
               <div className="pt-4 border-t border-border/50">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-muted-foreground">Daily Sessions</span>
-                  <span className="text-sm font-medium">{dailySessionsUsed}/{MAX_DAILY_SESSIONS_FREE}</span>
+                  <span className="text-sm font-medium">
+                    {dailySessionsUsed}/{MAX_DAILY_SESSIONS_FREE}
+                  </span>
                 </div>
                 <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={cn(
                       "h-full transition-all rounded-full",
-                      remainingSessions === 0 ? "bg-destructive" : "bg-primary"
+                      remainingSessions === 0 ? "bg-destructive" : "bg-primary",
                     )}
                     style={{ width: `${(dailySessionsUsed / MAX_DAILY_SESSIONS_FREE) * 100}%` }}
                   />
@@ -176,19 +177,12 @@ const Account = () => {
           {/* Name */}
           <div className="p-6 rounded-xl bg-card border border-border mb-6 shadow-card">
             <label className="text-sm font-medium mb-3 block">Name</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              className="h-12"
-            />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="h-12" />
           </div>
 
           {/* Training Goals */}
           <div className="p-6 rounded-xl bg-card border border-border mb-6 shadow-card">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              Training Goals
-            </h3>
+            <h3 className="font-semibold mb-4 flex items-center gap-2">Training Goals</h3>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => toggleGoal("fast_thinking")}
@@ -196,7 +190,7 @@ const Account = () => {
                   "p-4 rounded-xl border text-left transition-all",
                   trainingGoals.includes("fast_thinking")
                     ? "border-warning bg-warning/10"
-                    : "border-border hover:border-warning/30"
+                    : "border-border hover:border-warning/30",
                 )}
               >
                 <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center mb-2">
@@ -211,7 +205,7 @@ const Account = () => {
                   "p-4 rounded-xl border text-left transition-all",
                   trainingGoals.includes("slow_thinking")
                     ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/30"
+                    : "border-border hover:border-primary/30",
                 )}
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
@@ -222,7 +216,6 @@ const Account = () => {
               </button>
             </div>
           </div>
-
 
           {/* Daily Time */}
           <div className="p-6 rounded-xl bg-card border border-border mb-6 shadow-card">
@@ -239,7 +232,7 @@ const Account = () => {
                     "flex-1 p-3 rounded-xl border text-sm transition-all",
                     dailyTimeCommitment === option.value
                       ? "border-primary bg-primary/8"
-                      : "border-border hover:border-primary/30"
+                      : "border-border hover:border-primary/30",
                   )}
                 >
                   {option.label}
@@ -271,14 +264,13 @@ const Account = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Reset Initial Assessment?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will clear your current baseline cognitive metrics and redirect you to retake the initial assessment. Your training history will be preserved.
+                    This will clear your current baseline cognitive metrics and redirect you to retake the initial
+                    assessment. Your training history will be preserved.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleResetAssessment}>
-                    Reset & Retake
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleResetAssessment}>Reset & Retake</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -302,9 +294,7 @@ const Account = () => {
               <Zap className="w-3 h-3" />
               <span className="text-xs font-medium tracking-wide">SuperHuman Labs</span>
             </div>
-            <p className="text-[10px] text-muted-foreground/40 mt-1">
-              Cognitive Performance Engineering
-            </p>
+            <p className="text-[10px] text-muted-foreground/40 mt-1">Cognitive Performance Engineering</p>
           </div>
         </div>
       </div>
