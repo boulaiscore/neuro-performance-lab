@@ -14,6 +14,21 @@ const Home = () => {
   const hasFastThinking = user?.trainingGoals?.includes("fast_thinking");
   const hasSlowThinking = user?.trainingGoals?.includes("slow_thinking");
 
+  const getDurationLabel = (duration?: string) => {
+    switch (duration) {
+      case "30s":
+        return "30s";
+      case "2min":
+        return "2min";
+      case "5min":
+        return "5min";
+      case "7min":
+        return "7min";
+      default:
+        return "—";
+    }
+  };
+
   const getDailyTimeLabel = (time?: string) => {
     switch (time) {
       case "1min":
