@@ -23,7 +23,8 @@ export type DrillType =
   | "color_harmony"   // Pick harmonizing colors
   | "gestalt_completion" // Complete partial shapes intuitively
   | "rapid_association"  // Quick emotional/visual associations
-  | "open_reflection";   // Open-ended reflection exercises
+  | "open_reflection"    // Open-ended reflection exercises
+  | "critical_reasoning_slow"; // Socratic/philosophical reasoning drills
 
 // Default configurations for each drill type
 export const DRILL_CONFIGS: Record<DrillType, {
@@ -52,6 +53,7 @@ export const DRILL_CONFIGS: Record<DrillType, {
   gestalt_completion: { timeLimit: 30, difficulty: 'easy' },
   rapid_association: { timeLimit: 30, difficulty: 'easy' },
   open_reflection: { timeLimit: 180, difficulty: 'medium' },
+  critical_reasoning_slow: { timeLimit: 60, difficulty: 'hard' },
 };
 
 // Map exercise IDs to drill types
@@ -123,9 +125,9 @@ export function getDrillTypeForExercise(exerciseId: string): DrillType {
   }
   
   // Critical Reasoning Slow Thinking exercises (CR_SLOW_001 - CR_SLOW_050)
-  // These are open-ended reflection exercises, not visual drills
+  // These use Socratic/philosophical reasoning drills
   if (id.startsWith("CR_SLOW_")) {
-    return "open_reflection";
+    return "critical_reasoning_slow";
   }
   
   // Critical Reasoning legacy exercises
