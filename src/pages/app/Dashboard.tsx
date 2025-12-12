@@ -229,7 +229,7 @@ const Dashboard = () => {
               transition={{ duration: 0.4, delay: 0.3 }}
               className="pt-1"
             >
-              <Link to="/app/neuro-lab">
+              <Link to="/neuro-lab">
                 <Button variant="premium" className="w-full h-11 text-[13px] gap-2">
                   <Play className="w-4 h-4" />
                   Inizia allenamento
