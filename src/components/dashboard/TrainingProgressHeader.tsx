@@ -51,11 +51,11 @@ export const TrainingProgressHeader = () => {
 
   // Get motivational message
   const motivationalMessage = useMemo(() => {
-    if (streak >= 7) return "🔥 Una settimana perfetta! Continua così";
-    if (streak >= 3) return "🚀 Ottimo ritmo! La costanza paga";
-    if (weeklyStats.trend === "up") return `📈 Stai migliorando! +${weeklyStats.trendValue}% questa settimana`;
-    if (weeklyStats.completedDays === 0) return "🎯 Inizia il tuo percorso cognitivo";
-    return "💪 Ogni sessione conta. Continua ad allenarti";
+    if (streak >= 7) return "🔥 Perfect week! Keep it up";
+    if (streak >= 3) return "🚀 Great rhythm! Consistency pays off";
+    if (weeklyStats.trend === "up") return `📈 You're improving! +${weeklyStats.trendValue}% this week`;
+    if (weeklyStats.completedDays === 0) return "🎯 Start your cognitive journey";
+    return "💪 Every session counts. Keep training";
   }, [streak, weeklyStats]);
 
   const circumference = 2 * Math.PI * 40;
@@ -113,7 +113,7 @@ export const TrainingProgressHeader = () => {
             >
               {weeklyStats.completedDays}
             </motion.span>
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">/7 giorni</span>
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">/7 days</span>
           </div>
           
           {/* Pulse glow when streak active */}
@@ -136,7 +136,7 @@ export const TrainingProgressHeader = () => {
         {/* Stats and Message */}
         <div className="flex-1 min-w-0">
           <h3 className="text-[13px] font-semibold text-foreground mb-1">
-            Il tuo progresso
+            Your Progress
           </h3>
           
           {/* Streak and Trend */}
@@ -164,7 +164,7 @@ export const TrainingProgressHeader = () => {
               }`}>
                 {weeklyStats.trend === "up" ? `+${weeklyStats.trendValue}%` : 
                  weeklyStats.trend === "down" ? `${weeklyStats.trendValue}%` : 
-                 "Stabile"}
+                 "Stable"}
               </span>
             </div>
           </div>
