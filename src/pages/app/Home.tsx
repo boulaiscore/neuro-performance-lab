@@ -55,7 +55,7 @@ const Home = () => {
             Cognitive Training
           </p>
           <h1 className="text-xl font-semibold tracking-tight">
-            Ciao, {firstName}
+            Hello, {firstName}
           </h1>
         </motion.div>
 
@@ -85,7 +85,7 @@ const Home = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-[16px] font-semibold text-foreground mb-0.5">
-                  Inizia allenamento
+                  Start Training
                 </h3>
                 <p className="text-[12px] text-muted-foreground">
                   Focus • Reasoning • Creativity
@@ -106,13 +106,13 @@ const Home = () => {
           className="p-4 rounded-xl bg-card/50 border border-border/30 mb-5"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[13px] font-semibold text-foreground">Il tuo protocollo</h2>
+            <h2 className="text-[13px] font-semibold text-foreground">Your Protocol</h2>
             <Link 
               to="/app/account" 
               className="text-[11px] text-primary/70 hover:text-primary flex items-center gap-1 transition-colors"
             >
               <Settings className="w-3 h-3" />
-              Modifica
+              Edit
             </Link>
           </div>
 
@@ -124,7 +124,7 @@ const Home = () => {
                   <Target className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Obiettivo</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Goal</p>
                   <p className="text-[13px] font-medium text-foreground">{getGoalsLabel()}</p>
                 </div>
               </div>
@@ -135,7 +135,7 @@ const Home = () => {
                   <Clock className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sessioni</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sessions</p>
                   <p className="text-[13px] font-medium text-foreground">
                     {getDurationLabel(user?.sessionDuration)} • {getDailyTimeLabel(user?.dailyTimeCommitment)}
                   </p>
@@ -145,9 +145,9 @@ const Home = () => {
           ) : (
             <div className="text-center py-4">
               <Sparkles className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
-              <p className="text-[12px] text-muted-foreground mb-2">Configura il tuo training</p>
+              <p className="text-[12px] text-muted-foreground mb-2">Configure your training</p>
               <Link to="/onboarding" className="text-[12px] text-primary hover:underline">
-                Completa setup →
+                Complete setup →
               </Link>
             </div>
           )}
@@ -161,8 +161,8 @@ const Home = () => {
           className="text-center pt-4"
         >
           <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
-            Allena il tuo cervello ogni giorno per costruire<br />
-            un vantaggio cognitivo duraturo
+            Train your brain daily to build<br />
+            lasting cognitive advantage
           </p>
         </motion.div>
       </div>

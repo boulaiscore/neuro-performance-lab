@@ -232,7 +232,7 @@ const Dashboard = () => {
               <Link to="/neuro-lab">
                 <Button variant="premium" className="w-full h-11 text-[13px] gap-2">
                   <Play className="w-4 h-4" />
-                  Inizia allenamento
+                  Start Training
                 </Button>
               </Link>
             </motion.div>
