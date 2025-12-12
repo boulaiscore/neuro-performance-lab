@@ -2,6 +2,39 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { NeuroLabArea, NeuroLabDuration, NeuroLabSession } from "@/lib/neuroLab";
 
+// Get completed exercise IDs for a user (to avoid repetition)
+export function useCompletedExerciseIds(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["completed-exercise-ids", userId],
+    queryFn: async () => {
+      if (!userId) return new Set<string>();
+      
+      // Get exercises used in the last 7 days
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const { data, error } = await supabase
+        .from("neuro_gym_sessions")
+        .select("exercises_used")
+        .eq("user_id", userId)
+        .gte("completed_at", sevenDaysAgo.toISOString());
+      
+      if (error) throw error;
+      
+      // Flatten all exercises_used arrays into a single Set
+      const completedIds = new Set<string>();
+      data?.forEach((session) => {
+        session.exercises_used?.forEach((id: string) => {
+          completedIds.add(id);
+        });
+      });
+      
+      return completedIds;
+    },
+    enabled: !!userId,
+  });
+}
+
 // Save Neuro Lab session
 export function useSaveNeuroLabSession() {
   const queryClient = useQueryClient();

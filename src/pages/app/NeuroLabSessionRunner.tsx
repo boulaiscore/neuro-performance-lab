@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { X, Trophy, Brain, Star, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExercises, useUpdateUserMetrics, useUserMetrics } from "@/hooks/useExercises";
-import { useSaveNeuroLabSession } from "@/hooks/useNeuroLab";
+import { useSaveNeuroLabSession, useCompletedExerciseIds } from "@/hooks/useNeuroLab";
 import { useUpdateXP, useCheckAndAwardBadges, useUserBadges } from "@/hooks/useBadges";
 import { usePremiumGating } from "@/hooks/usePremiumGating";
 import { useDailyTraining } from "@/hooks/useDailyTraining";
@@ -33,6 +33,7 @@ export default function NeuroLabSessionRunner() {
   const isDailyTraining = searchParams.get("daily") === "true" && !isDailyCompleted;
   
   const { data: allExercises, isLoading: exercisesLoading } = useExercises();
+  const { data: completedExerciseIds, isLoading: completedLoading } = useCompletedExerciseIds(user?.id);
   const { data: userMetrics } = useUserMetrics(user?.id);
   const { data: userBadges } = useUserBadges(user?.id);
   const saveSession = useSaveNeuroLabSession();
@@ -58,13 +59,14 @@ export default function NeuroLabSessionRunner() {
       return;
     }
     
-    if (allExercises && allExercises.length > 0 && area && !sessionStarted) {
+    if (allExercises && allExercises.length > 0 && area && !sessionStarted && !completedLoading) {
       const exercises = generateNeuroLabSession(
         area, 
         duration || "2min", 
         allExercises,
         user?.trainingGoals,
-        thinkingMode || undefined
+        thinkingMode || undefined,
+        completedExerciseIds
       );
       setSessionExercises(exercises);
       setSessionStarted(true);
@@ -72,7 +74,7 @@ export default function NeuroLabSessionRunner() {
       // Increment session counter for free users
       incrementSession.mutate();
     }
-  }, [allExercises, area, duration, user?.trainingGoals, thinkingMode, canStartSession, sessionStarted]);
+  }, [allExercises, area, duration, user?.trainingGoals, thinkingMode, canStartSession, sessionStarted, completedExerciseIds, completedLoading]);
 
   const areaConfig = useMemo(() => {
     if (area === "neuro-activation") {
@@ -219,7 +221,7 @@ export default function NeuroLabSessionRunner() {
     );
   }
 
-  if (exercisesLoading) {
+  if (exercisesLoading || completedLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

@@ -102,7 +102,8 @@ export function generateNeuroLabSession(
   duration: NeuroLabDuration,
   allExercises: CognitiveExercise[],
   trainingGoals?: TrainingGoal[],
-  explicitThinkingMode?: "fast" | "slow"
+  explicitThinkingMode?: "fast" | "slow",
+  completedExerciseIds?: Set<string>
 ): CognitiveExercise[] {
   if (area === "neuro-activation") {
     // Return fixed sequence for Neuro Activation
@@ -112,7 +113,17 @@ export function generateNeuroLabSession(
   }
 
   // Filter exercises by gym_area field (database column name unchanged)
-  const areaExercises = allExercises.filter(e => e.gym_area === area);
+  let areaExercises = allExercises.filter(e => e.gym_area === area);
+  
+  // Filter out completed exercises if provided
+  if (completedExerciseIds && completedExerciseIds.size > 0) {
+    const freshExercises = areaExercises.filter(e => !completedExerciseIds.has(e.id));
+    // Only use fresh exercises if there are enough, otherwise reset and use all
+    if (freshExercises.length >= 2) {
+      areaExercises = freshExercises;
+    }
+    // If not enough fresh exercises, use all (exercises will repeat)
+  }
   
   // If no exercises found for this area, return empty array
   if (areaExercises.length === 0) {
