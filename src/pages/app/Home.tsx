@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { AppShell } from "@/components/app/AppShell";
 import { useAuth } from "@/contexts/AuthContext";
-import { Zap, Brain, ChevronRight, Dumbbell, Settings } from "lucide-react";
+import { ChevronRight, Dumbbell, Settings, Target, Clock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Home = () => {
@@ -11,154 +12,159 @@ const Home = () => {
   const firstName = user?.name?.split(" ")[0] || "there";
 
   const hasGoals = user?.trainingGoals && user.trainingGoals.length > 0;
-  const hasFastThinking = user?.trainingGoals?.includes("fast_thinking");
-  const hasSlowThinking = user?.trainingGoals?.includes("slow_thinking");
 
   const getDurationLabel = (duration?: string) => {
     switch (duration) {
-      case "30s":
-        return "30s";
-      case "2min":
-        return "2min";
-      case "5min":
-        return "5min";
-      case "7min":
-        return "7min";
-      default:
-        return "—";
+      case "30s": return "30 secondi";
+      case "2min": return "2 minuti";
+      case "5min": return "5 minuti";
+      case "7min": return "7 minuti";
+      default: return "—";
     }
   };
 
   const getDailyTimeLabel = (time?: string) => {
     switch (time) {
-      case "1min":
-        return "1min/day";
-      case "5min":
-        return "5min/day";
-      case "10min":
-        return "10min/day";
-      default:
-        return "—";
+      case "3min": return "3 min/giorno";
+      case "7min": return "7 min/giorno";
+      case "10min": return "10 min/giorno";
+      default: return "—";
     }
+  };
+
+  const getGoalsLabel = () => {
+    const goals = user?.trainingGoals || [];
+    if (goals.includes("fast_thinking") && goals.includes("slow_thinking")) {
+      return "Fast & Slow Thinking";
+    }
+    if (goals.includes("fast_thinking")) return "Fast Thinking";
+    if (goals.includes("slow_thinking")) return "Slow Thinking";
+    return "Non configurato";
   };
 
   return (
     <AppShell>
-      <div className="px-5 py-5 max-w-md mx-auto">
-        {/* Header */}
-        <div className="mb-5">
-          <p className="text-[10px] text-muted-foreground/70 uppercase tracking-widest mb-0.5">
-            Strategic Cognitive Training
+      <div className="px-5 py-6 max-w-md mx-auto">
+        {/* Header with greeting */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <p className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1">
+            Cognitive Training
           </p>
-          <h1 className="text-lg font-semibold tracking-tight">Hello, {firstName}</h1>
-        </div>
+          <h1 className="text-xl font-semibold tracking-tight">
+            Ciao, {firstName}
+          </h1>
+        </motion.div>
 
-        {/* Training Profile Card */}
-        <div className="p-4 rounded-xl bg-card/60 border border-border/30 mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium text-[13px]">Training Protocol</h2>
-            <Link to="/app/account" className="text-[11px] text-primary/80 hover:text-primary flex items-center gap-1">
+        {/* Main CTA - Cognitive Lab */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-5"
+        >
+          <button
+            onClick={() => navigate("/neuro-lab")}
+            className={cn(
+              "group w-full p-5 rounded-2xl",
+              "bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5",
+              "border border-primary/30 hover:border-primary/50",
+              "transition-all duration-300 text-left active:scale-[0.98]",
+              "relative overflow-hidden"
+            )}
+          >
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Dumbbell className="w-7 h-7 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[16px] font-semibold text-foreground mb-0.5">
+                  Inizia allenamento
+                </h3>
+                <p className="text-[12px] text-muted-foreground">
+                  Focus • Reasoning • Creativity
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <ChevronRight className="w-4 h-4 text-primary" />
+              </div>
+            </div>
+          </button>
+        </motion.div>
+
+        {/* Training Protocol Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="p-4 rounded-xl bg-card/50 border border-border/30 mb-5"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[13px] font-semibold text-foreground">Il tuo protocollo</h2>
+            <Link 
+              to="/app/account" 
+              className="text-[11px] text-primary/70 hover:text-primary flex items-center gap-1 transition-colors"
+            >
               <Settings className="w-3 h-3" />
-              Edit
+              Modifica
             </Link>
           </div>
 
           {hasGoals ? (
-            <div className="space-y-2.5">
-              {/* Goals */}
-              <div className="flex gap-2">
-                {hasFastThinking && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <Zap className="w-3 h-3 text-amber-400" />
-                    <span className="text-[11px] font-medium text-amber-400">System 1</span>
-                  </div>
-                )}
-                {hasSlowThinking && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-500/10 border border-teal-500/20">
-                    <Brain className="w-3 h-3 text-teal-400" />
-                    <span className="text-[11px] font-medium text-teal-400">System 2</span>
-                  </div>
-                )}
+            <div className="space-y-3">
+              {/* Goal */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Obiettivo</p>
+                  <p className="text-[13px] font-medium text-foreground">{getGoalsLabel()}</p>
+                </div>
               </div>
 
-              {/* Preferences */}
-              <div className="flex gap-3 text-[11px] text-muted-foreground">
-                <span>{getDurationLabel(user?.sessionDuration)} drills</span>
-                <span className="text-muted-foreground/40">•</span>
-                <span>{getDailyTimeLabel(user?.dailyTimeCommitment)}</span>
+              {/* Duration */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sessioni</p>
+                  <p className="text-[13px] font-medium text-foreground">
+                    {getDurationLabel(user?.sessionDuration)} • {getDailyTimeLabel(user?.dailyTimeCommitment)}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="text-center py-3">
-              <p className="text-[12px] text-muted-foreground mb-2">Configure your training</p>
+            <div className="text-center py-4">
+              <Sparkles className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-[12px] text-muted-foreground mb-2">Configura il tuo training</p>
               <Link to="/onboarding" className="text-[12px] text-primary hover:underline">
-                Complete Setup →
+                Completa setup →
               </Link>
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Quick Access to Gym */}
-        <div className="mb-5">
-          <p className="text-[10px] text-muted-foreground/70 uppercase tracking-widest mb-2.5">Begin Training</p>
-          <button
-            onClick={() => navigate("/neuro-lab")}
-            className={cn(
-              "group w-full p-4 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5",
-              "border border-primary/25 hover:border-primary/40",
-              "transition-all duration-200 text-left active:scale-[0.98]",
-            )}
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                <Dumbbell className="w-6 h-6 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-[15px] font-semibold text-foreground">Cognitive Lab</h3>
-                <p className="text-[12px] text-muted-foreground mt-0.5">Strategic drills • 5 domains</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-            </div>
-          </button>
-        </div>
-
-        {/* Training Focus Overview */}
-        <div className="mb-5">
-          <p className="text-[10px] text-muted-foreground/70 uppercase tracking-widest mb-2.5">Cognitive Systems</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            <div
-              className={cn(
-                "p-3.5 rounded-xl border transition-colors",
-                hasFastThinking ? "bg-amber-500/5 border-amber-500/20" : "bg-card/40 border-border/30 opacity-40",
-              )}
-            >
-              <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center mb-2.5">
-                <Zap className="w-4 h-4 text-amber-400" />
-              </div>
-              <h3 className="text-[13px] font-semibold text-foreground">System 1</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Intuitive Processing</p>
-            </div>
-            <div
-              className={cn(
-                "p-3.5 rounded-xl border transition-colors",
-                hasSlowThinking ? "bg-teal-500/5 border-teal-500/20" : "bg-card/40 border-border/30 opacity-40",
-              )}
-            >
-              <div className="w-9 h-9 rounded-lg bg-teal-500/10 flex items-center justify-center mb-2.5">
-                <Brain className="w-4 h-4 text-teal-400" />
-              </div>
-              <h3 className="text-[13px] font-semibold text-foreground">System 2</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Deliberate Analysis</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tagline */}
-        <div className="text-center pt-2">
-          <p className="text-[9px] text-muted-foreground/50 uppercase tracking-widest">
-            Build strategic cognitive advantage
+        {/* Quick Stats or Tips */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-center pt-4"
+        >
+          <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
+            Allena il tuo cervello ogni giorno per costruire<br />
+            un vantaggio cognitivo duraturo
           </p>
-        </div>
+        </motion.div>
       </div>
     </AppShell>
   );
