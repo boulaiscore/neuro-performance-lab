@@ -1,4 +1,5 @@
-import { Zap, Brain, Target } from "lucide-react";
+import { Zap, Brain, Target, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const systems = [
   {
@@ -52,10 +53,17 @@ export function HowItWorks() {
           <h2 className="text-3xl sm:text-4xl font-semibold mb-5">
             Train <span className="text-gradient">Strategic Thinking</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed mb-4">
             The modern mind is fragmented. AI makes thinking easier but weaker. 
             Elite performers train deep reasoning and strategic clarity daily.
           </p>
+          <Link 
+            to="/brain-science" 
+            className="inline-flex items-center gap-2 text-primary text-sm font-medium hover:underline"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Deep dive: AI, Social Media & Your Brain
+          </Link>
         </div>
 
         {/* Two Systems */}
