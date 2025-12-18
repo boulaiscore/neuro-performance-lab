@@ -10,7 +10,7 @@ import { DailyTrainingHistory } from "@/components/dashboard/DailyTrainingHistor
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { TrainingProgressHeader } from "@/components/dashboard/TrainingProgressHeader";
 import { Button } from "@/components/ui/button";
-import { Info, Loader2, Activity, BarChart3, Play } from "lucide-react";
+import { Info, Loader2, Activity, BarChart3, Play, BookOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserMetrics } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
@@ -174,9 +174,10 @@ const Dashboard = () => {
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h2 className="text-[13px] font-semibold text-foreground">Dual-Process Integration</h2>
-                <span className="text-[9px] text-muted-foreground/60 uppercase tracking-widest">
-                  vs baseline
-                </span>
+                <Link to="/brain-science" className="flex items-center gap-1 text-[10px] text-primary hover:underline">
+                  <BookOpen className="w-3 h-3" />
+                  Learn more
+                </Link>
               </div>
               
               <FastSlowBrainMap
