@@ -21,6 +21,7 @@ import TrainingRunner from "./pages/app/TrainingRunner";
 import TrainingCategories from "./pages/app/TrainingCategories";
 import DynamicTrainingRunner from "./pages/app/DynamicTrainingRunner";
 import CognitiveAgeExplained from "./pages/CognitiveAgeExplained";
+import BrainScienceDeepDive from "./pages/BrainScienceDeepDive";
 import InstallPage from "./pages/app/Install";
 import NeuroLab from "./pages/app/NeuroLab";
 import NeuroLabArea from "./pages/app/NeuroLabArea";
@@ -211,6 +212,10 @@ function AppRoutes() {
             <CognitiveAgeExplained />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/brain-science"
+        element={<BrainScienceDeepDive />}
       />
       <Route
         path="/app/daily-session"
