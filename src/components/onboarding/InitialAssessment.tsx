@@ -257,8 +257,13 @@ export function InitialAssessment({ userAge, onComplete, onSkip }: InitialAssess
         </Button>
         
         <button
-          onClick={handleSkip}
-          className="w-full text-[13px] text-muted-foreground hover:text-foreground transition-colors py-2"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSkip();
+          }}
+          className="w-full text-[13px] text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
         >
           Skip for now — I'll do it later
         </button>
