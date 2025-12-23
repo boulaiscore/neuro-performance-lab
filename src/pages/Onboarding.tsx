@@ -115,7 +115,15 @@ const Onboarding = () => {
     overallScore: number;
     cognitiveAge: number;
   }) => {
-    await handleAssessmentComplete(results, true);
+    console.log("[Onboarding] Assessment skipped → forcing onboardingCompleted");
+    await handleAssessmentComplete(
+      {
+        ...results,
+        overallScore: results.overallScore ?? 0,
+        cognitiveAge: results.cognitiveAge ?? 0,
+      },
+      true
+    );
   };
 
   const handleComplete = async () => {
