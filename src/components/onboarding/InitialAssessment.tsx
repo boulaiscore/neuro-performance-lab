@@ -251,22 +251,27 @@ export function InitialAssessment({ userAge, onComplete, onSkip }: InitialAssess
           <span>Slow Thinking</span>
         </div>
 
-        <Button onClick={() => setPhase("testing")} variant="hero" className="w-full h-[52px] text-[15px] font-medium mb-3">
+        <Button type="button" onClick={() => setPhase("testing")} variant="hero" className="w-full h-[52px] text-[15px] font-medium mb-3">
           Start Assessment
           <ArrowRight className="w-4 h-4 ml-1" />
         </Button>
         
-        <button
+        <Button
           type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          variant="ghost"
+          className="text-sm text-muted-foreground hover:text-white"
+          onClick={() => {
+            console.log("[InitialAssessment] Skip clicked");
             handleSkip();
           }}
-          className="w-full text-[13px] text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
+          onPointerUp={() => {
+            // fallback utile su mobile/webview se onClick non parte in alcuni casi
+            console.log("[InitialAssessment] Skip pointerUp");
+          }}
         >
           Skip for now — I'll do it later
-        </button>
+        </Button>
+
       </div>
     );
   }
