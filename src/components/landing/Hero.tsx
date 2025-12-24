@@ -52,8 +52,18 @@ export function Hero() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button asChild variant="hero-outline" size="xl" className="w-full sm:w-auto min-h-[56px]">
-              <a href="#how-it-works">How It Works</a>
+            <Button 
+              variant="hero-outline" 
+              size="xl" 
+              className="w-full sm:w-auto min-h-[56px]"
+              onClick={() => {
+                const element = document.getElementById('how-it-works');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
+              How It Works
             </Button>
           </div>
 
