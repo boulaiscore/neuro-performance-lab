@@ -1,0 +1,55 @@
+/* src/styles/report-print.css */
+
+/* contenitore globale del report */
+.report-root {
+  background: #ffffff;
+  color: #0b0f1a;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* una pagina = un foglio A4 */
+.report-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 16mm;
+  margin: 0 auto 16px auto;
+  box-sizing: border-box;
+  background: #ffffff;
+  page-break-after: always;
+}
+
+/* evita che i blocchi vengano spezzati a metà */
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* bottone UI (non stampato) */
+.nl-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #0b0f1a;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+/* ====== PRINT ====== */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* nasconde elementi UI */
+  .nl-btn,
+  header,
+  nav {
+    display: none !important;
+  }
+
+  .report-page {
+    margin: 0;
+  }
+}
