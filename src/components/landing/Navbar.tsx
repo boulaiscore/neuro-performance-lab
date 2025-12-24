@@ -1,7 +1,29 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export function Navbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleHowItWorksClick = () => {
+    if (location.pathname === "/") {
+      // Already on home page, just scroll
+      const element = document.getElementById('how-it-works');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to home first, then scroll after a short delay
+      navigate("/");
+      setTimeout(() => {
+        const element = document.getElementById('how-it-works');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container px-6">
@@ -17,12 +39,7 @@ export function Navbar() {
           {/* Nav links - hidden on mobile */}
           <div className="hidden md:flex items-center gap-8">
             <button 
-              onClick={() => {
-                const element = document.getElementById('how-it-works');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
+              onClick={handleHowItWorksClick}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               How It Works
