@@ -112,6 +112,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/app/report"
+        element={
+          <ProtectedRoute>
+            <CognitiveReport />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/app/trainings"
         element={
           <ProtectedRoute>
