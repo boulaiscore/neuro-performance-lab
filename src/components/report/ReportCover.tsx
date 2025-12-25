@@ -1,42 +1,45 @@
 import React, { useMemo } from "react";
-import { Brain } from "lucide-react";
+import { Brain, Activity, Zap, Target } from "lucide-react";
 
 function goalsBadge(goals: string[]) {
   const hasFast = goals?.includes("fast_thinking");
   const hasSlow = goals?.includes("slow_thinking");
-  if (hasFast && hasSlow) return "Balanced Thinker";
-  if (hasFast) return "Fast Thinker";
-  if (hasSlow) return "Deep Thinker";
-  return "Adaptive Learner";
+  if (hasFast && hasSlow) return "Dual-Process Optimization";
+  if (hasFast) return "System 1 Enhancement";
+  if (hasSlow) return "System 2 Development";
+  return "Integrated Cognitive Training";
 }
 
-function getRiskLevel(score: number) {
-  if (score >= 70) return { label: "LOW RISK", color: "#81c784" };
-  if (score >= 50) return { label: "MODERATE RISK", color: "#ffb74d" };
-  return { label: "HIGH RISK", color: "#e57373" };
+function getCognitiveProfile(sci: number) {
+  if (sci >= 85) return { label: "Elite Performer", tier: "A" };
+  if (sci >= 70) return { label: "High Performer", tier: "B" };
+  if (sci >= 55) return { label: "Developing", tier: "C" };
+  return { label: "Foundation", tier: "D" };
 }
 
 export function ReportCover({ profile, metrics, generatedAt }: any) {
   const badge = useMemo(() => goalsBadge(profile.training_goals ?? []), [profile]);
   const sci = Math.round(metrics.cognitive_performance_score ?? 50);
   const level = metrics.cognitive_level ?? 1;
+  const sessions = metrics.total_sessions ?? 0;
+  const cogProfile = getCognitiveProfile(sci);
   
   const domains = [
-    { name: "Fast Thinking", score: metrics.fast_thinking ?? 50 },
-    { name: "Slow Thinking", score: metrics.slow_thinking ?? 50 },
-    { name: "Focus", score: metrics.focus_stability ?? 50 },
-    { name: "Reasoning", score: metrics.reasoning_accuracy ?? 50 },
+    { name: "System 1", value: metrics.fast_thinking ?? 50, icon: Zap, color: "#ffa726" },
+    { name: "System 2", value: metrics.slow_thinking ?? 50, icon: Target, color: "#29b6f6" },
+    { name: "Focus", value: metrics.focus_stability ?? 50, icon: Activity, color: "#7e57c2" },
+    { name: "Reasoning", value: metrics.reasoning_accuracy ?? 50, icon: Brain, color: "#42a5f5" },
   ];
 
-  // Radar chart points
-  const centerX = 90;
-  const centerY = 90;
-  const maxRadius = 70;
+  // Radar chart setup
+  const centerX = 100;
+  const centerY = 100;
+  const maxRadius = 80;
   const angleStep = (2 * Math.PI) / domains.length;
   
   const points = domains.map((d, i) => {
     const angle = i * angleStep - Math.PI / 2;
-    const radius = (d.score / 100) * maxRadius;
+    const radius = (d.value / 100) * maxRadius;
     return { x: centerX + radius * Math.cos(angle), y: centerY + radius * Math.sin(angle) };
   });
   
@@ -45,98 +48,140 @@ export function ReportCover({ profile, metrics, generatedAt }: any) {
   return (
     <section className="report-page report-cover">
       <div className="report-cover-header">
-        <div className="report-cover-logo">NeuroLoop Pro</div>
-        <div className="report-cover-date">{generatedAt.toLocaleDateString("en-GB")}</div>
+        <div className="report-cover-brand">
+          <div className="report-cover-logo">NeuroLoop</div>
+          <div className="report-cover-tagline">by SuperHuman Labs</div>
+        </div>
+        <div className="report-cover-meta">
+          <span className="report-cover-version">v2.0</span>
+          <span className="report-cover-date">{generatedAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+        </div>
       </div>
 
       <div className="report-cover-main">
         <div className="report-cover-icon">
-          <Brain size={32} color="#fff" />
+          <Brain size={40} color="#fff" />
         </div>
-        <h1 className="report-cover-title">GENERAL COGNITIVE<br />ASSESSMENT</h1>
-        <p className="report-cover-subtitle">RESULTS REPORT</p>
+        <h1 className="report-cover-title">COGNITIVE<br />PERFORMANCE<br />ASSESSMENT</h1>
+        <p className="report-cover-subtitle">Evidence-Based Neuropsychological Profile</p>
 
         <div className="report-cover-user-section">
           <div className="report-cover-user-info">
-            <h2>{profile.name ?? "User"}</h2>
+            <div className="report-cover-tier">Tier {cogProfile.tier}</div>
+            <h2>{profile.name ?? "Participant"}</h2>
             <div className="report-cover-user-meta">
-              DATE OF ASSESSMENT: {generatedAt.toLocaleDateString("en-GB")}<br />
-              COGNITIVE LEVEL: {level}<br />
-              TRAINING FOCUS: {badge}
+              <div className="meta-row">
+                <span className="meta-label">Assessment Date</span>
+                <span className="meta-value">{generatedAt.toLocaleDateString("en-GB")}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Cognitive Level</span>
+                <span className="meta-value">Level {level}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Training Sessions</span>
+                <span className="meta-value">{sessions} completed</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-label">Protocol Focus</span>
+                <span className="meta-value">{badge}</span>
+              </div>
             </div>
           </div>
 
-          <svg viewBox="0 0 180 180" className="report-cover-radar">
-            {/* Grid */}
-            {[25, 50, 75, 100].map((pct) => (
-              <polygon
-                key={pct}
-                points={domains.map((_, i) => {
-                  const angle = i * angleStep - Math.PI / 2;
-                  const r = (pct / 100) * maxRadius;
-                  return `${centerX + r * Math.cos(angle)},${centerY + r * Math.sin(angle)}`;
-                }).join(" ")}
-                fill="none"
-                stroke="#e0e0e0"
-                strokeWidth="1"
-              />
-            ))}
-            {/* Axes */}
-            {domains.map((_, i) => {
-              const angle = i * angleStep - Math.PI / 2;
-              return (
-                <line
-                  key={i}
-                  x1={centerX}
-                  y1={centerY}
-                  x2={centerX + maxRadius * Math.cos(angle)}
-                  y2={centerY + maxRadius * Math.sin(angle)}
+          <div className="report-cover-chart">
+            <svg viewBox="0 0 200 200" className="report-cover-radar">
+              {/* Grid circles */}
+              {[25, 50, 75, 100].map((pct) => (
+                <polygon
+                  key={pct}
+                  points={domains.map((_, i) => {
+                    const angle = i * angleStep - Math.PI / 2;
+                    const r = (pct / 100) * maxRadius;
+                    return `${centerX + r * Math.cos(angle)},${centerY + r * Math.sin(angle)}`;
+                  }).join(" ")}
+                  fill="none"
                   stroke="#e0e0e0"
                   strokeWidth="1"
+                  strokeDasharray={pct === 50 ? "4,2" : "0"}
                 />
-              );
-            })}
-            {/* Data */}
-            <path d={pathD} fill="rgba(77, 182, 172, 0.3)" stroke="#4db6ac" strokeWidth="2" />
-            {points.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r="4" fill="#4db6ac" />
-            ))}
-            {/* Labels */}
-            {domains.map((d, i) => {
-              const angle = i * angleStep - Math.PI / 2;
-              const lx = centerX + (maxRadius + 20) * Math.cos(angle);
-              const ly = centerY + (maxRadius + 20) * Math.sin(angle);
-              return (
-                <text
-                  key={i}
-                  x={lx}
-                  y={ly}
-                  fontSize="8"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill="#718096"
-                >
-                  {d.name}
-                </text>
-              );
-            })}
-          </svg>
+              ))}
+              {/* Axes */}
+              {domains.map((_, i) => {
+                const angle = i * angleStep - Math.PI / 2;
+                return (
+                  <line
+                    key={i}
+                    x1={centerX}
+                    y1={centerY}
+                    x2={centerX + maxRadius * Math.cos(angle)}
+                    y2={centerY + maxRadius * Math.sin(angle)}
+                    stroke="#e0e0e0"
+                    strokeWidth="1"
+                  />
+                );
+              })}
+              {/* Data polygon */}
+              <path d={pathD} fill="rgba(0, 137, 123, 0.2)" stroke="#00897b" strokeWidth="2.5" />
+              {/* Data points */}
+              {points.map((p, i) => (
+                <circle key={i} cx={p.x} cy={p.y} r="5" fill={domains[i].color} stroke="#fff" strokeWidth="2" />
+              ))}
+              {/* Labels */}
+              {domains.map((d, i) => {
+                const angle = i * angleStep - Math.PI / 2;
+                const lx = centerX + (maxRadius + 25) * Math.cos(angle);
+                const ly = centerY + (maxRadius + 25) * Math.sin(angle);
+                return (
+                  <g key={i}>
+                    <text
+                      x={lx}
+                      y={ly - 6}
+                      fontSize="9"
+                      fontWeight="600"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#2d3748"
+                    >
+                      {d.name}
+                    </text>
+                    <text
+                      x={lx}
+                      y={ly + 6}
+                      fontSize="11"
+                      fontWeight="700"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={d.color}
+                    >
+                      {Math.round(d.value)}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
         </div>
 
-        <div className="report-cover-legend">
-          <div className="legend-item">
-            <div className="legend-dot low" />
-            <span>LOW RISK</span>
+        <div className="report-cover-footer">
+          <div className="report-cover-sci">
+            <span className="sci-value">{sci}</span>
+            <span className="sci-label">SCI Score</span>
           </div>
-          <div className="legend-item">
-            <div className="legend-dot moderate" />
-            <span>MODERATE RISK</span>
+          <div className="report-cover-classification">
+            <span className="class-label">{cogProfile.label}</span>
+            <span className="class-desc">Based on {sessions} training sessions</span>
           </div>
-          <div className="legend-item">
-            <div className="legend-dot high" />
-            <span>HIGH RISK</span>
+          <div className="report-cover-ref">
+            <span className="ref-label">Reference Framework</span>
+            <span className="ref-value">Kahneman Dual-Process Theory</span>
           </div>
         </div>
+      </div>
+
+      <div className="report-cover-disclaimer">
+        This assessment is based on cognitive training performance data collected through the NeuroLoop platform.
+        Results are for educational and self-improvement purposes only and do not constitute clinical diagnosis.
       </div>
     </section>
   );
