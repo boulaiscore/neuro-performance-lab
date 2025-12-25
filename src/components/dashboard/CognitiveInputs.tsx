@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { Headphones, Clock, Target, MapPin, Zap, ExternalLink, CheckCircle2, Circle } from "lucide-react";
+import { Headphones, Clock, Target, MapPin, Zap, ExternalLink, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface CognitiveInput {
   id: string;
@@ -85,16 +88,34 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
   },
 ];
 
-const STORAGE_KEY = "neuroloop-listened-podcasts";
+function useListenedPodcasts(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["listened-podcasts", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await supabase
+        .from("user_listened_podcasts")
+        .select("podcast_id")
+        .eq("user_id", userId);
+      if (error) throw error;
+      return data.map((row) => row.podcast_id);
+    },
+    enabled: !!userId,
+  });
+}
 
 function InputCard({ 
   input, 
   isListened, 
-  onToggleListened 
+  onToggleListened,
+  isToggling,
+  isLoggedIn
 }: { 
   input: CognitiveInput; 
   isListened: boolean;
   onToggleListened: () => void;
+  isToggling: boolean;
+  isLoggedIn: boolean;
 }) {
   return (
     <div className={`border border-border/40 bg-card/30 p-4 space-y-3 transition-all ${isListened ? 'opacity-60' : ''}`}>
@@ -103,10 +124,14 @@ function InputCard({
         <div className="flex items-center gap-3">
           <button 
             onClick={onToggleListened}
-            className="flex items-center gap-2 group"
+            disabled={isToggling || !isLoggedIn}
+            className="flex items-center gap-2 group disabled:opacity-50"
             aria-label={isListened ? "Mark as not listened" : "Mark as listened"}
+            title={!isLoggedIn ? "Login to track progress" : undefined}
           >
-            {isListened ? (
+            {isToggling ? (
+              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+            ) : isListened ? (
               <CheckCircle2 className="h-5 w-5 text-primary" />
             ) : (
               <Circle className="h-5 w-5 text-muted-foreground group-hover:text-primary/70 transition-colors" />
@@ -174,35 +199,66 @@ function InputCard({
 }
 
 export function CognitiveInputs() {
-  const [listenedIds, setListenedIds] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { data: listenedIds = [], isLoading } = useListenedPodcasts(user?.id);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setListenedIds(new Set(JSON.parse(stored)));
-      }
-    } catch {
-      // Ignore parse errors
-    }
-  }, []);
-
-  // Save to localStorage when changed
-  const toggleListened = (id: string) => {
-    setListenedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
+  const toggleMutation = useMutation({
+    mutationFn: async ({ podcastId, isCurrentlyListened }: { podcastId: string; isCurrentlyListened: boolean }) => {
+      if (!user?.id) throw new Error("Not authenticated");
+      
+      if (isCurrentlyListened) {
+        // Remove from listened
+        const { error } = await supabase
+          .from("user_listened_podcasts")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("podcast_id", podcastId);
+        if (error) throw error;
       } else {
-        next.add(id);
+        // Add to listened
+        const { error } = await supabase
+          .from("user_listened_podcasts")
+          .insert({ user_id: user.id, podcast_id: podcastId });
+        if (error) throw error;
       }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
-      return next;
-    });
+    },
+    onMutate: async ({ podcastId, isCurrentlyListened }) => {
+      setTogglingId(podcastId);
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ["listened-podcasts", user?.id] });
+      const previousData = queryClient.getQueryData<string[]>(["listened-podcasts", user?.id]);
+      
+      queryClient.setQueryData<string[]>(["listened-podcasts", user?.id], (old = []) => {
+        if (isCurrentlyListened) {
+          return old.filter(id => id !== podcastId);
+        } else {
+          return [...old, podcastId];
+        }
+      });
+      
+      return { previousData };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(["listened-podcasts", user?.id], context.previousData);
+      }
+    },
+    onSettled: () => {
+      setTogglingId(null);
+      queryClient.invalidateQueries({ queryKey: ["listened-podcasts", user?.id] });
+    },
+  });
+
+  const handleToggle = (podcastId: string) => {
+    if (!user?.id) return;
+    const isCurrentlyListened = listenedIds.includes(podcastId);
+    toggleMutation.mutate({ podcastId, isCurrentlyListened });
   };
 
-  const listenedCount = listenedIds.size;
+  const listenedCount = listenedIds.length;
 
   return (
     <section className="space-y-4">
@@ -217,7 +273,7 @@ export function CognitiveInputs() {
           </p>
         </div>
         <div className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-medium">
-          {listenedCount}/{COGNITIVE_INPUTS.length} Listened
+          {isLoading ? "..." : `${listenedCount}/${COGNITIVE_INPUTS.length}`} Listened
         </div>
       </div>
 
@@ -227,15 +283,17 @@ export function CognitiveInputs() {
           <InputCard 
             key={input.id} 
             input={input} 
-            isListened={listenedIds.has(input.id)}
-            onToggleListened={() => toggleListened(input.id)}
+            isListened={listenedIds.includes(input.id)}
+            onToggleListened={() => handleToggle(input.id)}
+            isToggling={togglingId === input.id}
+            isLoggedIn={!!user}
           />
         ))}
       </div>
 
       {/* Footer Note */}
       <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wide text-center pt-2">
-        Tap circle to mark as listened
+        {user ? "Tap circle to mark as listened • Synced across devices" : "Login to track your progress"}
       </p>
     </section>
   );
