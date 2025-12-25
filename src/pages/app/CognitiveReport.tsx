@@ -1,5 +1,7 @@
 // src/pages/app/CognitiveReport.tsx
 import React, { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useReportData } from "@/hooks/useReportData";
 import { useAuth } from "@/contexts/AuthContext";
 import html2pdf from "html2pdf.js";
@@ -18,6 +20,7 @@ import { ReportActionable } from "@/components/report/ReportActionable";
 import { ReportMethodology } from "@/components/report/ReportMethodology";
 
 export default function CognitiveReport() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id as string;
 
@@ -63,10 +66,19 @@ export default function CognitiveReport() {
   return (
     <div className="p-4 max-w-[220mm] mx-auto">
       <div className="flex items-center justify-between gap-4 mb-3 print:hidden">
-        <div>
-          <h1 className="text-lg font-semibold">Cognitive Intelligence Report</h1>
-          <div className="text-xs opacity-70">
-            Generated {generatedAt.toLocaleDateString("en-GB")}
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-2 rounded-full hover:bg-muted transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-lg font-semibold">Cognitive Intelligence Report</h1>
+            <div className="text-xs opacity-70">
+              Generated {generatedAt.toLocaleDateString("en-GB")}
+            </div>
           </div>
         </div>
         <button 
