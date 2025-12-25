@@ -1,7 +1,8 @@
 // src/pages/app/CognitiveReport.tsx
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useReportData } from "@/hooks/useReportData";
 import { useAuth } from "@/contexts/AuthContext";
+import html2pdf from "html2pdf.js";
 
 import "@/styles/report-print.css";
 
@@ -24,8 +25,27 @@ export default function CognitiveReport() {
 
   const printRef = useRef<HTMLDivElement>(null);
   const generatedAt = useMemo(() => new Date(), []);
+  const [downloading, setDownloading] = useState(false);
 
-  const handlePrint = () => window.print();
+  const handleDownloadPDF = async () => {
+    if (!printRef.current) return;
+    setDownloading(true);
+    
+    const opt = {
+      margin: 0,
+      filename: `NeuroLoop_Report_${generatedAt.toISOString().split('T')[0]}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], before: '.report-page' }
+    };
+
+    try {
+      await html2pdf().set(opt).from(printRef.current).save();
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (loading) return <div className="p-6">Generating report data…</div>;
   if (error || !metrics || !profile || !aggregates) return <div className="p-6">Error: {error ?? "Missing data"}</div>;
@@ -39,8 +59,12 @@ export default function CognitiveReport() {
             Generated {generatedAt.toLocaleDateString("en-GB")}
           </div>
         </div>
-        <button className="nl-btn" onClick={handlePrint}>
-          Download PDF
+        <button 
+          className="nl-btn" 
+          onClick={handleDownloadPDF}
+          disabled={downloading}
+        >
+          {downloading ? "Generating..." : "Download PDF"}
         </button>
       </div>
 
