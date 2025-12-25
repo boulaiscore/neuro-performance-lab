@@ -31,10 +31,10 @@ export function ReportCover({ profile, metrics, generatedAt }: any) {
     { name: "Reasoning", value: metrics.reasoning_accuracy ?? 50, icon: Brain, color: "#42a5f5" },
   ];
 
-  // Radar chart setup - wider viewBox for side labels
-  const centerX = 150;
-  const centerY = 120;
-  const maxRadius = 60;
+  // Radar chart setup
+  const centerX = 100;
+  const centerY = 100;
+  const maxRadius = 80;
   const angleStep = (2 * Math.PI) / domains.length;
   
   const points = domains.map((d, i) => {
@@ -44,43 +44,6 @@ export function ReportCover({ profile, metrics, generatedAt }: any) {
   });
   
   const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ") + " Z";
-
-  // Calculate label positions with proper spacing for each quadrant
-  const getLabelPosition = (i: number) => {
-    const angle = i * angleStep - Math.PI / 2;
-    let labelRadius = maxRadius + 30;
-    let anchor: "start" | "middle" | "end" = "middle";
-    let offsetX = 0;
-    let offsetY = 0;
-    
-    // Position 0: Top (System 1)
-    if (i === 0) {
-      anchor = "middle";
-      offsetY = -10;
-    }
-    // Position 1: Right (System 2)
-    else if (i === 1) {
-      anchor = "start";
-      labelRadius = maxRadius + 20;
-      offsetX = 5;
-    }
-    // Position 2: Bottom (Focus)
-    else if (i === 2) {
-      anchor = "middle";
-      offsetY = 10;
-    }
-    // Position 3: Left (Reasoning)
-    else if (i === 3) {
-      anchor = "end";
-      labelRadius = maxRadius + 20;
-      offsetX = -5;
-    }
-    
-    const lx = centerX + labelRadius * Math.cos(angle) + offsetX;
-    const ly = centerY + labelRadius * Math.sin(angle) + offsetY;
-    
-    return { lx, ly, anchor };
-  };
 
   return (
     <section className="report-page report-cover">
@@ -127,7 +90,7 @@ export function ReportCover({ profile, metrics, generatedAt }: any) {
           </div>
 
           <div className="report-cover-chart">
-            <svg viewBox="0 0 300 240" className="report-cover-radar">
+            <svg viewBox="0 0 200 200" className="report-cover-radar">
               {/* Grid circles */}
               {[25, 50, 75, 100].map((pct) => (
                 <polygon
@@ -164,17 +127,19 @@ export function ReportCover({ profile, metrics, generatedAt }: any) {
               {points.map((p, i) => (
                 <circle key={i} cx={p.x} cy={p.y} r="5" fill={domains[i].color} stroke="#fff" strokeWidth="2" />
               ))}
-              {/* Labels with better positioning */}
+              {/* Labels */}
               {domains.map((d, i) => {
-                const { lx, ly, anchor } = getLabelPosition(i);
+                const angle = i * angleStep - Math.PI / 2;
+                const lx = centerX + (maxRadius + 25) * Math.cos(angle);
+                const ly = centerY + (maxRadius + 25) * Math.sin(angle);
                 return (
                   <g key={i}>
                     <text
                       x={lx}
-                      y={ly - 7}
-                      fontSize="10"
+                      y={ly - 6}
+                      fontSize="9"
                       fontWeight="600"
-                      textAnchor={anchor}
+                      textAnchor="middle"
                       dominantBaseline="middle"
                       fill="#2d3748"
                     >
@@ -182,10 +147,10 @@ export function ReportCover({ profile, metrics, generatedAt }: any) {
                     </text>
                     <text
                       x={lx}
-                      y={ly + 8}
-                      fontSize="13"
+                      y={ly + 6}
+                      fontSize="11"
                       fontWeight="700"
-                      textAnchor={anchor}
+                      textAnchor="middle"
                       dominantBaseline="middle"
                       fill={d.color}
                     >
