@@ -561,7 +561,7 @@ function PrescriptionCard({
             input.type === "book" ? "bg-amber-500/20" : 
             "bg-blue-500/20"
           }`}>
-            <Icon className={`h-4.5 w-4.5 ${config.color}`} />
+            <Icon className={`h-4 w-4 ${config.color}`} />
           </div>
           
           {/* Content */}
