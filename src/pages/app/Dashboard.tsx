@@ -10,8 +10,9 @@ import { DailyTrainingHistory } from "@/components/dashboard/DailyTrainingHistor
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { TrainingProgressHeader } from "@/components/dashboard/TrainingProgressHeader";
 import { TrainingTasks } from "@/components/dashboard/TrainingTasks";
+import { GamesStats } from "@/components/dashboard/GamesStats";
 import { Button } from "@/components/ui/button";
-import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText, ListChecks } from "lucide-react";
+import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText, Gamepad2, BookMarked } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserMetrics } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 const Dashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"overview" | "training">("overview");
+  const [trainingSubTab, setTrainingSubTab] = useState<"games" | "tasks">("games");
   
   // Fetch real metrics from database
   const { data: metrics, isLoading: metricsLoading } = useUserMetrics(user?.id);
@@ -221,8 +223,40 @@ const Dashboard = () => {
             {/* Progress Header with Animation */}
             <TrainingProgressHeader />
 
-            {/* Weekly Tasks Section */}
-            <TrainingTasks />
+            {/* Sub-tabs for Games/Tasks */}
+            <div className="flex items-center gap-1 p-1 bg-card/40 border border-border/30 rounded-xl">
+              <button
+                onClick={() => setTrainingSubTab("games")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+                  trainingSubTab === "games"
+                    ? "bg-primary/15 text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Gamepad2 className="w-3.5 h-3.5" />
+                Games
+              </button>
+              <button
+                onClick={() => setTrainingSubTab("tasks")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+                  trainingSubTab === "tasks"
+                    ? "bg-primary/15 text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <BookMarked className="w-3.5 h-3.5" />
+                Tasks
+              </button>
+            </div>
+
+            {/* Games or Tasks Content */}
+            {trainingSubTab === "games" ? (
+              <GamesStats />
+            ) : (
+              <TrainingTasks />
+            )}
 
             {/* Performance Trends */}
             <motion.div
