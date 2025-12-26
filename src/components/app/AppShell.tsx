@@ -1,8 +1,9 @@
 import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, LayoutDashboard, User, Bell, BellOff, Dumbbell, BookOpen } from "lucide-react";
+import { Home, LayoutDashboard, User, Bell, BellOff, Dumbbell, BookOpen, Sun, Moon } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useTheme } from "@/hooks/useTheme";
 
 interface AppShellProps {
   children: ReactNode;
@@ -19,6 +20,7 @@ const navItems = [
 export function AppShell({ children }: AppShellProps) {
   const location = useLocation();
   const { permission, isSupported, checkReminders } = useNotifications();
+  const { theme, toggleTheme } = useTheme();
 
   // Check for reminders on mount
   useEffect(() => {
@@ -33,13 +35,26 @@ export function AppShell({ children }: AppShellProps) {
       <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/30">
         <div className="container px-4">
           <div className="flex items-center justify-between h-12">
-            <div className="w-8" />
+            {/* Theme toggle */}
+            <button 
+              onClick={toggleTheme}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+              ) : (
+                <Moon className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+              )}
+            </button>
+            
             <Link to="/app" className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-primary-foreground font-semibold text-[10px]">N</span>
               </div>
               <span className="font-semibold tracking-tight text-sm">NeuroLoop</span>
             </Link>
+            
             <Link to="/app/install" className="w-8 flex justify-end">
               {isSupported && permission !== "granted" ? (
                 <BellOff className="w-4 h-4 text-muted-foreground" />
