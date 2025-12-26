@@ -2,45 +2,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/app/AppShell";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronRight, Dumbbell, Settings, Target, Clock, Sparkles } from "lucide-react";
+import { ChevronRight, Dumbbell, Settings, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WeeklySchedule } from "@/components/dashboard/WeeklySchedule";
+import { TRAINING_PLANS } from "@/lib/trainingPlans";
 
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const firstName = user?.name?.split(" ")[0] || "there";
+  const trainingPlan = user?.trainingPlan || "light";
+  const plan = TRAINING_PLANS[trainingPlan];
 
-  const hasGoals = user?.trainingGoals && user.trainingGoals.length > 0;
-
-  const getDurationLabel = (duration?: string) => {
-    switch (duration) {
-      case "30s": return "30 secondi";
-      case "2min": return "2 minuti";
-      case "5min": return "5 minuti";
-      case "7min": return "7 minuti";
-      default: return "—";
-    }
-  };
-
-  const getDailyTimeLabel = (time?: string) => {
-    switch (time) {
-      case "3min": return "3 min/giorno";
-      case "7min": return "7 min/giorno";
-      case "10min": return "10 min/giorno";
-      default: return "—";
-    }
-  };
-
-  const getGoalsLabel = () => {
-    const goals = user?.trainingGoals || [];
-    if (goals.includes("fast_thinking") && goals.includes("slow_thinking")) {
-      return "Fast & Slow Thinking";
-    }
-    if (goals.includes("fast_thinking")) return "Fast Thinking";
-    if (goals.includes("slow_thinking")) return "Slow Thinking";
-    return "Non configurato";
-  };
+  const hasProtocol = !!user?.trainingPlan;
 
   return (
     <AppShell>
@@ -98,7 +73,7 @@ const Home = () => {
           </button>
         </motion.div>
 
-        {/* Training Protocol Summary */}
+        {/* Training Protocol Summary with Weekly Schedule */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -106,7 +81,10 @@ const Home = () => {
           className="p-4 rounded-xl bg-card/50 border border-border/30 mb-5"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[13px] font-semibold text-foreground">Your Protocol</h2>
+            <div>
+              <h2 className="text-[13px] font-semibold text-foreground">{plan.name}</h2>
+              <p className="text-[11px] text-muted-foreground">{plan.tagline}</p>
+            </div>
             <Link 
               to="/app/account" 
               className="text-[11px] text-primary/70 hover:text-primary flex items-center gap-1 transition-colors"
@@ -116,32 +94,8 @@ const Home = () => {
             </Link>
           </div>
 
-          {hasGoals ? (
-            <div className="space-y-3">
-              {/* Goal */}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Goal</p>
-                  <p className="text-[13px] font-medium text-foreground">{getGoalsLabel()}</p>
-                </div>
-              </div>
-
-              {/* Duration */}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Sessions</p>
-                  <p className="text-[13px] font-medium text-foreground">
-                    {getDurationLabel(user?.sessionDuration)} • {getDailyTimeLabel(user?.dailyTimeCommitment)}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {hasProtocol ? (
+            <WeeklySchedule planId={trainingPlan} />
           ) : (
             <div className="text-center py-4">
               <Sparkles className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
