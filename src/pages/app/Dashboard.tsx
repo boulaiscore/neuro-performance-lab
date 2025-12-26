@@ -9,8 +9,9 @@ import { ThinkingSystemSources } from "@/components/dashboard/ThinkingSystemSour
 import { DailyTrainingHistory } from "@/components/dashboard/DailyTrainingHistory";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { TrainingProgressHeader } from "@/components/dashboard/TrainingProgressHeader";
+import { TrainingTasks } from "@/components/dashboard/TrainingTasks";
 import { Button } from "@/components/ui/button";
-import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText } from "lucide-react";
+import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText, ListChecks } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserMetrics } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
@@ -216,16 +217,22 @@ const Dashboard = () => {
             </motion.div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Progress Header with Animation */}
             <TrainingProgressHeader />
 
-            {/* Performance Chart with fade-in */}
+            {/* Weekly Tasks Section */}
+            <TrainingTasks />
+
+            {/* Performance Trends */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
             >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-[13px] font-semibold text-foreground">Performance Trend</h3>
+              </div>
               <PerformanceChart />
             </motion.div>
 
@@ -233,7 +240,7 @@ const Dashboard = () => {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
             >
               <DailyTrainingHistory />
             </motion.div>
@@ -242,7 +249,7 @@ const Dashboard = () => {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
               className="pt-1"
             >
               <Link to="/neuro-lab">
