@@ -2,19 +2,22 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/app/AppShell";
 import { NEURO_LAB_AREAS, NeuroLabArea } from "@/lib/neuroLab";
-import { CognitiveInputs } from "@/components/dashboard/CognitiveInputs";
-import { Target, Brain, Sliders, Lightbulb, Sparkles, Zap, ChevronRight, Lock, Crown } from "lucide-react";
+import { CognitiveTasksSection } from "@/components/dashboard/CognitiveInputs";
+import { 
+  Target, Brain, Lightbulb, Sparkles, Zap, ChevronRight, Lock, Crown, 
+  Gamepad2, BookMarked, Headphones, BookOpen, FileText
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePremiumGating } from "@/hooks/usePremiumGating";
 import { PremiumPaywall } from "@/components/app/PremiumPaywall";
 import { DailyTrainingConfirmDialog } from "@/components/app/DailyTrainingConfirmDialog";
 import { useDailyTraining } from "@/hooks/useDailyTraining";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AREA_ICONS: Record<string, React.ElementType> = {
   Target,
   Brain,
-  Sliders,
   Lightbulb,
   Sparkles,
   Zap,
@@ -29,10 +32,9 @@ export default function NeuroLab() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallFeature, setPaywallFeature] = useState<"area" | "neuro-activation" | "session-limit">("area");
   const [paywallFeatureName, setPaywallFeatureName] = useState<string>("");
-  
-  // State for daily training confirmation
   const [showDailyConfirm, setShowDailyConfirm] = useState(false);
   const [pendingAreaId, setPendingAreaId] = useState<NeuroLabArea | null>(null);
+  const [activeTab, setActiveTab] = useState("games");
 
   const getThinkingBadge = () => {
     const goals = user?.trainingGoals || [];
@@ -48,7 +50,6 @@ export default function NeuroLab() {
   const badge = getThinkingBadge();
 
   const handleEnterArea = (areaId: NeuroLabArea) => {
-    // Check session limit first
     if (!canStartSession()) {
       setPaywallFeature("session-limit");
       setPaywallFeatureName("");
@@ -56,7 +57,6 @@ export default function NeuroLab() {
       return;
     }
     
-    // Check area access
     if (isAreaLocked(areaId)) {
       const area = NEURO_LAB_AREAS.find(a => a.id === areaId);
       setPaywallFeature("area");
@@ -65,14 +65,12 @@ export default function NeuroLab() {
       return;
     }
     
-    // If daily training not completed and outside reminder window, show confirmation
     if (!isDailyCompleted && !isInReminderWindow && reminderTime) {
       setPendingAreaId(areaId);
       setShowDailyConfirm(true);
       return;
     }
     
-    // Navigate with daily training flag
     navigateToArea(areaId);
   };
 
@@ -113,7 +111,7 @@ export default function NeuroLab() {
             )}
           </div>
           <p className="text-[11px] text-muted-foreground/70 mt-0.5">
-            Strategic cognitive training
+            Strategic cognitive training system
           </p>
         </div>
 
@@ -146,7 +144,7 @@ export default function NeuroLab() {
           )
         )}
 
-        {/* Neuro Activation CTA */}
+        {/* Neuro Activation - Always visible at top */}
         <button
           onClick={handleNeuroActivation}
           className={cn(
@@ -163,7 +161,7 @@ export default function NeuroLab() {
             <div className="flex-1 text-left">
               <h3 className="font-semibold text-[14px]">Neuro Activation</h3>
               <p className="text-[11px] text-muted-foreground">
-                5-min cognitive warm-up
+                5-min cognitive warm-up protocol
               </p>
             </div>
             <div className="flex items-center gap-1.5">
@@ -182,75 +180,125 @@ export default function NeuroLab() {
           </div>
         </button>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-border/30" />
-          <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest">
-            Training Domains
-          </span>
-          <div className="h-px flex-1 bg-border/30" />
-        </div>
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-2 mb-4">
+            <TabsTrigger value="games" className="flex items-center gap-2 text-xs">
+              <Gamepad2 className="w-4 h-4" />
+              Games
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="flex items-center gap-2 text-xs">
+              <BookMarked className="w-4 h-4" />
+              Cognitive Tasks
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Area Cards */}
-        <div className="space-y-2.5">
-          {NEURO_LAB_AREAS.map((area) => {
-            const IconComponent = AREA_ICONS[area.icon] || Brain;
-            const locked = isAreaLocked(area.id);
-            
-            return (
-              <button
-                key={area.id}
-                onClick={() => handleEnterArea(area.id)}
-                className={cn(
-                  "w-full p-3.5 rounded-xl border transition-all duration-200 text-left",
-                  "bg-card/50 hover:bg-card/80",
-                  "border-border/30 hover:border-primary/30",
-                  "active:scale-[0.98]",
-                  locked && "opacity-70"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                    locked ? "bg-muted/50" : "bg-primary/10"
-                  )}>
-                    <IconComponent className={cn(
-                      "w-5 h-5",
-                      locked ? "text-muted-foreground" : "text-primary"
-                    )} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-[13px]">{area.title}</h3>
-                      {locked && (
-                        <span className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground font-medium">
-                          <Lock className="w-2.5 h-2.5" />
-                          PRO
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
-                      {area.subtitle}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+          {/* Games Tab */}
+          <TabsContent value="games" className="mt-0">
+            <div className="space-y-3">
+              {/* Section Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Gamepad2 className="w-4 h-4 text-primary" />
                 </div>
-              </button>
-            );
-          })}
-        </div>
+                <div>
+                  <h3 className="text-sm font-medium">Training Games</h3>
+                  <p className="text-[10px] text-muted-foreground">Active cognitive exercises</p>
+                </div>
+              </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-5">
-          <div className="h-px flex-1 bg-border/30" />
-          <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest">
-            Passive Training
-          </span>
-          <div className="h-px flex-1 bg-border/30" />
-        </div>
+              {/* Game Area Cards */}
+              {NEURO_LAB_AREAS.map((area) => {
+                const IconComponent = AREA_ICONS[area.icon] || Brain;
+                const locked = isAreaLocked(area.id);
+                
+                return (
+                  <button
+                    key={area.id}
+                    onClick={() => handleEnterArea(area.id)}
+                    className={cn(
+                      "w-full p-3.5 rounded-xl border transition-all duration-200 text-left",
+                      "bg-card/50 hover:bg-card/80",
+                      "border-border/30 hover:border-primary/30",
+                      "active:scale-[0.98]",
+                      locked && "opacity-70"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                        locked ? "bg-muted/50" : "bg-primary/10"
+                      )}>
+                        <IconComponent className={cn(
+                          "w-5 h-5",
+                          locked ? "text-muted-foreground" : "text-primary"
+                        )} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-[13px]">{area.title}</h3>
+                          {locked && (
+                            <span className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground font-medium">
+                              <Lock className="w-2.5 h-2.5" />
+                              PRO
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
+                          {area.subtitle}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+                    </div>
+                  </button>
+                );
+              })}
 
-        {/* Cognitive Inputs */}
-        <CognitiveInputs />
+              {/* Games info */}
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wide text-center pt-3">
+                Fast-paced cognitive drills • 30s–7min sessions
+              </p>
+            </div>
+          </TabsContent>
+
+          {/* Cognitive Tasks Tab */}
+          <TabsContent value="tasks" className="mt-0">
+            <div className="space-y-6">
+              {/* Intro */}
+              <div className="p-3 rounded-xl bg-muted/30 border border-border/30">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">Passive training:</span> Curated content for deep cognitive development. Complete 1–2 per week for optimal integration.
+                </p>
+              </div>
+
+              {/* Podcasts Section */}
+              <CognitiveTasksSection 
+                type="podcast" 
+                title="Podcasts" 
+                subtitle="Audio cognitive training"
+              />
+
+              {/* Books Section */}
+              <CognitiveTasksSection 
+                type="book" 
+                title="Books" 
+                subtitle="Deep critical reasoning"
+              />
+
+              {/* Articles Section */}
+              <CognitiveTasksSection 
+                type="article" 
+                title="Articles & Essays" 
+                subtitle="Focused thinking exercises"
+              />
+
+              {/* Tasks info */}
+              <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wide text-center pt-2">
+                Progress synced across devices
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Footer */}
         <div className="mt-6 text-center">
