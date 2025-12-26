@@ -1,29 +1,47 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { useState } from "react";
-import heroVideo from "@/assets/hero-video.mp4";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import heroReading from "@/assets/hero-video.mp4";
+import heroTraining from "@/assets/hero-training.mp4";
+import heroYoga from "@/assets/hero-yoga.mp4";
+
+const heroVideos = [heroReading, heroTraining, heroYoga];
 
 export function Hero() {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
+
+  // Cycle through videos every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentVideoIndex((prev) => (prev + 1) % heroVideos.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          onLoadedData={() => setVideoLoaded(true)}
-          className={`w-full h-full object-cover transition-opacity duration-1000 ${
-            videoLoaded ? "opacity-40" : "opacity-0"
-          }`}
-        >
-          <source src={heroVideo} type="video/mp4" />
-        </video>
+        <AnimatePresence mode="wait">
+          <motion.video
+            key={currentVideoIndex}
+            autoPlay
+            muted
+            loop
+            playsInline
+            onLoadedData={() => setVideoLoaded(true)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+            className="w-full h-full object-cover"
+          >
+            <source src={heroVideos[currentVideoIndex]} type="video/mp4" />
+          </motion.video>
+        </AnimatePresence>
         {/* Gradient overlays for depth */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/40" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
@@ -105,12 +123,32 @@ export function Hero() {
             </Button>
           </motion.div>
 
+          {/* Video indicators */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="flex justify-center gap-2 mt-10"
+          >
+            {heroVideos.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentVideoIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentVideoIndex 
+                    ? "w-8 bg-primary" 
+                    : "bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
+          </motion.div>
+
           {/* Elite Stats/Social Proof */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="mt-20 pt-10 border-t border-white/10"
+            className="mt-16 pt-10 border-t border-white/10"
           >
             <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
               <div className="text-center">
