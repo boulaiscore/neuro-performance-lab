@@ -828,6 +828,8 @@ export function CognitiveTasksSection({ type, title }: PrescriptionSectionProps)
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string>(ACTIVE_PRESCRIPTIONS[type]);
 
+  console.log(`[CognitiveTasksSection] type=${type}, user=${user?.id}, isLoading=${isLoading}, loggedIds=`, loggedIds);
+
   const toggleMutation = useMutation({
     mutationFn: async ({ inputId, isCurrentlyLogged }: { inputId: string; isCurrentlyLogged: boolean }) => {
       if (!user?.id) throw new Error("Not authenticated");
