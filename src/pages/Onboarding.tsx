@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInYears } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAuth, TrainingGoal, SessionDuration, DailyTimeCommitment, Gender, WorkType, EducationLevel, DegreeDiscipline } from "@/contexts/AuthContext";
+import { useAuth, TrainingGoal, Gender, WorkType, EducationLevel, DegreeDiscipline } from "@/contexts/AuthContext";
 import { useUpdateUserMetrics } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
-import { Zap, Brain, Clock, Calendar as CalendarIcon, ArrowRight, User, Briefcase, GraduationCap, Bell } from "lucide-react";
+import { Zap, Brain, Calendar as CalendarIcon, ArrowRight, User, Briefcase, GraduationCap, Bell, Leaf, Target, Flame } from "lucide-react";
 import { InitialAssessment } from "@/components/onboarding/InitialAssessment";
 import { useSaveBaseline } from "@/hooks/useBadges";
+import { TRAINING_PLANS, TrainingPlanId } from "@/lib/trainingPlans";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
@@ -33,7 +34,7 @@ const Onboarding = () => {
   const [degreeDiscipline, setDegreeDiscipline] = useState<DegreeDiscipline | undefined>(undefined);
   
   const [trainingGoals, setTrainingGoals] = useState<TrainingGoal[]>([]);
-  const [dailyTimeCommitment, setDailyTimeCommitment] = useState<DailyTimeCommitment | undefined>(undefined);
+  const [trainingPlan, setTrainingPlan] = useState<TrainingPlanId>("light");
   const [reminderTime, setReminderTime] = useState<string>("08:00");
   const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -98,7 +99,7 @@ const Onboarding = () => {
         degreeDiscipline,
         trainingGoals,
         sessionDuration: "2min",
-        dailyTimeCommitment,
+        trainingPlan,
         reminderEnabled: true,
         reminderTime,
         onboardingCompleted: true,
@@ -126,7 +127,7 @@ const Onboarding = () => {
         degreeDiscipline,
         trainingGoals,
         sessionDuration: "2min",
-        dailyTimeCommitment,
+        trainingPlan,
         reminderEnabled: true,
         reminderTime,
         onboardingCompleted: true,
@@ -202,11 +203,25 @@ const Onboarding = () => {
     },
   ];
 
-
-  const dailyTimeOptions: { value: DailyTimeCommitment; label: string; description: string }[] = [
-    { value: "3min", label: "3 min", description: "Micro-drills" },
-    { value: "7min", label: "7 min", description: "Quick session" },
-    { value: "10min", label: "10 min", description: "Daily protocol" },
+  const planOptions = [
+    { 
+      id: "light" as TrainingPlanId, 
+      icon: Leaf, 
+      color: "text-emerald-400 bg-emerald-500/15",
+      plan: TRAINING_PLANS.light 
+    },
+    { 
+      id: "expert" as TrainingPlanId, 
+      icon: Target, 
+      color: "text-blue-400 bg-blue-500/15",
+      plan: TRAINING_PLANS.expert 
+    },
+    { 
+      id: "superhuman" as TrainingPlanId, 
+      icon: Flame, 
+      color: "text-red-400 bg-red-500/15",
+      plan: TRAINING_PLANS.superhuman 
+    },
   ];
 
   return (
@@ -531,50 +546,55 @@ const Onboarding = () => {
             </div>
           )}
 
-          {/* Step 7: Session Duration & Daily Commitment */}
+          {/* Step 7: Training Plan Selection */}
           {step === 7 && (
             <div className="animate-fade-in">
               <div className="text-center mb-6">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <Clock className="w-5 h-5 text-primary" />
-                </div>
                 <h1 className="text-xl font-semibold mb-1.5 tracking-tight">
-                  Training protocol
+                  Training Plan
                 </h1>
                 <p className="text-muted-foreground text-[13px]">
-                  Small drills. Strategic gains.
+                  Choose your intensity level
                 </p>
               </div>
               
-              {/* Daily Commitment */}
-              <div className="mb-6">
-                <label className="text-[13px] font-medium text-muted-foreground mb-2.5 block">Daily commitment</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {dailyTimeOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setDailyTimeCommitment(option.value)}
-                      className={cn(
-                        "py-3 px-2 rounded-xl border text-center transition-all",
-                        dailyTimeCommitment === option.value
-                          ? "border-primary bg-primary/10"
-                          : "border-border/60 bg-card/50 hover:border-primary/40"
-                      )}
-                    >
-                      <span className="font-semibold text-[14px] block mb-0.5">{option.label}</span>
-                      <span className="text-[9px] text-muted-foreground">{option.description}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="space-y-3 mb-6">
+                {planOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setTrainingPlan(option.id)}
+                    className={cn(
+                      "w-full py-4 px-4 rounded-xl border text-left transition-all",
+                      trainingPlan === option.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border/60 bg-card/50 hover:border-primary/40"
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", option.color)}>
+                        <option.icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-[14px]">{option.plan.name}</span>
+                          <span className="text-[10px] text-muted-foreground">{option.plan.sessionDuration}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mb-1.5">{option.plan.tagline}</p>
+                        <p className="text-[10px] text-muted-foreground/70">
+                          {option.plan.sessionsPerWeek} sessions/week • {option.plan.contentPerWeek} content/week
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
 
               <Button
                 onClick={handleComplete}
                 variant="hero"
                 className="w-full h-[52px] text-[15px] font-medium"
-                disabled={!dailyTimeCommitment}
               >
-                Continue to Assessment
+                Continue
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
