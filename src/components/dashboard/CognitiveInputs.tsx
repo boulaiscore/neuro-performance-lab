@@ -25,6 +25,7 @@ interface CognitiveInput {
   type: InputType;
   title: string;
   author?: string;
+  summary: string;
   duration: string;
   cognitivePurpose: string;
   reflectionPrompt: string;
@@ -70,6 +71,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "In Our Time",
     author: "BBC Radio 4",
+    summary: "Conversazioni dense e ben moderate su idee storiche/scientifiche/filosofiche; ottimo allenamento di attenzione e tracciamento argomentativo.",
     duration: "35–55 min",
     cognitivePurpose: "Attenzione e tracciamento argomentativo",
     reflectionPrompt: "Qual è la tesi principale? Che evidenze la supportano?",
@@ -88,6 +90,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "The Partially Examined Life",
     author: "Mark Linsenmayer et al.",
+    summary: "Lettura/analisi di testi e concetti; allena ricostruzione di tesi e contro-tesi senza semplificazioni.",
     duration: "60–120 min",
     cognitivePurpose: "Ricostruzione di tesi e contro-tesi",
     reflectionPrompt: "Riesco a ricostruire l'argomento in 5 frasi?",
@@ -100,6 +103,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "Very Bad Wizards",
     author: "Tamler Sommers & David Pizarro",
+    summary: "Filosofia + psicologia con taglio critico; utile per smontare intuizioni facili e verificare assunzioni.",
     duration: "45–90 min",
     cognitivePurpose: "Smontare intuizioni e verificare assunzioni",
     reflectionPrompt: "Quale principio morale stanno usando?",
@@ -112,6 +116,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "Sean Carroll's Mindscape",
     author: "Sean Carroll",
+    summary: "Interviste lunghe e strutturate; ottimo per slow thinking e integrazione di concetti complessi.",
     duration: "60–120 min",
     cognitivePurpose: "Slow thinking e integrazione concetti complessi",
     reflectionPrompt: "Quali assunzioni sottendono la visione dell'ospite?",
@@ -124,6 +129,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "Philosophy Bites",
     author: "David Edmonds & Nigel Warburton",
+    summary: "Episodi brevi ma rigorosi; perfetto per micro-sessioni di chiarezza concettuale.",
     duration: "15–25 min",
     cognitivePurpose: "Micro-sessioni di chiarezza concettuale",
     reflectionPrompt: "Definisci il concetto e genera 1 controesempio.",
@@ -137,6 +143,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "EconTalk",
     author: "Russ Roberts",
+    summary: "Conversazioni da primo principio su incentivi, trade-off e sistemi; allena ragionamento causale.",
     duration: "50–90 min",
     cognitivePurpose: "Ragionamento causale su incentivi e trade-off",
     reflectionPrompt: "Qual è il meccanismo causale proposto?",
@@ -150,6 +157,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "podcast",
     title: "Conversations with Tyler",
     author: "Tyler Cowen",
+    summary: "Domande non ovvie e ospiti profondi; ottimo per elasticità mentale e cambio di frame.",
     duration: "45–90 min",
     cognitivePurpose: "Elasticità mentale e cambio di frame",
     reflectionPrompt: "Qual è l'idea meno ovvia emersa?",
@@ -164,6 +172,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "Apology",
     author: "Plato",
+    summary: "Difesa razionale sotto pressione; perfetto per allenare coerenza e argomentazione.",
     duration: "1–2 hrs",
     cognitivePurpose: "Coerenza e argomentazione sotto pressione",
     reflectionPrompt: "Quale premessa è più vulnerabile?",
@@ -182,6 +191,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "The Ones Who Walk Away from Omelas",
     author: "Ursula K. Le Guin",
+    summary: "Dilemma morale impossibile; allena trade-off e pensiero controfattuale.",
     duration: "30–45 min",
     cognitivePurpose: "Trade-off e pensiero controfattuale",
     reflectionPrompt: "Quale costo sono disposto ad accettare?",
@@ -194,6 +204,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "The Myth of Sisyphus",
     author: "Albert Camus",
+    summary: "Ragionamento esistenziale serrato; allena tenuta attentiva su concetti astratti.",
     duration: "2–3 hrs",
     cognitivePurpose: "Tenuta attentiva su concetti astratti",
     reflectionPrompt: "Qual è il nucleo dell'argomentazione esistenziale?",
@@ -206,6 +217,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "On Liberty",
     author: "John Stuart Mill",
+    summary: "Principi, limiti e conseguenze; ottimo per pensare in regole + eccezioni.",
     duration: "3–4 hrs",
     cognitivePurpose: "Pensare in regole + eccezioni",
     reflectionPrompt: "Quali sono i limiti del principio proposto?",
@@ -218,6 +230,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "Politics and the English Language",
     author: "George Orwell",
+    summary: "Smonta la manipolazione linguistica; allena precisione e anti-razionalizzazioni.",
     duration: "30–45 min",
     cognitivePurpose: "Precisione e anti-razionalizzazioni",
     reflectionPrompt: "Quali parole mascherano l'argomento?",
@@ -230,6 +243,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "Meditations",
     author: "Marcus Aurelius",
+    summary: "Disciplina del giudizio; ottimo per ridurre reattività e migliorare metacognizione.",
     duration: "10–15 min/session",
     cognitivePurpose: "Ridurre reattività e migliorare metacognizione",
     reflectionPrompt: "Quale giudizio sto aggiungendo ai fatti?",
@@ -242,6 +256,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "book",
     title: "Notes from Underground",
     author: "Fyodor Dostoevsky",
+    summary: "Autoinganno e razionalizzazione; eccellente per riconoscere bias interni.",
     duration: "2–3 hrs",
     cognitivePurpose: "Riconoscere autoinganno e bias interni",
     reflectionPrompt: "Dove l'argomento diventa auto-giustificazione?",
@@ -255,6 +270,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "Critical Thinking Is About Asking Better Questions",
     author: "Harvard Business Review",
+    summary: "Sposta il focus da risposte rapide a domande di qualità per migliorare decisioni e diagnosi.",
     duration: "10–15 min",
     cognitivePurpose: "Focus su domande di qualità per decisioni migliori",
     reflectionPrompt: "Quale domanda migliorerebbe questa decisione?",
@@ -273,6 +289,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "If You Rush Your Decisions, Ask Yourself Why",
     author: "Harvard Business Review",
+    summary: "Micro-protocollo per rallentare quando scatta l'urgenza (anti-impulsività decisionale).",
     duration: "5–10 min",
     cognitivePurpose: "Anti-impulsività decisionale",
     reflectionPrompt: "Perché sento urgenza in questa decisione?",
@@ -285,6 +302,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "Intelligent Choices Reshape Decision-Making",
     author: "MIT Sloan Management Review",
+    summary: "Decisioni migliori richiedono prima scelte migliori (option quality), non solo processi.",
     duration: "15–20 min",
     cognitivePurpose: "Option quality prima dei processi",
     reflectionPrompt: "Sto ottimizzando le opzioni o solo il processo?",
@@ -297,6 +315,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "Scenario Planning: A Tool for Strategic Thinking",
     author: "MIT Sloan Management Review",
+    summary: "Metodo disciplinato per pensare futuri multipli senza innamorarsi di una sola previsione.",
     duration: "20–25 min",
     cognitivePurpose: "Pensare futuri multipli senza bias di conferma",
     reflectionPrompt: "Quali scenari sto ignorando?",
@@ -309,6 +328,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "Teaching science students how to think",
     author: "Science",
+    summary: "Perché sapere non basta: serve insegnare esplicitamente il ragionare.",
     duration: "10–15 min",
     cognitivePurpose: "Insegnare esplicitamente il ragionare",
     reflectionPrompt: "Cosa so vs come lo so?",
@@ -321,6 +341,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "Before making a career move, try an experiment",
     author: "Nature Careers",
+    summary: "Tiny experiments applicati alle scelte: testare ipotesi prima di impegnarsi in cambi radicali.",
     duration: "10–15 min",
     cognitivePurpose: "Testare ipotesi prima di impegnarsi",
     reflectionPrompt: "Quale piccolo esperimento posso fare prima?",
@@ -333,6 +354,7 @@ const COGNITIVE_INPUTS: CognitiveInput[] = [
     type: "article",
     title: "AI, peer review and the human activity of science",
     author: "Nature Careers",
+    summary: "Difende il giudizio umano come competenza critica: valutare, triage, priorità.",
     duration: "10–15 min",
     cognitivePurpose: "Giudizio umano come competenza critica",
     reflectionPrompt: "Cosa non posso delegare al pensiero automatico?",
@@ -571,6 +593,11 @@ function PrescriptionCard({
               <span>{thinkingConfig.label}</span>
             </span>
           </div>
+          
+          {/* Summary */}
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {input.summary}
+          </p>
           
           {/* Prescription block */}
           {input.prescription && (
