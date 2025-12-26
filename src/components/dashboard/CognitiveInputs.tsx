@@ -1092,6 +1092,43 @@ export function CognitiveInputs() {
   );
 }
 
+// Calculate points for a completed item based on difficulty and thinking system
+function calculateItemPoints(item: CognitiveInput): number {
+  // Base points by difficulty: 1=10, 2=20, 3=35, 4=50, 5=75
+  const difficultyPoints: Record<number, number> = { 1: 10, 2: 20, 3: 35, 4: 50, 5: 75 };
+  return difficultyPoints[item.difficulty] || 10;
+}
+
+// Calculate total stats from completed items
+function calculateLibraryStats(items: CognitiveInput[]) {
+  let totalPoints = 0;
+  let s1Points = 0;
+  let s2Points = 0;
+  let s1Items = 0;
+  let s2Items = 0;
+  let dualItems = 0;
+
+  items.forEach(item => {
+    const points = calculateItemPoints(item);
+    totalPoints += points;
+
+    if (item.thinkingSystem === "S1") {
+      s1Points += points;
+      s1Items++;
+    } else if (item.thinkingSystem === "S2") {
+      s2Points += points;
+      s2Items++;
+    } else {
+      // S1+S2 contributes to both
+      s1Points += Math.floor(points / 2);
+      s2Points += Math.floor(points / 2);
+      dualItems++;
+    }
+  });
+
+  return { totalPoints, s1Points, s2Points, s1Items, s2Items, dualItems };
+}
+
 // Library component - shows all completed items
 export function CognitiveLibrary() {
   const { user } = useAuth();
@@ -1102,6 +1139,8 @@ export function CognitiveLibrary() {
   const podcastsCompleted = completedItems.filter(i => i.type === "podcast");
   const booksCompleted = completedItems.filter(i => i.type === "book");
   const articlesCompleted = completedItems.filter(i => i.type === "article");
+
+  const stats = calculateLibraryStats(completedItems);
 
   if (!user) {
     return (
@@ -1133,7 +1172,38 @@ export function CognitiveLibrary() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Header */}
+      {/* Score Header */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-amber-500/10 border border-primary/20">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">Total Score</span>
+          </div>
+          <span className="text-2xl font-bold text-primary">{stats.totalPoints}</span>
+        </div>
+
+        {/* S1 vs S2 breakdown */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Zap className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-[10px] font-medium text-amber-400">System 1</span>
+            </div>
+            <p className="text-lg font-semibold">{stats.s1Points}</p>
+            <p className="text-[9px] text-muted-foreground">{stats.s1Items} items + {stats.dualItems} dual</p>
+          </div>
+          <div className="p-2.5 rounded-lg bg-teal-500/10 border border-teal-500/20">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Brain className="h-3.5 w-3.5 text-teal-400" />
+              <span className="text-[10px] font-medium text-teal-400">System 2</span>
+            </div>
+            <p className="text-lg font-semibold">{stats.s2Points}</p>
+            <p className="text-[9px] text-muted-foreground">{stats.s2Items} items + {stats.dualItems} dual</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Stats */}
       <div className="grid grid-cols-3 gap-3">
         <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 text-center">
           <Headphones className="h-4 w-4 text-primary mx-auto mb-1" />
@@ -1213,30 +1283,40 @@ function LibrarySection({
       </div>
 
       <div className="space-y-2">
-        {items.map(item => (
-          <a
-            key={item.id}
-            href={item.primaryUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block p-3 rounded-xl border border-border/30 bg-card/30 hover:bg-card/50 hover:border-primary/30 transition-all"
-          >
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{item.title}</p>
-                {item.author && (
-                  <p className="text-[10px] text-muted-foreground/60">{item.author}</p>
-                )}
-                <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{item.summary}</p>
+        {items.map(item => {
+          const points = calculateItemPoints(item);
+          return (
+            <a
+              key={item.id}
+              href={item.primaryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-3 rounded-xl border border-border/30 bg-card/30 hover:bg-card/50 hover:border-primary/30 transition-all"
+            >
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{item.title}</p>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium shrink-0">
+                      +{points} pts
+                    </span>
+                  </div>
+                  {item.author && (
+                    <p className="text-[10px] text-muted-foreground/60">{item.author}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] text-muted-foreground/50">
+                      Difficulty: {item.difficulty}/5
+                    </span>
+                    <ThinkingSystemIcon system={item.thinkingSystem} />
+                  </div>
+                </div>
+                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <ThinkingSystemIcon system={item.thinkingSystem} />
-                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40" />
-              </div>
-            </div>
-          </a>
-        ))}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
