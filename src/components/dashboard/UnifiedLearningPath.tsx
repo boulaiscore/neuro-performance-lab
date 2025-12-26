@@ -6,7 +6,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { LEVELS, getLevelFromXP } from "@/lib/badges";
-import { TRAINING_PLANS, TrainingPlanId, SessionType } from "@/lib/trainingPlans";
+import { TRAINING_PLANS, TrainingPlanId, SessionType, XP_VALUES } from "@/lib/trainingPlans";
 import { ContentAssignment } from "@/hooks/useMonthlyContent";
 
 interface PathNode {
@@ -90,7 +90,7 @@ export function UnifiedLearningPath({
       icon: config.icon,
       color: config.color,
       bgColor: config.bg,
-      xpReward: 10,
+      xpReward: XP_VALUES.gameComplete,
       status,
       order: order++,
     });
@@ -104,6 +104,13 @@ export function UnifiedLearningPath({
         );
         const contentConfig = CONTENT_CONFIG[contentType] || CONTENT_CONFIG["reading"];
         
+        // Get correct XP based on content type
+        const contentXP = contentType === "podcast" 
+          ? XP_VALUES.podcastComplete 
+          : contentType === "book" 
+            ? XP_VALUES.bookChapterComplete 
+            : XP_VALUES.readingComplete;
+
         pathNodes.push({
           id: matchingContent?.id || `content-${idx}`,
           type: "content",
@@ -113,7 +120,7 @@ export function UnifiedLearningPath({
           icon: contentConfig.icon,
           color: contentConfig.color,
           bgColor: contentConfig.bg,
-          xpReward: 5,
+          xpReward: contentXP,
           status: matchingContent?.status === "completed" ? "completed" : (isCompleted ? "current" : "upcoming"),
           order: order++,
         });
