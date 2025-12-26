@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { 
   Gamepad2, Headphones, BookOpen, ChevronRight, Clock, 
-  Brain, Target, Lightbulb, Play, X, Sparkles
+  Brain, Target, Lightbulb, Play, CheckCircle2, Sparkles, Circle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CONTENT_LIBRARY, ContentItem, ContentDifficulty } from "@/lib/contentLibrary";
+import { CONTENT_LIBRARY, ContentDifficulty } from "@/lib/contentLibrary";
 import { NEURO_LAB_AREAS, NeuroLabArea } from "@/lib/neuroLab";
 
 interface SessionPickerProps {
@@ -30,22 +30,22 @@ const AREA_ICONS: Record<string, React.ElementType> = {
   creativity: Lightbulb,
 };
 
-const DIFFICULTY_LABELS: Record<ContentDifficulty, string> = {
-  light: "Light",
-  medium: "Medium",
-  dense: "Deep",
+const DIFFICULTY_LABELS: Record<ContentDifficulty, { label: string; gameCount: number; contentCount: number }> = {
+  light: { label: "Light", gameCount: 1, contentCount: 1 },
+  medium: { label: "Medium", gameCount: 2, contentCount: 1 },
+  dense: { label: "Deep", gameCount: 2, contentCount: 2 },
 };
 
-type ActivityType = "game" | "podcast" | "reading" | "book";
-
-interface ActivityOption {
-  type: ActivityType;
+interface SessionStep {
   id: string;
+  type: "game" | "content";
   title: string;
   subtitle: string;
   duration: string;
   icon: React.ElementType;
-  area?: NeuroLabArea;
+  areaId?: NeuroLabArea;
+  contentId?: string;
+  completed: boolean;
 }
 
 export function SessionPicker({
@@ -57,93 +57,79 @@ export function SessionPicker({
   contentDifficulty,
 }: SessionPickerProps) {
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<ActivityType | null>(null);
+  
+  const difficultyConfig = DIFFICULTY_LABELS[contentDifficulty];
 
-  // Get recommended games
-  const gameOptions: ActivityOption[] = recommendedAreas.map((areaId) => {
-    const area = NEURO_LAB_AREAS.find((a) => a.id === areaId);
-    return {
-      type: "game" as const,
-      id: areaId,
-      title: area?.title || areaId,
-      subtitle: area?.subtitle || "",
-      duration: "5-15 min",
-      icon: AREA_ICONS[areaId] || Brain,
-      area: areaId,
-    };
-  });
+  // Build the session steps
+  const buildSessionSteps = (): SessionStep[] => {
+    const steps: SessionStep[] = [];
+    
+    // Add game steps
+    for (let i = 0; i < difficultyConfig.gameCount && i < recommendedAreas.length; i++) {
+      const areaId = recommendedAreas[i % recommendedAreas.length];
+      const area = NEURO_LAB_AREAS.find((a) => a.id === areaId);
+      steps.push({
+        id: `game-${i}`,
+        type: "game",
+        title: area?.title || areaId,
+        subtitle: "Complete 5 exercises",
+        duration: "5-10 min",
+        icon: AREA_ICONS[areaId] || Brain,
+        areaId,
+        completed: false,
+      });
+    }
 
-  // Get recommended content based on difficulty
-  const getContentOptions = (format: "podcast" | "reading" | "book"): ActivityOption[] => {
-    const content = CONTENT_LIBRARY.filter(
-      (c) => c.format === format && c.difficulty === contentDifficulty
-    ).slice(0, 2);
+    // Add content steps
+    const contentTypes: ("podcast" | "reading" | "book")[] = ["podcast", "reading", "book"];
+    let contentAdded = 0;
+    
+    for (const format of contentTypes) {
+      if (contentAdded >= difficultyConfig.contentCount) break;
+      
+      const content = CONTENT_LIBRARY.find(
+        (c) => c.format === format && c.difficulty === contentDifficulty
+      );
+      
+      if (content) {
+        const iconMap = {
+          podcast: Headphones,
+          reading: BookOpen,
+          book: BookOpen,
+        };
+        
+        steps.push({
+          id: content.id,
+          type: "content",
+          title: content.title,
+          subtitle: content.author || "",
+          duration: `${content.durationMinutes} min`,
+          icon: iconMap[format],
+          contentId: content.id,
+          completed: false,
+        });
+        contentAdded++;
+      }
+    }
 
-    const iconMap = {
-      podcast: Headphones,
-      reading: BookOpen,
-      book: BookOpen,
-    };
-
-    return content.map((c) => ({
-      type: format as ActivityType,
-      id: c.id,
-      title: c.title,
-      subtitle: c.author || c.description,
-      duration: `${c.durationMinutes} min`,
-      icon: iconMap[format],
-    }));
+    return steps;
   };
 
-  const podcastOptions = getContentOptions("podcast");
-  const readingOptions = getContentOptions("reading");
-  const bookOptions = getContentOptions("book");
+  const sessionSteps = buildSessionSteps();
+  const totalDuration = sessionSteps.reduce((acc, step) => {
+    const match = step.duration.match(/(\d+)/);
+    return acc + (match ? parseInt(match[1]) : 0);
+  }, 0);
 
-  const handleSelectGame = (areaId: NeuroLabArea) => {
+  const handleStartGame = (areaId: NeuroLabArea) => {
     onOpenChange(false);
     navigate(`/neuro-lab/${areaId}?daily=true`);
   };
 
-  const handleSelectContent = (content: ActivityOption) => {
-    // For now, just close - you can add content tracking later
+  const handleStartContent = (contentId: string) => {
+    // For now just close - content player can be added later
     onOpenChange(false);
-    // Could navigate to content player or mark as started
   };
-
-  const categories = [
-    {
-      type: "game" as const,
-      label: "Cognitive Games",
-      icon: Gamepad2,
-      options: gameOptions,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-    },
-    {
-      type: "podcast" as const,
-      label: "Podcasts",
-      icon: Headphones,
-      options: podcastOptions,
-      color: "text-amber-400",
-      bgColor: "bg-amber-400/10",
-    },
-    {
-      type: "reading" as const,
-      label: "Readings",
-      icon: BookOpen,
-      options: readingOptions,
-      color: "text-emerald-400",
-      bgColor: "bg-emerald-400/10",
-    },
-    {
-      type: "book" as const,
-      label: "Book Chapters",
-      icon: BookOpen,
-      options: bookOptions,
-      color: "text-violet-400",
-      bgColor: "bg-violet-400/10",
-    },
-  ].filter((cat) => cat.options.length > 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,91 +147,138 @@ export function SessionPicker({
               {sessionName}
             </DialogTitle>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              {sessionDescription} • Choose an activity
+              {sessionDescription}
             </p>
           </DialogHeader>
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-5">
-          {/* Difficulty indicator */}
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/30 border border-border/30">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Brain className="w-4 h-4 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-[11px] text-muted-foreground">
-                Recommended difficulty
-              </p>
-              <p className="text-[13px] font-medium">
-                {DIFFICULTY_LABELS[contentDifficulty]} cognitive load
-              </p>
+        <div className="p-4 space-y-4">
+          {/* Session Overview Card */}
+          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+            <h3 className="text-[13px] font-semibold mb-2">Your Session Plan</h3>
+            <div className="flex items-center gap-4 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <Gamepad2 className="w-3.5 h-3.5 text-primary" />
+                <span>{difficultyConfig.gameCount} game{difficultyConfig.gameCount > 1 ? 's' : ''}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{difficultyConfig.contentCount} content</span>
+              </div>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">~{totalDuration} min total</span>
+              </div>
             </div>
           </div>
 
-          {/* Activity Categories */}
-          {categories.map((category) => (
-            <div key={category.type} className="space-y-2">
-              <div className="flex items-center gap-2">
-                <category.icon className={cn("w-4 h-4", category.color)} />
-                <h3 className="text-[12px] font-semibold text-foreground">
-                  {category.label}
-                </h3>
-              </div>
+          {/* How it works */}
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/30">
+            <p className="text-[11px] text-muted-foreground">
+              <span className="font-medium text-foreground">How it works:</span> Start with a game to activate your brain, then reinforce with curated content. Complete all steps to finish your session.
+            </p>
+          </div>
 
-              <div className="space-y-2">
-                {category.options.map((option) => (
-                  <motion.button
-                    key={option.id}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() =>
-                      option.type === "game" && option.area
-                        ? handleSelectGame(option.area)
-                        : handleSelectContent(option)
-                    }
-                    className={cn(
-                      "w-full p-3 rounded-xl border transition-all duration-200 text-left",
-                      "bg-card/50 hover:bg-card/80 border-border/30 hover:border-primary/30",
-                      "flex items-center gap-3"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                        category.bgColor
-                      )}
-                    >
-                      <option.icon className={cn("w-5 h-5", category.color)} />
+          {/* Session Steps */}
+          <div className="space-y-3">
+            <h4 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wide">
+              Complete in order
+            </h4>
+            
+            {sessionSteps.map((step, index) => {
+              const isGame = step.type === "game";
+              const stepNumber = index + 1;
+              
+              return (
+                <motion.div
+                  key={step.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={cn(
+                    "relative p-3 rounded-xl border transition-all duration-200",
+                    "bg-card/50 border-border/30",
+                    isGame && "hover:border-primary/40"
+                  )}
+                >
+                  {/* Step connector line */}
+                  {index < sessionSteps.length - 1 && (
+                    <div className="absolute left-[22px] top-[52px] w-px h-4 bg-border/50" />
+                  )}
+                  
+                  <div className="flex items-center gap-3">
+                    {/* Step number & icon */}
+                    <div className="relative">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center",
+                        isGame ? "bg-primary/15" : "bg-emerald-500/10"
+                      )}>
+                        <step.icon className={cn(
+                          "w-5 h-5",
+                          isGame ? "text-primary" : "text-emerald-400"
+                        )} />
+                      </div>
+                      <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-background border border-border flex items-center justify-center">
+                        <span className="text-[9px] font-bold">{stepNumber}</span>
+                      </div>
                     </div>
 
+                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-[13px] font-medium line-clamp-1">
-                        {option.title}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-[13px] font-medium line-clamp-1">
+                          {step.title}
+                        </h4>
+                        <span className={cn(
+                          "text-[8px] px-1.5 py-0.5 rounded font-medium uppercase",
+                          isGame 
+                            ? "bg-primary/15 text-primary" 
+                            : "bg-emerald-500/10 text-emerald-400"
+                        )}>
+                          {isGame ? "Game" : "Content"}
+                        </span>
+                      </div>
                       <p className="text-[10px] text-muted-foreground line-clamp-1">
-                        {option.subtitle}
+                        {step.subtitle}
                       </p>
                     </div>
 
+                    {/* Duration & Action */}
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        {option.duration}
+                        {step.duration}
                       </span>
-                      {option.type === "game" ? (
-                        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                          <Play className="w-3.5 h-3.5 text-primary-foreground fill-current" />
-                        </div>
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-muted-foreground/40" />
+                      {isGame && step.areaId && (
+                        <button
+                          onClick={() => handleStartGame(step.areaId!)}
+                          className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all"
+                        >
+                          <Play className="w-4 h-4 text-primary-foreground fill-current" />
+                        </button>
+                      )}
+                      {!isGame && (
+                        <button
+                          onClick={() => step.contentId && handleStartContent(step.contentId)}
+                          className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center hover:bg-emerald-500/30 active:scale-95 transition-all"
+                        >
+                          <ChevronRight className="w-4 h-4 text-emerald-400" />
+                        </button>
                       )}
                     </div>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          ))}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Tip */}
+          <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+            <p className="text-[10px] text-amber-200/80">
+              <span className="font-medium text-amber-300">💡 Tip:</span> Each game has 5 exercises. Try to complete them without breaks to maximize cognitive training effect.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
