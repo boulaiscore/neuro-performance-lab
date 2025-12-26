@@ -49,123 +49,116 @@ export function TrainHeader({
         : "text-destructive";
 
   return (
-    <section className="relative pb-6" aria-label="Train overview">
+    <section className="relative pb-3" aria-label="Train overview">
       {/* Top row: plan + settings */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-4"
+        className="flex items-center justify-between mb-2"
       >
         <button
           onClick={() => navigate("/app/account")}
           className={cn(
-            "flex items-center gap-2 px-3 py-1.5 rounded-full",
+            "flex items-center gap-2 px-2.5 py-1 rounded-full",
             "border border-border/50 bg-card/50 backdrop-blur-sm",
             "hover:bg-card/80 transition-colors"
           )}
           aria-label={`Selected plan: ${plan.name}. Open account settings.`}
         >
-          <PlanIcon className="w-4 h-4 text-primary" />
-          <span className="text-xs font-medium">{plan.name}</span>
+          <PlanIcon className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[11px] font-medium">{plan.name}</span>
         </button>
 
         <button
           onClick={() => navigate("/app/account")}
-          className="w-8 h-8 rounded-full bg-card/50 border border-border/50 flex items-center justify-center hover:bg-card/80 transition-colors"
+          className="w-7 h-7 rounded-full bg-card/50 border border-border/50 flex items-center justify-center hover:bg-card/80 transition-colors"
           aria-label="Open settings"
         >
-          <Settings2 className="w-4 h-4 text-muted-foreground" />
+          <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
       </motion.div>
 
-      {/* Greeting */}
+      {/* Greeting - single line */}
       {greetingName ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.05 }}
-          className="mb-6"
+          className="mb-3"
         >
-          <p className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-0.5">
-            {plan.tagline}
-          </p>
-          <h1 className="text-lg font-semibold tracking-tight">Hey {greetingName}</h1>
+          <h1 className="text-base font-semibold tracking-tight">
+            Hey {greetingName} <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest ml-2">{plan.tagline}</span>
+          </h1>
         </motion.div>
       ) : null}
 
-      {/* Central ring - WHOOP style */}
-      <div className="flex items-center justify-center gap-6">
+      {/* Compact ring row */}
+      <div className="flex items-center justify-between gap-2">
         {/* Left Metrics */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col items-end gap-4"
+          className="flex flex-col items-end gap-1"
         >
           <div className="text-right">
-            <p className={cn("text-2xl font-bold", readinessTone)}>
+            <p className={cn("text-lg font-bold leading-none", readinessTone)}>
               {Math.round(readinessScore)}%
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Readiness</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Readiness</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-semibold text-foreground">{sessionsCompleted}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Sessions</p>
+            <p className="text-sm font-semibold text-foreground leading-none">{sessionsCompleted}/{sessionsRequired}</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Sessions</p>
           </div>
         </motion.div>
 
-        {/* Ring */}
+        {/* Ring - smaller */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.15 }}
         >
-          <CognitiveRing progress={weekProgress} size={160} strokeWidth={10}>
+          <CognitiveRing progress={weekProgress} size={100} strokeWidth={7}>
             <div className="flex flex-col items-center">
-              <Brain className="w-8 h-8 mb-1 text-primary" />
-              <span className="text-3xl font-bold">{Math.round(weekProgress)}%</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Week</span>
+              <Brain className="w-5 h-5 mb-0.5 text-primary" />
+              <span className="text-xl font-bold leading-none">{Math.round(weekProgress)}%</span>
+              <span className="text-[8px] text-muted-foreground uppercase tracking-wide">Week</span>
             </div>
           </CognitiveRing>
         </motion.div>
 
         {/* Right Metrics */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col items-start gap-4"
+          className="flex flex-col items-start gap-1"
         >
           <div>
-            <p className="text-2xl font-bold text-primary">{weeklyXPEarned}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">XP Earned</p>
+            <p className="text-lg font-bold text-primary leading-none">{weeklyXPEarned}</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">XP</p>
           </div>
           <div>
-            <p className="text-lg font-semibold text-foreground">{weeklyXPTarget}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">XP Target</p>
+            <p className="text-sm font-semibold text-foreground leading-none">{weeklyXPTarget}</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Target</p>
           </div>
         </motion.div>
       </div>
 
-      {/* XP progress */}
+      {/* XP progress bar - slimmer */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-6 px-4"
+        transition={{ delay: 0.2 }}
+        className="mt-2 px-2"
       >
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] text-muted-foreground">Weekly XP Progress</span>
-          <span className="text-[10px] text-muted-foreground">
-            {weeklyXPEarned}/{weeklyXPTarget} XP
-          </span>
-        </div>
-        <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
+        <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full bg-primary"
             initial={{ width: 0 }}
             animate={{ width: `${xpProgress}%` }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           />
         </div>
       </motion.div>
