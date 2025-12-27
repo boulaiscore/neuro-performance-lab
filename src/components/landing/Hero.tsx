@@ -78,7 +78,8 @@ export function Hero() {
             transition={{ delay: 0.3, duration: 0.7 }}
             className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-8 leading-[0.95] text-white"
           >
-            Train Your Mind. <span className="text-primary">Unlock Elite Reasoning.</span>
+            Train Your Mind.<br />
+            <span className="text-primary">Unlock Elite Reasoning.</span>
           </motion.h1>
 
           {/* Subheadline */}
