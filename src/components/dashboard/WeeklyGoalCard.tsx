@@ -80,7 +80,7 @@ export function WeeklyGoalCard() {
         {/* Total XP Progress Bar - multi-color gradient */}
         <div className="h-2 bg-muted/50 rounded-full overflow-hidden mb-4">
           <motion.div 
-            className="h-full bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400 rounded-full"
+            className="h-full bg-gradient-to-r from-blue-400 via-violet-400 to-teal-400 rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${xpProgress}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -129,8 +129,8 @@ export function WeeklyGoalCard() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-purple-500/15 flex items-center justify-center">
-                  <BookMarked className="w-3 h-3 text-purple-400" />
+                <div className="w-5 h-5 rounded bg-violet-500/15 flex items-center justify-center">
+                  <BookMarked className="w-3 h-3 text-violet-400" />
                 </div>
                 <span className="text-[11px] font-medium text-foreground">Tasks</span>
                 {tasksComplete && (
@@ -140,13 +140,13 @@ export function WeeklyGoalCard() {
                   </span>
                 )}
               </div>
-              <span className="text-[11px] font-semibold text-purple-400">
+              <span className="text-[11px] font-semibold text-violet-400">
                 {weeklyContentXP} / {tasksXPTarget} XP
               </span>
             </div>
-            <div className="h-1.5 bg-purple-500/10 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-violet-500/10 rounded-full overflow-hidden">
               <motion.div 
-                className={`h-full rounded-full ${tasksComplete ? 'bg-emerald-400' : 'bg-purple-400'}`}
+                className={`h-full rounded-full ${tasksComplete ? 'bg-emerald-400' : 'bg-violet-400'}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${tasksProgress}%` }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
