@@ -5,6 +5,7 @@ import { AppShell } from "@/components/app/AppShell";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronRight, Check, Leaf, Target, Flame, Star, Gamepad2, BookMarked, Smartphone } from "lucide-react";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
+import { useWeeklyDetoxXP } from "@/hooks/useDetoxProgress";
 import { useCognitiveReadiness } from "@/hooks/useCognitiveReadiness";
 import { cn } from "@/lib/utils";
 import { TrainingPlanId, TRAINING_PLANS } from "@/lib/trainingPlans";
@@ -89,6 +90,9 @@ const Home = () => {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
   const { sessionsCompleted, weeklyXPEarned, weeklyXPTarget, plan } = useWeeklyProgress();
+  const { data: detoxData } = useWeeklyDetoxXP();
+  const weeklyDetoxXP = detoxData?.totalXP || 0;
+  const totalWeeklyXP = weeklyXPEarned + weeklyDetoxXP;
   const { cognitiveReadinessScore, isLoading: readinessLoading } = useCognitiveReadiness();
   
   const [showProtocolSheet, setShowProtocolSheet] = useState(false);
@@ -293,13 +297,13 @@ const Home = () => {
             <div className="flex items-center gap-1.5">
               <Star className="w-3.5 h-3.5 text-amber-400" />
               <p className="text-sm font-semibold tabular-nums text-amber-400">
-                {weeklyXPEarned} <span className="text-muted-foreground font-normal">/ {weeklyXPTarget}</span>
+                {totalWeeklyXP} <span className="text-muted-foreground font-normal">/ {weeklyXPTarget}</span>
               </p>
             </div>
             <div className="h-1 bg-amber-500/10 rounded-full overflow-hidden mt-2">
               <div 
                 className="h-full bg-amber-400 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, (weeklyXPEarned / weeklyXPTarget) * 100)}%` }}
+                style={{ width: `${Math.min(100, (totalWeeklyXP / weeklyXPTarget) * 100)}%` }}
               />
             </div>
           </div>
