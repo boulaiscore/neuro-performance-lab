@@ -21,6 +21,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { XP_VALUES } from "@/lib/trainingPlans";
 import { startOfWeek, format } from "date-fns";
+import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 
 type InputType = "podcast" | "book" | "article";
 type ThinkingSystem = "S1" | "S2" | "S1+S2";
@@ -83,17 +84,30 @@ const ACTIVE_TASKS: CognitiveInput[] = [
   },
 ];
 
-function useLoggedExposures(userId: string | undefined) {
+// Hook to get completed content for THIS WEEK only
+function useWeeklyCompletedContent(userId: string | undefined) {
+  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
+  
   return useQuery({
-    queryKey: ["logged-exposures", userId],
+    queryKey: ["weekly-content-completions", userId, weekStart],
     queryFn: async () => {
       if (!userId) return [];
+      
+      // Get exercise completions for content this week
       const { data, error } = await supabase
-        .from("user_listened_podcasts")
-        .select("podcast_id")
-        .eq("user_id", userId);
+        .from("exercise_completions")
+        .select("exercise_id, xp_earned")
+        .eq("user_id", userId)
+        .eq("week_start", weekStart)
+        .like("exercise_id", "content-%");
+      
       if (error) throw error;
-      return data.map((row) => row.podcast_id);
+      
+      // Extract content IDs (remove "content-" prefix and type)
+      return (data || []).map(row => ({
+        contentId: row.exercise_id.replace(/^content-(podcast|book|article)-/, ""),
+        xpEarned: row.xp_earned
+      }));
     },
     enabled: !!userId,
   });
@@ -102,10 +116,10 @@ function useLoggedExposures(userId: string | undefined) {
 // Content XP values aligned with training plans
 function calculateXP(type: InputType): number {
   switch (type) {
-    case "podcast": return XP_VALUES.podcastComplete;     // 15 XP
-    case "article": return XP_VALUES.readingComplete;     // 20 XP
-    case "book": return XP_VALUES.bookChapterComplete;    // 30 XP
-    default: return 15;
+    case "podcast": return XP_VALUES.podcastComplete;
+    case "article": return XP_VALUES.readingComplete;
+    case "book": return XP_VALUES.bookChapterComplete;
+    default: return 8;
   }
 }
 
@@ -261,8 +275,14 @@ function TaskCard({ task, isCompleted, onComplete, isToggling }: TaskCardProps) 
 export function TrainingTasks() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: completedIds = [], isLoading } = useLoggedExposures(user?.id);
+  const { weeklyContentXP } = useWeeklyProgress();
+  const { data: weeklyCompletions = [], isLoading } = useWeeklyCompletedContent(user?.id);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  
+  // Extract completed content IDs for this week
+  const completedThisWeek = weeklyCompletions.map(c => c.contentId);
+  // Calculate XP earned this week from these tasks
+  const weeklyTasksXPEarned = weeklyCompletions.reduce((sum, c) => sum + c.xpEarned, 0);
 
   const toggleMutation = useMutation({
     mutationFn: async ({ taskId, taskType }: { taskId: string; taskType: InputType }) => {
@@ -271,7 +291,7 @@ export function TrainingTasks() {
       const weekStart = getCurrentWeekStart();
       const xpEarned = calculateXP(taskType);
       
-      // Record completion in user_listened_podcasts (legacy tracking)
+      // Record completion in user_listened_podcasts (legacy tracking - for library)
       const { error: legacyError } = await supabase
         .from("user_listened_podcasts")
         .insert({ user_id: user.id, podcast_id: taskId });
@@ -282,7 +302,7 @@ export function TrainingTasks() {
         .from("exercise_completions")
         .insert({
           user_id: user.id,
-          exercise_id: `content-${taskId}`,
+          exercise_id: `content-${taskType}-${taskId}`,
           gym_area: "content",
           thinking_mode: "slow",
           difficulty: taskType === "book" ? "hard" : taskType === "article" ? "medium" : "easy",
@@ -294,25 +314,17 @@ export function TrainingTasks() {
     },
     onMutate: async ({ taskId }) => {
       setTogglingId(taskId);
-      await queryClient.cancelQueries({ queryKey: ["logged-exposures", user?.id] });
-      const previousData = queryClient.getQueryData<string[]>(["logged-exposures", user?.id]);
-      
-      queryClient.setQueryData<string[]>(["logged-exposures", user?.id], (old = []) => {
-        return [...old, taskId];
-      });
-      
-      return { previousData };
+      await queryClient.cancelQueries({ queryKey: ["weekly-content-completions", user?.id] });
     },
-    onError: (_err, _vars, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(["logged-exposures", user?.id], context.previousData);
-      }
+    onError: () => {
+      // Error handled by toast
     },
     onSettled: () => {
       setTogglingId(null);
-      queryClient.invalidateQueries({ queryKey: ["logged-exposures", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["weekly-content-completions"] });
       queryClient.invalidateQueries({ queryKey: ["weekly-exercise-xp"] });
       queryClient.invalidateQueries({ queryKey: ["weekly-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["logged-exposures"] });
     },
   });
 
@@ -321,13 +333,13 @@ export function TrainingTasks() {
     toggleMutation.mutate({ taskId, taskType });
   };
 
-  // Filter active tasks (not completed)
-  const activeTasks = ACTIVE_TASKS.filter(t => !completedIds.includes(t.id));
-  const completedTasks = ACTIVE_TASKS.filter(t => completedIds.includes(t.id));
+  // Filter active tasks (not completed THIS WEEK)
+  const activeTasks = ACTIVE_TASKS.filter(t => !completedThisWeek.includes(t.id));
+  const completedTasks = ACTIVE_TASKS.filter(t => completedThisWeek.includes(t.id));
   
-  // Calculate stats for tasks only
+  // Calculate stats for tasks only (this week)
   const totalPossibleXP = ACTIVE_TASKS.reduce((sum, t) => sum + calculateXP(t.type), 0);
-  const earnedXP = completedTasks.reduce((sum, t) => sum + calculateXP(t.type), 0);
+  const earnedXP = weeklyTasksXPEarned; // Use XP from exercise_completions this week
   const completionPercent = ACTIVE_TASKS.length > 0 ? Math.round((completedTasks.length / ACTIVE_TASKS.length) * 100) : 0;
   if (isLoading) {
     return (
