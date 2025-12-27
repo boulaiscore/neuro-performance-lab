@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ const InstallPage = () => {
   const [isInstalled, setIsInstalled] = useState(false);
 
   // Listen for the beforeinstallprompt event
-  useState(() => {
+  useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e);
@@ -27,7 +27,7 @@ const InstallPage = () => {
     }
     
     return () => window.removeEventListener("beforeinstallprompt", handler);
-  });
+  }, []);
 
   const handleInstall = async () => {
     if (!installPrompt) return;
