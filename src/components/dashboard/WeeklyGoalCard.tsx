@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Star, Gamepad2, BookMarked, Target, CheckCircle2 } from "lucide-react";
+import { Star, Gamepad2, BookMarked, Target, CheckCircle2, Smartphone, Ban, Gift } from "lucide-react";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 import { XPCelebration } from "@/components/app/XPCelebration";
 
@@ -10,6 +10,9 @@ const PLAN_XP_SPLIT: Record<string, { gamesPercent: number; tasksPercent: number
   expert: { gamesPercent: 0.60, tasksPercent: 0.40 },     // ~90 games, ~60 tasks
   superhuman: { gamesPercent: 0.58, tasksPercent: 0.42 }, // ~145 games, ~105 tasks
 };
+
+// Bonus XP target for detox (not part of main goal, purely additive)
+const DETOX_BONUS_TARGET = 50;
 
 export function WeeklyGoalCard() {
   const { 
@@ -38,6 +41,10 @@ export function WeeklyGoalCard() {
   // Check if each category is complete
   const gamesComplete = weeklyGamesXP >= gamesXPTarget;
   const tasksComplete = weeklyContentXP >= tasksXPTarget;
+
+  // Mock detox XP for now (will be replaced with real data from DetoxChallengeTab)
+  const weeklyDetoxXP = 25; // TODO: integrate with actual detox tracking
+  const detoxProgress = Math.min(100, (weeklyDetoxXP / DETOX_BONUS_TARGET) * 100);
 
   // Trigger celebration when goal is reached for the first time
   useEffect(() => {
@@ -146,6 +153,40 @@ export function WeeklyGoalCard() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Detox Bonus Section */}
+        <div className="p-2.5 rounded-lg bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-500/20 mb-3">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Gift className="w-3 h-3 text-teal-400" />
+            <span className="text-[10px] text-teal-400 font-semibold uppercase tracking-wide">
+              Bonus XP
+            </span>
+          </div>
+          
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-teal-500/15 flex items-center justify-center relative">
+                <Smartphone className="w-3 h-3 text-teal-400" />
+                <Ban className="w-2 h-2 text-teal-400 absolute -bottom-0.5 -right-0.5" />
+              </div>
+              <span className="text-[11px] font-medium text-foreground">Detox</span>
+            </div>
+            <span className="text-[11px] font-semibold text-teal-400">
+              +{weeklyDetoxXP} / {DETOX_BONUS_TARGET} XP
+            </span>
+          </div>
+          <div className="h-1.5 bg-teal-500/10 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full rounded-full bg-gradient-to-r from-teal-400 to-cyan-400"
+              initial={{ width: 0 }}
+              animate={{ width: `${detoxProgress}%` }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
+            />
+          </div>
+          <p className="text-[9px] text-muted-foreground mt-1.5">
+            Earn bonus XP by completing detox challenges in NeuroLab
+          </p>
         </div>
         
         {xpRemaining > 0 ? (
