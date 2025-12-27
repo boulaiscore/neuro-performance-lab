@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { TRAINING_PLANS, TrainingPlanId, TrainingPlan } from "@/lib/trainingPlans";
-import { Leaf, Target, Flame, Check, Clock, BookOpen, Gamepad2, ChevronDown, ChevronUp, Star } from "lucide-react";
+import { Leaf, Target, Flame, Check, Clock, BookOpen, Gamepad2, ChevronDown, ChevronUp, Star, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PLAN_ICONS: Record<TrainingPlanId, typeof Leaf> = {
@@ -261,6 +261,37 @@ export function TrainingPlanSelector({ selectedPlan, onSelectPlan, showDetails =
                       ))}
                     </div>
                   </div>
+
+                  {/* Detox Requirement */}
+                  {plan.detox && (
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Digital Detox</p>
+                      <div className="p-2.5 rounded-lg bg-green-500/10 border border-green-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-5 h-5 rounded bg-green-500/20 flex items-center justify-center">
+                            <Smartphone className="w-3 h-3 text-green-400" />
+                          </div>
+                          <span className="text-[11px] font-semibold text-green-400">
+                            {Math.round(plan.detox.weeklyMinutes / 60)}h / settimana
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[10px]">
+                          <div>
+                            <span className="text-muted-foreground">Sessione min:</span>
+                            <span className="ml-1 text-foreground">{plan.detox.minSessionMinutes} min</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">XP/min:</span>
+                            <span className="ml-1 text-green-400">{plan.detox.xpPerMinute} XP</span>
+                          </div>
+                        </div>
+                        <div className="mt-1.5 text-[10px]">
+                          <span className="text-muted-foreground">Bonus obiettivo:</span>
+                          <span className="ml-1 text-amber-400">+{plan.detox.bonusXP} XP</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
