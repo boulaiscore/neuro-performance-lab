@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/app/AppShell";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronRight, Check, Leaf, Target, Flame, Star, Gamepad2, BookMarked } from "lucide-react";
+import { ChevronRight, Check, Leaf, Target, Flame, Star, Gamepad2, BookMarked, Smartphone } from "lucide-react";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 import { useCognitiveReadiness } from "@/hooks/useCognitiveReadiness";
 import { cn } from "@/lib/utils";
@@ -423,7 +423,7 @@ const Home = () => {
                       <Star className="w-3 h-3 text-amber-400" />
                       <span className="text-[11px] font-medium text-amber-400">{plan.weeklyXPTarget} XP/week</span>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-wrap">
                       <div className="flex items-center gap-1.5">
                         <Gamepad2 className="w-3 h-3 text-blue-400" />
                         <span className="text-[10px] text-muted-foreground">
@@ -436,6 +436,14 @@ const Home = () => {
                           Tasks: <span className="text-purple-400 font-medium">{tasksXPTarget}</span>
                         </span>
                       </div>
+                      {plan.detox && (
+                        <div className="flex items-center gap-1.5">
+                          <Smartphone className="w-3 h-3 text-green-400" />
+                          <span className="text-[10px] text-muted-foreground">
+                            Detox: <span className="text-green-400 font-medium">{Math.round(plan.detox.weeklyMinutes / 60)}h/week</span>
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </button>
