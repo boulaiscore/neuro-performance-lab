@@ -22,6 +22,7 @@ import { toast } from "@/hooks/use-toast";
 import { XP_VALUES } from "@/lib/trainingPlans";
 import { startOfWeek, format } from "date-fns";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
+import { TRAINING_PLANS, TrainingPlanId } from "@/lib/trainingPlans";
 
 type InputType = "podcast" | "book" | "article";
 type ThinkingSystem = "S1" | "S2" | "S1+S2";
@@ -279,6 +280,24 @@ export function TrainingTasks() {
   const { data: weeklyCompletions = [], isLoading } = useWeeklyCompletedContent(user?.id);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   
+  // Get user's training plan for XP target
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("training_plan")
+        .eq("user_id", user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+  
+  const userPlan = (profile?.training_plan as TrainingPlanId) || "light";
+  const planXPTarget = TRAINING_PLANS[userPlan]?.weeklyXPTarget || 100;
+  
   // Extract completed content IDs for this week
   const completedThisWeek = weeklyCompletions.map(c => c.contentId);
   // Calculate XP earned this week from these tasks
@@ -337,10 +356,9 @@ export function TrainingTasks() {
   const activeTasks = ACTIVE_TASKS.filter(t => !completedThisWeek.includes(t.id));
   const completedTasks = ACTIVE_TASKS.filter(t => completedThisWeek.includes(t.id));
   
-  // Calculate stats for tasks only (this week)
-  const totalPossibleXP = ACTIVE_TASKS.reduce((sum, t) => sum + calculateXP(t.type), 0);
-  const earnedXP = weeklyTasksXPEarned; // Use XP from exercise_completions this week
-  const completionPercent = ACTIVE_TASKS.length > 0 ? Math.round((completedTasks.length / ACTIVE_TASKS.length) * 100) : 0;
+  // Use plan-based XP target and calculate progress
+  const earnedXP = weeklyTasksXPEarned;
+  const completionPercent = planXPTarget > 0 ? Math.min(100, Math.round((earnedXP / planXPTarget) * 100)) : 0;
   if (isLoading) {
     return (
       <div className="p-4 rounded-xl bg-card/40 border border-border/30">
@@ -368,12 +386,12 @@ export function TrainingTasks() {
           </div>
           <div className="text-right">
             <span className="text-lg font-bold text-primary">{earnedXP}</span>
-            <span className="text-[10px] text-muted-foreground">/{totalPossibleXP} XP</span>
+            <span className="text-[10px] text-muted-foreground">/{planXPTarget} XP</span>
           </div>
         </div>
         
         {/* Progress bar */}
-        <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden mb-2">
+        <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${completionPercent}%` }}
@@ -381,10 +399,6 @@ export function TrainingTasks() {
             className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full"
           />
         </div>
-        
-        <p className="text-[10px] text-muted-foreground">
-          {completedTasks.length}/{ACTIVE_TASKS.length} completed • {activeTasks.length} remaining
-        </p>
       </div>
 
       {/* Active Tasks */}
