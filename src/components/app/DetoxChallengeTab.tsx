@@ -70,13 +70,13 @@ export function DetoxChallengeTab() {
   return (
     <div className="space-y-5">
       {/* Stats Banner */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/20">
+      <div className="p-4 rounded-xl bg-gradient-to-br from-teal-500/10 via-teal-500/5 to-transparent border border-teal-500/20">
         <div className="flex items-center gap-2 mb-3">
           <div className="relative">
-            <Smartphone className="w-4 h-4 text-violet-400" />
-            <Ban className="w-4 h-4 text-violet-400 absolute inset-0" />
+            <Smartphone className="w-4 h-4 text-teal-400" />
+            <Ban className="w-4 h-4 text-teal-400 absolute inset-0" />
           </div>
-          <span className="text-xs font-medium text-violet-400">Digital Detox</span>
+          <span className="text-xs font-medium text-teal-400">Digital Detox</span>
         </div>
         
         <div className="grid grid-cols-3 gap-3">
@@ -89,7 +89,7 @@ export function DetoxChallengeTab() {
             <div className="text-[10px] text-muted-foreground">min this week</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-violet-400">+{weeklyDetoxXP}</div>
+            <div className="text-lg font-bold text-teal-400">+{weeklyDetoxXP}</div>
             <div className="text-[10px] text-muted-foreground">XP earned</div>
           </div>
         </div>
@@ -153,13 +153,13 @@ export function DetoxChallengeTab() {
                     strokeWidth="6"
                     strokeDasharray={`${progress * 2.83} 283`}
                     strokeLinecap="round"
-                    className="text-violet-500 transition-all duration-1000"
+                    className="text-teal-500 transition-all duration-1000"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <div className="relative mb-1">
-                    <Smartphone className="w-5 h-5 text-violet-400" />
-                    <Ban className="w-5 h-5 text-violet-400 absolute inset-0" />
+                    <Smartphone className="w-5 h-5 text-teal-400" />
+                    <Ban className="w-5 h-5 text-teal-400 absolute inset-0" />
                   </div>
                   <span className="text-xl font-mono font-bold">{formatTime(elapsedSeconds)}</span>
                 </div>
@@ -201,7 +201,7 @@ export function DetoxChallengeTab() {
                 className={cn(
                   "p-4 rounded-xl border transition-all text-left",
                   selectedOption?.targetMinutes === option.targetMinutes
-                    ? "bg-violet-500/15 border-violet-500/40"
+                    ? "bg-teal-500/15 border-teal-500/40"
                     : "bg-card border-border/50 hover:border-border"
                 )}
               >
@@ -209,7 +209,7 @@ export function DetoxChallengeTab() {
                   <Clock className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-semibold">{option.label}</span>
                 </div>
-                <div className="flex items-center gap-1 text-violet-400 text-xs font-medium">
+                <div className="flex items-center gap-1 text-teal-400 text-xs font-medium">
                   <Trophy className="w-3 h-3" />
                   +{option.xp} XP
                 </div>
@@ -225,9 +225,9 @@ export function DetoxChallengeTab() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
               >
-                <Button 
+              <Button 
                   onClick={handleStart}
-                  className="w-full gap-2 bg-violet-600 hover:bg-violet-700"
+                  className="w-full gap-2 bg-teal-600 hover:bg-teal-700"
                 >
                   <Play className="w-4 h-4 fill-current" />
                   Start {selectedOption.label} Detox
@@ -246,19 +246,19 @@ export function DetoxChallengeTab() {
         </h4>
         <ul className="space-y-1.5 text-[11px] text-muted-foreground">
           <li className="flex items-start gap-2">
-            <span className="text-violet-400">1.</span>
+            <span className="text-teal-400">1.</span>
             Select a challenge duration
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-violet-400">2.</span>
+            <span className="text-teal-400">2.</span>
             Start the timer and put your phone down
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-violet-400">3.</span>
+            <span className="text-teal-400">3.</span>
             Avoid opening social apps until time is up
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-violet-400">4.</span>
+            <span className="text-teal-400">4.</span>
             Earn XP and build healthier habits
           </li>
         </ul>
