@@ -11,9 +11,9 @@ import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { TrainingProgressHeader } from "@/components/dashboard/TrainingProgressHeader";
 import { TrainingTasks } from "@/components/dashboard/TrainingTasks";
 import { GamesStats } from "@/components/dashboard/GamesStats";
-import { WeeklyGoalCard } from "@/components/dashboard/WeeklyGoalCard";
+import { DetoxStats } from "@/components/dashboard/DetoxStats";
 import { Button } from "@/components/ui/button";
-import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText, Gamepad2, BookMarked } from "lucide-react";
+import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText, Gamepad2, BookMarked, Smartphone, Ban } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserMetrics } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 const Dashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"overview" | "training">("overview");
-  const [trainingSubTab, setTrainingSubTab] = useState<"games" | "tasks">("games");
+  const [trainingSubTab, setTrainingSubTab] = useState<"games" | "tasks" | "detox">("games");
   
   // Fetch real metrics from database
   const { data: metrics, isLoading: metricsLoading } = useUserMetrics(user?.id);
@@ -216,12 +216,12 @@ const Dashboard = () => {
             <TrainingProgressHeader />
 
 
-            {/* Sub-tabs for Games/Tasks */}
+            {/* Sub-tabs for Games/Tasks/Detox */}
             <div className="flex items-center gap-1 p-1 bg-card/40 border border-border/30 rounded-xl">
               <button
                 onClick={() => setTrainingSubTab("games")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all",
                   trainingSubTab === "games"
                     ? "bg-primary/15 text-primary shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -233,7 +233,7 @@ const Dashboard = () => {
               <button
                 onClick={() => setTrainingSubTab("tasks")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all",
                   trainingSubTab === "tasks"
                     ? "bg-primary/15 text-primary shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -242,9 +242,24 @@ const Dashboard = () => {
                 <BookMarked className="w-3.5 h-3.5" />
                 Tasks
               </button>
+              <button
+                onClick={() => setTrainingSubTab("detox")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all",
+                  trainingSubTab === "detox"
+                    ? "bg-primary/15 text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <div className="relative">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <Ban className="w-2 h-2 absolute -bottom-0.5 -right-1" />
+                </div>
+                Detox
+              </button>
             </div>
 
-            {/* Games or Tasks Content */}
+            {/* Games, Tasks or Detox Content */}
             {trainingSubTab === "games" ? (
               <>
                 <GamesStats />
@@ -258,8 +273,10 @@ const Dashboard = () => {
                   currentCreativity={metrics?.creativity || metrics?.baseline_creativity || 50}
                 />
               </>
-            ) : (
+            ) : trainingSubTab === "tasks" ? (
               <TrainingTasks />
+            ) : (
+              <DetoxStats />
             )}
 
             {/* Performance Trends */}
