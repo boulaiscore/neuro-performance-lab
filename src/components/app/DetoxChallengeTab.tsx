@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Smartphone, Clock, Trophy, 
-  Play, Pause, Check, Sparkles, Target, Ban, Settings, Save
+  Play, Pause, Check, Sparkles, Target, Ban, Settings, Save, Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   useDetoxGoal,
   useUpdateDetoxGoal
 } from "@/hooks/useDetoxProgress";
+import { useAppBlocker } from "@/hooks/useAppBlocker";
 import { toast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -22,7 +23,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DetoxBlockerSettings } from "./DetoxBlockerSettings";
 interface DetoxSession {
   targetMinutes: number;
   label: string;
@@ -43,6 +45,8 @@ export function DetoxChallengeTab() {
   const [completed, setCompleted] = useState(false);
   const [showGoalSettings, setShowGoalSettings] = useState(false);
   const [goalMinutes, setGoalMinutes] = useState(120);
+  const [selectedAppsToBlock, setSelectedAppsToBlock] = useState<string[]>([]);
+  const [settingsTab, setSettingsTab] = useState<string>("goal");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Real data from database
@@ -51,7 +55,7 @@ export function DetoxChallengeTab() {
   const { data: goal } = useDetoxGoal();
   const updateGoal = useUpdateDetoxGoal();
   const recordCompletion = useRecordDetoxCompletion();
-
+  const { startBlocking, stopBlocking, isNative } = useAppBlocker();
   const todayDetoxMinutes = todayMinutes || 0;
   const weeklyDetoxMinutes = weeklyData?.totalMinutes || 0;
   const weeklyDetoxXP = weeklyData?.totalXP || 0;
@@ -72,11 +76,20 @@ export function DetoxChallengeTab() {
     };
   }, []);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!selectedOption) return;
     setIsRunning(true);
     setElapsedSeconds(0);
     setCompleted(false);
+    
+    // Start app blocking if configured
+    if (isNative && selectedAppsToBlock.length > 0) {
+      await startBlocking(
+        selectedAppsToBlock, 
+        selectedOption.targetMinutes,
+        "Detox in corso. Rimani concentrato!"
+      );
+    }
     
     intervalRef.current = setInterval(() => {
       setElapsedSeconds(prev => {
@@ -103,10 +116,15 @@ export function DetoxChallengeTab() {
     }, 1000);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setIsRunning(false);
     setElapsedSeconds(0);
+    
+    // Stop app blocking
+    if (isNative) {
+      await stopBlocking();
+    }
   };
 
   const handleSaveGoal = () => {
@@ -154,42 +172,69 @@ export function DetoxChallengeTab() {
                 <Settings className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             </DialogTrigger>
-            <DialogContent className="max-w-sm">
+            <DialogContent className="max-w-sm max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-base">Weekly Detox Goal</DialogTitle>
+                <DialogTitle className="text-base">Detox Settings</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6 py-4">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-muted-foreground">Target minutes per week</span>
-                    <span className="text-lg font-bold text-teal-400">{goalMinutes} min</span>
+              
+              <Tabs value={settingsTab} onValueChange={setSettingsTab} className="w-full">
+                <TabsList className="w-full grid grid-cols-2 mb-4">
+                  <TabsTrigger value="goal" className="text-xs gap-1">
+                    <Target className="w-3 h-3" />
+                    Goal
+                  </TabsTrigger>
+                  <TabsTrigger value="blocking" className="text-xs gap-1">
+                    <Shield className="w-3 h-3" />
+                    App Blocking
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="goal" className="space-y-6 py-2">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-muted-foreground">Target minutes per week</span>
+                      <span className="text-lg font-bold text-teal-400">{goalMinutes} min</span>
+                    </div>
+                    <Slider
+                      value={[goalMinutes]}
+                      onValueChange={(v) => setGoalMinutes(v[0])}
+                      min={30}
+                      max={420}
+                      step={15}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
+                      <span>30 min</span>
+                      <span>7 hours</span>
+                    </div>
                   </div>
-                  <Slider
-                    value={[goalMinutes]}
-                    onValueChange={(v) => setGoalMinutes(v[0])}
-                    min={30}
-                    max={420}
-                    step={15}
-                    className="w-full"
+
+                  <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">Suggested:</span> Start with 2 hours/week and gradually increase. 
+                      This equals about {Math.ceil(goalMinutes / 30)} sessions of 30 min each.
+                    </p>
+                  </div>
+
+                  <Button onClick={handleSaveGoal} className="w-full gap-2 bg-teal-600 hover:bg-teal-700">
+                    <Save className="w-4 h-4" />
+                    Save Goal
+                  </Button>
+                </TabsContent>
+                
+                <TabsContent value="blocking" className="py-2">
+                  <DetoxBlockerSettings 
+                    selectedApps={selectedAppsToBlock}
+                    onAppsChange={setSelectedAppsToBlock}
+                    onBlockingConfigured={(apps) => {
+                      toast({
+                        title: "App Blocking Configured",
+                        description: `${apps.length} apps will be blocked during detox`,
+                      });
+                    }}
                   />
-                  <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
-                    <span>30 min</span>
-                    <span>7 hours</span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-muted/30 border border-border/30">
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">Suggested:</span> Start with 2 hours/week and gradually increase. 
-                    This equals about {Math.ceil(goalMinutes / 30)} sessions of 30 min each.
-                  </p>
-                </div>
-
-                <Button onClick={handleSaveGoal} className="w-full gap-2 bg-teal-600 hover:bg-teal-700">
-                  <Save className="w-4 h-4" />
-                  Save Goal
-                </Button>
-              </div>
+                </TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
         </div>
