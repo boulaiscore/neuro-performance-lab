@@ -6,7 +6,7 @@ import { NEURO_LAB_AREAS, NeuroLabArea } from "@/lib/neuroLab";
 import { CognitiveTasksSection, CognitiveTasksLegend, CognitiveLibrary } from "@/components/dashboard/CognitiveInputs";
 import { 
   Zap, ChevronRight, Crown, 
-  Gamepad2, BookMarked, Library, Smartphone, Ban
+  Gamepad2, BookMarked, Library, Smartphone, Ban, HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -153,12 +153,21 @@ export default function NeuroLab() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-6 flex items-start justify-between"
         >
-          <h1 className="text-2xl font-bold mb-1">Lab</h1>
-          <p className="text-sm text-muted-foreground">
-            Train your brain with games, tasks, and digital detox challenges.
-          </p>
+          <div>
+            <h1 className="text-2xl font-bold mb-1">Lab</h1>
+            <p className="text-sm text-muted-foreground">
+              Train your brain with games, tasks, and digital detox challenges.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowTutorial(true)}
+            className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+            aria-label="Replay tutorial"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </button>
         </motion.div>
 
         {/* Neuro Activation */}
