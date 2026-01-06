@@ -1,61 +1,107 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Smartphone, Instagram, MessageCircle, Facebook, Clock, Shield, ChevronDown } from "lucide-react";
+import { Smartphone, Instagram, MessageCircle, Facebook, Clock, ChevronDown, Youtube, Twitter, Send, Linkedin, Camera, Gamepad2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAppBlocker } from "@/hooks/useAppBlocker";
 
-interface SocialAppUsage {
-  app: string;
-  icon: React.ElementType;
-  minutes: number;
-  color: string;
-}
+// Package name to icon/color mapping
+const APP_CONFIG: Record<string, { icon: React.ElementType; color: string; name: string }> = {
+  "com.instagram.android": { icon: Instagram, color: "text-pink-400", name: "Instagram" },
+  "com.facebook.katana": { icon: Facebook, color: "text-blue-400", name: "Facebook" },
+  "com.facebook.orca": { icon: MessageCircle, color: "text-blue-400", name: "Messenger" },
+  "com.twitter.android": { icon: Twitter, color: "text-sky-400", name: "X (Twitter)" },
+  "com.zhiliaoapp.musically": { icon: Clock, color: "text-cyan-400", name: "TikTok" },
+  "com.snapchat.android": { icon: Camera, color: "text-yellow-400", name: "Snapchat" },
+  "com.whatsapp": { icon: MessageCircle, color: "text-emerald-400", name: "WhatsApp" },
+  "org.telegram.messenger": { icon: Send, color: "text-sky-400", name: "Telegram" },
+  "com.linkedin.android": { icon: Linkedin, color: "text-blue-500", name: "LinkedIn" },
+  "com.pinterest": { icon: Gamepad2, color: "text-red-400", name: "Pinterest" },
+  "com.reddit.frontpage": { icon: Gamepad2, color: "text-orange-400", name: "Reddit" },
+  "com.discord": { icon: Gamepad2, color: "text-indigo-400", name: "Discord" },
+  "com.youtube": { icon: Youtube, color: "text-red-500", name: "YouTube" },
+};
+
+const SOCIAL_PACKAGES = Object.keys(APP_CONFIG);
 
 export function DistractionLoadCard() {
-  const [isEnabled, setIsEnabled] = useState<boolean>(() => {
-    const stored = localStorage.getItem("distraction-load-enabled");
-    return stored === "true";
-  });
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  const {
+    isNative,
+    hasUsagePermission,
+    usageStats,
+    isLoading,
+    requestUsagePermission,
+  } = useAppBlocker();
 
-  // Mock usage data - in production this would come from device APIs
-  const [usageData, setUsageData] = useState<SocialAppUsage[]>([
-    { app: "Instagram", icon: Instagram, minutes: 0, color: "text-pink-400" },
-    { app: "TikTok", icon: Clock, minutes: 0, color: "text-cyan-400" },
-    { app: "WhatsApp", icon: MessageCircle, minutes: 0, color: "text-emerald-400" },
-    { app: "Facebook", icon: Facebook, minutes: 0, color: "text-blue-400" },
-  ]);
+  // Filter only social apps and map to display format
+  const socialUsage = useMemo(() => {
+    return usageStats
+      .filter(stat => SOCIAL_PACKAGES.includes(stat.packageName))
+      .map(stat => {
+        const config = APP_CONFIG[stat.packageName] || { 
+          icon: Smartphone, 
+          color: "text-muted-foreground", 
+          name: stat.appName 
+        };
+        return {
+          packageName: stat.packageName,
+          app: config.name,
+          icon: config.icon,
+          minutes: stat.usageMinutes,
+          color: config.color,
+        };
+      })
+      .sort((a, b) => b.minutes - a.minutes);
+  }, [usageStats]);
 
-  useEffect(() => {
-    if (isEnabled) {
-      // Simulate fetching usage data
-      // In production, this would use native device APIs
-      setUsageData([
-        { app: "Instagram", icon: Instagram, minutes: 47, color: "text-pink-400" },
-        { app: "TikTok", icon: Clock, minutes: 32, color: "text-cyan-400" },
-        { app: "WhatsApp", icon: MessageCircle, minutes: 28, color: "text-emerald-400" },
-        { app: "Facebook", icon: Facebook, minutes: 12, color: "text-blue-400" },
-      ]);
-    }
-  }, [isEnabled]);
+  const totalMinutes = socialUsage.reduce((sum, app) => sum + app.minutes, 0);
 
-  const handleEnable = (e: React.MouseEvent) => {
+  const handleEnableClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // In production, this would trigger native permission dialogs
-    setIsEnabled(true);
-    localStorage.setItem("distraction-load-enabled", "true");
+    requestUsagePermission();
   };
-
-  const totalMinutes = usageData.reduce((sum, app) => sum + app.minutes, 0);
 
   // Get distraction level based on total usage
   const getDistractionLevel = () => {
-    if (!isEnabled) return { level: "Unknown", color: "text-muted-foreground" };
+    if (!hasUsagePermission) return { level: "Unknown", color: "text-muted-foreground" };
     if (totalMinutes <= 60) return { level: "Low", color: "text-emerald-400" };
     if (totalMinutes <= 120) return { level: "Elevated", color: "text-amber-400" };
     return { level: "High", color: "text-red-400" };
   };
 
   const distractionLevel = getDistractionLevel();
+  const isEnabled = hasUsagePermission;
+
+  // Show different states based on platform and permissions
+  const renderEnableButton = () => {
+    if (isLoading) {
+      return (
+        <span className="text-[11px] text-muted-foreground">Loading...</span>
+      );
+    }
+
+    if (!isNative) {
+      return (
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <AlertCircle className="w-3 h-3" />
+          <span>Android only</span>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        onClick={handleEnableClick}
+        className={cn(
+          "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all",
+          "bg-primary/10 text-primary hover:bg-primary/20 active:scale-[0.97]"
+        )}
+      >
+        Enable Usage Access
+      </button>
+    );
+  };
 
   return (
     <div className="rounded-xl bg-card border border-border/40 overflow-hidden">
@@ -86,15 +132,7 @@ export function DistractionLoadCard() {
         </div>
 
         {!isEnabled ? (
-          <button
-            onClick={handleEnable}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all",
-              "bg-primary/10 text-primary hover:bg-primary/20 active:scale-[0.97]"
-            )}
-          >
-            Enable Usage Access
-          </button>
+          renderEnableButton()
         ) : (
           <ChevronDown className={cn(
             "w-4 h-4 text-muted-foreground transition-transform duration-200",
@@ -125,17 +163,23 @@ export function DistractionLoadCard() {
                 </span>
               </div>
               
-              {usageData.map((app) => (
-                <div key={app.app} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <app.icon className={cn("w-3.5 h-3.5", app.color)} />
-                    <span className="text-xs text-muted-foreground">{app.app}</span>
-                  </div>
-                  <span className={cn("text-xs font-medium tabular-nums", app.color)}>
-                    {app.minutes}m
-                  </span>
+              {socialUsage.length === 0 ? (
+                <div className="text-center py-2">
+                  <span className="text-[11px] text-muted-foreground">No social app usage today</span>
                 </div>
-              ))}
+              ) : (
+                socialUsage.map((app) => (
+                  <div key={app.packageName} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <app.icon className={cn("w-3.5 h-3.5", app.color)} />
+                      <span className="text-xs text-muted-foreground">{app.app}</span>
+                    </div>
+                    <span className={cn("text-xs font-medium tabular-nums", app.color)}>
+                      {app.minutes}m
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </motion.div>
         )}
