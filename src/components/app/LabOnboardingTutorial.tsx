@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, BookMarked, Smartphone, Ban, X, ChevronRight, Zap, Brain } from "lucide-react";
+import { Gamepad2, BookMarked, Smartphone, Ban, X, ChevronRight, Zap, Brain, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LabOnboardingTutorialProps {
@@ -14,7 +14,7 @@ interface TutorialStep {
   description: string;
   icon: React.ElementType;
   color: string;
-  targetSelector?: string;
+  hint: string;
   secondaryIcon?: React.ElementType;
 }
 
@@ -25,6 +25,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: "Your cognitive training hub. Here you'll find everything you need to sharpen your mind.",
     icon: Brain,
     color: "primary",
+    hint: "Let's take a quick tour!",
   },
   {
     id: "neuro-activation",
@@ -32,7 +33,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: "Start with a 5-minute warm-up protocol to prime your brain for peak performance.",
     icon: Zap,
     color: "primary",
-    targetSelector: "[data-tutorial='neuro-activation']",
+    hint: "Find the glowing button at the top",
   },
   {
     id: "games",
@@ -40,7 +41,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: "Active training through engaging games that target Focus, Reasoning, and Creativity.",
     icon: Gamepad2,
     color: "blue-500",
-    targetSelector: "[data-tutorial='games-tab']",
+    hint: "Tap the 'Games' tab to explore",
   },
   {
     id: "tasks",
@@ -48,7 +49,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: "Passive training through curated podcasts, books, and articles.",
     icon: BookMarked,
     color: "amber-500",
-    targetSelector: "[data-tutorial='tasks-tab']",
+    hint: "Tap the 'Tasks' tab to discover content",
   },
   {
     id: "detox",
@@ -56,19 +57,18 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     description: "Challenge yourself to reduce screen time and reclaim your attention.",
     icon: Smartphone,
     color: "emerald-500",
-    targetSelector: "[data-tutorial='detox-tab']",
+    hint: "Tap the 'Detox' tab to start a challenge",
     secondaryIcon: Ban,
   },
 ];
 
 export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
   const step = TUTORIAL_STEPS[currentStep];
   const Icon = step.icon;
   const isLastStep = currentStep === TUTORIAL_STEPS.length - 1;
-  const hasTarget = !!step.targetSelector;
+  const isFirstStep = currentStep === 0;
 
   // Reset step when opening
   useEffect(() => {
@@ -76,34 +76,6 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
       setCurrentStep(0);
     }
   }, [open]);
-
-  // Find and track the target element position
-  useEffect(() => {
-    if (!open || !step.targetSelector) {
-      setTargetRect(null);
-      return;
-    }
-
-    const updateTargetRect = () => {
-      const element = document.querySelector(step.targetSelector!);
-      if (element) {
-        setTargetRect(element.getBoundingClientRect());
-      }
-    };
-
-    // Initial update with small delay to ensure DOM is ready
-    const timeout = setTimeout(updateTargetRect, 100);
-
-    // Update on resize/scroll
-    window.addEventListener("resize", updateTargetRect);
-    window.addEventListener("scroll", updateTargetRect);
-
-    return () => {
-      clearTimeout(timeout);
-      window.removeEventListener("resize", updateTargetRect);
-      window.removeEventListener("scroll", updateTargetRect);
-    };
-  }, [open, step.targetSelector, currentStep]);
 
   const handleNext = () => {
     if (currentStep < TUTORIAL_STEPS.length - 1) {
@@ -113,8 +85,34 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
     }
   };
 
+  const handlePrev = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSkip = () => {
     onComplete();
+  };
+
+  const getIconColor = (color: string) => {
+    switch (color) {
+      case "primary": return "text-primary";
+      case "blue-500": return "text-blue-500";
+      case "amber-500": return "text-amber-500";
+      case "emerald-500": return "text-emerald-500";
+      default: return "text-primary";
+    }
+  };
+
+  const getIconBg = (color: string) => {
+    switch (color) {
+      case "primary": return "bg-primary/15";
+      case "blue-500": return "bg-blue-500/15";
+      case "amber-500": return "bg-amber-500/15";
+      case "emerald-500": return "bg-emerald-500/15";
+      default: return "bg-primary/15";
+    }
   };
 
   return (
@@ -124,146 +122,126 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-sm"
         >
-          {/* Dark overlay with optional spotlight */}
-          <div className="absolute inset-0 bg-black/85" />
-
-          {/* Spotlight cutout for target element */}
-          {targetRect && (
-            <>
-              {/* Highlight box */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="absolute bg-background rounded-xl pointer-events-none"
-                style={{
-                  left: targetRect.left - 6,
-                  top: targetRect.top - 6,
-                  width: targetRect.width + 12,
-                  height: targetRect.height + 12,
-                }}
-              />
-              {/* Pulsing ring */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="absolute pointer-events-none"
-                style={{
-                  left: targetRect.left - 6,
-                  top: targetRect.top - 6,
-                  width: targetRect.width + 12,
-                  height: targetRect.height + 12,
-                }}
-              >
-                <motion.div
-                  animate={{
-                    boxShadow: [
-                      "0 0 0 0 hsl(var(--primary) / 0.4)",
-                      "0 0 0 8px hsl(var(--primary) / 0)",
-                    ],
-                  }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                  }}
-                  className="absolute inset-0 rounded-xl border-2 border-primary"
-                />
-              </motion.div>
-            </>
-          )}
-
-          {/* Tutorial card - fixed at bottom for mobile */}
+          {/* Tutorial card - centered and full-width on mobile */}
           <motion.div
             key={step.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3 }}
-            className="absolute bottom-0 left-0 right-0 p-4 safe-area-inset-bottom"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.25 }}
+            className="w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
           >
-            {/* Card */}
-            <div className="bg-card border border-border rounded-2xl p-4 shadow-2xl max-w-md mx-auto">
-              {/* Skip button */}
-              <div className="flex justify-end mb-2">
-                <button
-                  onClick={handleSkip}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Skip
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+            {/* Header with step count */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+              <span className="text-xs font-medium text-muted-foreground">
+                Step {currentStep + 1} of {TUTORIAL_STEPS.length}
+              </span>
+              <button
+                onClick={handleSkip}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Skip
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-              {/* Icon + Title row */}
-              <div className="flex items-center gap-3 mb-2">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                  className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center relative shrink-0",
-                    step.color === "primary" && "bg-primary/15",
-                    step.color === "blue-500" && "bg-blue-500/15",
-                    step.color === "amber-500" && "bg-amber-500/15",
-                    step.color === "emerald-500" && "bg-emerald-500/15"
-                  )}
-                >
-                  <Icon className={cn(
-                    "w-5 h-5",
-                    step.color === "primary" && "text-primary",
-                    step.color === "blue-500" && "text-blue-500",
-                    step.color === "amber-500" && "text-amber-500",
-                    step.color === "emerald-500" && "text-emerald-500"
-                  )} />
+            {/* Main content */}
+            <div className="p-5">
+              {/* Large centered icon */}
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                className="flex justify-center mb-5"
+              >
+                <div className={cn(
+                  "w-20 h-20 rounded-2xl flex items-center justify-center relative",
+                  getIconBg(step.color)
+                )}>
+                  <Icon className={cn("w-10 h-10", getIconColor(step.color))} />
                   {step.secondaryIcon && (
-                    <step.secondaryIcon className={cn(
-                      "w-5 h-5 absolute",
-                      step.color === "emerald-500" && "text-emerald-500"
-                    )} />
+                    <motion.div
+                      initial={{ scale: 0, rotate: -45 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="absolute -right-1 -bottom-1 w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center"
+                    >
+                      <step.secondaryIcon className={cn("w-4 h-4", getIconColor(step.color))} />
+                    </motion.div>
                   )}
-                </motion.div>
-                <h2 className="text-base font-bold">{step.title}</h2>
-              </div>
+                </div>
+              </motion.div>
+
+              {/* Title */}
+              <h2 className="text-xl font-bold text-center mb-2">{step.title}</h2>
 
               {/* Description */}
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4 pl-[52px]">
+              <p className="text-sm text-muted-foreground text-center leading-relaxed mb-4">
                 {step.description}
               </p>
 
-              {/* Progress + Next */}
-              <div className="flex items-center justify-between">
-                {/* Progress dots */}
-                <div className="flex gap-1.5">
-                  {TUTORIAL_STEPS.map((_, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "w-2 h-2 rounded-full transition-all duration-300",
-                        index === currentStep 
-                          ? "bg-primary w-5" 
-                          : index < currentStep 
-                            ? "bg-primary/50" 
-                            : "bg-muted-foreground/30"
-                      )}
-                    />
-                  ))}
-                </div>
+              {/* Hint badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className={cn(
+                  "mx-auto w-fit px-3 py-1.5 rounded-full text-xs font-medium",
+                  getIconBg(step.color),
+                  getIconColor(step.color)
+                )}
+              >
+                💡 {step.hint}
+              </motion.div>
+            </div>
 
-                {/* Next button */}
+            {/* Footer with navigation */}
+            <div className="px-5 pb-5">
+              {/* Progress dots */}
+              <div className="flex justify-center gap-1.5 mb-4">
+                {TUTORIAL_STEPS.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentStep(index)}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      index === currentStep 
+                        ? "bg-primary w-6" 
+                        : index < currentStep 
+                          ? "bg-primary/50 w-2" 
+                          : "bg-muted-foreground/30 w-2"
+                    )}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex gap-2">
+                {!isFirstStep && (
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={handlePrev}
+                    className="flex-1 py-3 rounded-xl font-semibold text-sm bg-muted text-muted-foreground flex items-center justify-center gap-1"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Back
+                  </motion.button>
+                )}
                 <motion.button
                   onClick={handleNext}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "py-2.5 px-5 rounded-xl font-semibold text-sm",
+                    "flex-1 py-3 rounded-xl font-semibold text-sm",
                     "bg-primary text-primary-foreground",
-                    "flex items-center gap-1.5",
-                    "shadow-button"
+                    "flex items-center justify-center gap-1.5",
+                    isFirstStep && "w-full"
                   )}
                 >
-                  {isLastStep ? "Start" : "Next"}
+                  {isLastStep ? "Let's Go!" : "Next"}
                   {!isLastStep && <ChevronRight className="w-4 h-4" />}
                 </motion.button>
               </div>
