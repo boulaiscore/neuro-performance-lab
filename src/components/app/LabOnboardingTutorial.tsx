@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, BookMarked, Smartphone, Ban, X, ChevronRight, Zap, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -64,12 +64,18 @@ const TUTORIAL_STEPS: TutorialStep[] = [
 export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   const step = TUTORIAL_STEPS[currentStep];
   const Icon = step.icon;
   const isLastStep = currentStep === TUTORIAL_STEPS.length - 1;
   const hasTarget = !!step.targetSelector;
+
+  // Reset step when opening
+  useEffect(() => {
+    if (open) {
+      setCurrentStep(0);
+    }
+  }, [open]);
 
   // Find and track the target element position
   useEffect(() => {
@@ -85,14 +91,15 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
       }
     };
 
-    // Initial update
-    updateTargetRect();
+    // Initial update with small delay to ensure DOM is ready
+    const timeout = setTimeout(updateTargetRect, 100);
 
     // Update on resize/scroll
     window.addEventListener("resize", updateTargetRect);
     window.addEventListener("scroll", updateTargetRect);
 
     return () => {
+      clearTimeout(timeout);
       window.removeEventListener("resize", updateTargetRect);
       window.removeEventListener("scroll", updateTargetRect);
     };
@@ -110,132 +117,93 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
     onComplete();
   };
 
-  // Calculate tooltip position based on target
-  const getTooltipStyle = (): React.CSSProperties => {
-    if (!targetRect) {
-      return {
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-      };
-    }
-
-    const padding = 16;
-    const tooltipHeight = 280;
-    const viewportHeight = window.innerHeight;
-    
-    // Position below the target if there's room, otherwise above
-    const spaceBelow = viewportHeight - targetRect.bottom;
-    const positionBelow = spaceBelow > tooltipHeight + padding;
-
-    return {
-      left: "50%",
-      transform: "translateX(-50%)",
-      top: positionBelow ? targetRect.bottom + padding : undefined,
-      bottom: !positionBelow ? viewportHeight - targetRect.top + padding : undefined,
-    };
-  };
-
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          ref={overlayRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50"
         >
-          {/* Overlay with spotlight cutout */}
-          <svg className="absolute inset-0 w-full h-full">
-            <defs>
-              <mask id="spotlight-mask">
-                <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                {targetRect && (
-                  <motion.rect
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    x={targetRect.left - 8}
-                    y={targetRect.top - 8}
-                    width={targetRect.width + 16}
-                    height={targetRect.height + 16}
-                    rx="16"
-                    fill="black"
-                  />
-                )}
-              </mask>
-            </defs>
-            <rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="rgba(0, 0, 0, 0.85)"
-              mask="url(#spotlight-mask)"
-            />
-          </svg>
+          {/* Dark overlay with optional spotlight */}
+          <div className="absolute inset-0 bg-black/85" />
 
-          {/* Pulsing ring around target */}
+          {/* Spotlight cutout for target element */}
           {targetRect && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute pointer-events-none"
-              style={{
-                left: targetRect.left - 8,
-                top: targetRect.top - 8,
-                width: targetRect.width + 16,
-                height: targetRect.height + 16,
-              }}
-            >
+            <>
+              {/* Highlight box */}
               <motion.div
-                animate={{
-                  boxShadow: [
-                    "0 0 0 0 rgba(var(--primary-rgb), 0.4)",
-                    "0 0 0 12px rgba(var(--primary-rgb), 0)",
-                  ],
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute bg-background rounded-xl pointer-events-none"
+                style={{
+                  left: targetRect.left - 6,
+                  top: targetRect.top - 6,
+                  width: targetRect.width + 12,
+                  height: targetRect.height + 12,
                 }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeOut",
-                }}
-                className="absolute inset-0 rounded-2xl border-2 border-primary"
               />
-            </motion.div>
+              {/* Pulsing ring */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute pointer-events-none"
+                style={{
+                  left: targetRect.left - 6,
+                  top: targetRect.top - 6,
+                  width: targetRect.width + 12,
+                  height: targetRect.height + 12,
+                }}
+              >
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      "0 0 0 0 hsl(var(--primary) / 0.4)",
+                      "0 0 0 8px hsl(var(--primary) / 0)",
+                    ],
+                  }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                  }}
+                  className="absolute inset-0 rounded-xl border-2 border-primary"
+                />
+              </motion.div>
+            </>
           )}
 
-          {/* Tutorial card */}
+          {/* Tutorial card - fixed at bottom for mobile */}
           <motion.div
             key={step.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="absolute w-[calc(100%-40px)] max-w-sm px-5"
-            style={getTooltipStyle()}
+            className="absolute bottom-0 left-0 right-0 p-4 safe-area-inset-bottom"
           >
-            {/* Skip button */}
-            <div className="flex justify-end mb-3">
-              <button
-                onClick={handleSkip}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm px-2 py-1 rounded-md"
-              >
-                Skip
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
             {/* Card */}
-            <div className="bg-card border border-border rounded-2xl p-5 shadow-2xl">
+            <div className="bg-card border border-border rounded-2xl p-4 shadow-2xl max-w-md mx-auto">
+              {/* Skip button */}
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={handleSkip}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Skip
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
               {/* Icon + Title row */}
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-2">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
                   className={cn(
-                    "w-11 h-11 rounded-xl flex items-center justify-center relative shrink-0",
+                    "w-10 h-10 rounded-xl flex items-center justify-center relative shrink-0",
                     step.color === "primary" && "bg-primary/15",
                     step.color === "blue-500" && "bg-blue-500/15",
                     step.color === "amber-500" && "bg-amber-500/15",
@@ -256,11 +224,11 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
                     )} />
                   )}
                 </motion.div>
-                <h2 className="text-lg font-bold">{step.title}</h2>
+                <h2 className="text-base font-bold">{step.title}</h2>
               </div>
 
               {/* Description */}
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4 pl-[52px]">
                 {step.description}
               </p>
 
@@ -300,28 +268,6 @@ export function LabOnboardingTutorial({ open, onComplete }: LabOnboardingTutoria
                 </motion.button>
               </div>
             </div>
-
-            {/* Arrow pointing to target */}
-            {hasTarget && targetRect && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="absolute left-1/2 -translate-x-1/2"
-                style={{
-                  top: getTooltipStyle().top ? -12 : undefined,
-                  bottom: getTooltipStyle().bottom ? -12 : undefined,
-                }}
-              >
-                <div 
-                  className={cn(
-                    "w-0 h-0 border-l-8 border-r-8 border-l-transparent border-r-transparent",
-                    getTooltipStyle().top 
-                      ? "border-b-8 border-b-card" 
-                      : "border-t-8 border-t-card"
-                  )} 
-                />
-              </motion.div>
-            )}
           </motion.div>
         </motion.div>
       )}

@@ -16,6 +16,7 @@ import { DailyTrainingConfirmDialog } from "@/components/app/DailyTrainingConfir
 import { useDailyTraining } from "@/hooks/useDailyTraining";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { TrainingPlanId } from "@/lib/trainingPlans";
 import { SessionPicker } from "@/components/app/SessionPicker";
 import { GamesLibrary } from "@/components/app/GamesLibrary";
@@ -161,13 +162,20 @@ export default function NeuroLab() {
               Train your brain with games, tasks, and digital detox challenges.
             </p>
           </div>
-          <button
-            onClick={() => setShowTutorial(true)}
-            className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-            aria-label="Replay tutorial"
-          >
-            <HelpCircle className="w-5 h-5" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setShowTutorial(true)}
+                className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+                aria-label="Replay tutorial"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>Replay Tutorial</p>
+            </TooltipContent>
+          </Tooltip>
         </motion.div>
 
         {/* Neuro Activation */}
