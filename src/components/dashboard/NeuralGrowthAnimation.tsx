@@ -1,8 +1,11 @@
 import { useEffect, useRef } from "react";
+import type { SCIBreakdown } from "@/lib/cognitiveNetworkScore";
 
 interface NeuralGrowthAnimationProps {
   cognitiveAgeDelta: number;
   overallCognitiveScore: number;
+  sciBreakdown?: SCIBreakdown | null;
+  statusText?: string;
 }
 
 interface Node {
@@ -16,7 +19,12 @@ interface Node {
   active: boolean;
 }
 
-export function NeuralGrowthAnimation({ cognitiveAgeDelta, overallCognitiveScore }: NeuralGrowthAnimationProps) {
+export function NeuralGrowthAnimation({ 
+  cognitiveAgeDelta, 
+  overallCognitiveScore, 
+  sciBreakdown,
+  statusText: customStatusText 
+}: NeuralGrowthAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Map metrics to visual intensity
@@ -143,12 +151,12 @@ export function NeuralGrowthAnimation({ cognitiveAgeDelta, overallCognitiveScore
     return () => cancelAnimationFrame(animationId);
   }, [nodeCount, connectionDensity, glowIntensity, intensity]);
 
-  const statusText =
-    overallCognitiveScore >= 75
+  const statusText = customStatusText ||
+    (overallCognitiveScore >= 75
       ? "High strategic clarity"
       : overallCognitiveScore >= 50
         ? "Developing strategic capacity"
-        : "Building cognitive foundation";
+        : "Building cognitive foundation");
 
   return (
     <div className="p-5 rounded-2xl bg-card border border-border/30">
@@ -164,8 +172,32 @@ export function NeuralGrowthAnimation({ cognitiveAgeDelta, overallCognitiveScore
           <span className="text-[10px] text-muted-foreground/60 uppercase">/ 100</span>
         </div>
         <p className="text-[11px] text-primary font-medium">{statusText}</p>
-        <p className="text-[9px] text-muted-foreground/60 mt-1 leading-relaxed">
-          Strategic thinking density. More connections = sharper decision-making.
+        
+        {/* SCI Component Breakdown */}
+        {sciBreakdown && (
+          <div className="mt-3 pt-3 border-t border-border/20">
+            <div className="grid grid-cols-3 gap-2 text-[9px]">
+              <div className="text-center">
+                <div className="text-muted-foreground/60 uppercase mb-0.5">Performance</div>
+                <div className="font-semibold text-foreground">{sciBreakdown.cognitivePerformance.score}</div>
+                <div className="text-muted-foreground/40">50%</div>
+              </div>
+              <div className="text-center">
+                <div className="text-muted-foreground/60 uppercase mb-0.5">Engagement</div>
+                <div className="font-semibold text-foreground">{sciBreakdown.behavioralEngagement.score}</div>
+                <div className="text-muted-foreground/40">30%</div>
+              </div>
+              <div className="text-center">
+                <div className="text-muted-foreground/60 uppercase mb-0.5">Recovery</div>
+                <div className="font-semibold text-foreground">{sciBreakdown.recoveryFactor.score}</div>
+                <div className="text-muted-foreground/40">20%</div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <p className="text-[9px] text-muted-foreground/60 mt-3 leading-relaxed">
+          Synthesized Cognitive Index. Integrates cognitive abilities, training engagement, and recovery.
         </p>
       </div>
     </div>

@@ -629,37 +629,85 @@ const Account = () => {
                 </AccordionContent>
               </AccordionItem>
               
-              {/* Cognitive Network */}
+              {/* Cognitive Network - Synthesized Cognitive Index */}
               <AccordionItem value="cognitive-network" className="border-border/50">
                 <AccordionTrigger className="text-sm hover:no-underline py-3">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-primary" />
-                    Cognitive Network (Neural Growth)
+                    Cognitive Network (Synthesized Cognitive Index)
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-3 text-sm text-muted-foreground">
+                  <div className="space-y-4 text-sm text-muted-foreground">
+                    <p>The Synthesized Cognitive Index (SCI) is a scientifically-grounded score that integrates three key components:</p>
+                    
+                    {/* Main Formula */}
                     <div className="p-3 rounded-lg bg-muted/30 border border-border/50 font-mono text-xs">
-                      <p className="text-foreground font-semibold mb-1">Formula:</p>
-                      <p>Network Score = (Reasoning + Focus + Decision Quality + Creativity) / 4</p>
+                      <p className="text-foreground font-semibold mb-2">Master Formula:</p>
+                      <p className="text-primary">SCI = (0.50 × CP) + (0.30 × BE) + (0.20 × RF)</p>
                     </div>
                     
-                    <div className="space-y-2">
-                      <p className="flex items-start gap-2">
-                        <Info className="w-3 h-3 mt-1 text-primary flex-shrink-0" />
-                        <span>This score (0-100) represents overall neural efficiency and is visualized as network density in the Dashboard animation.</span>
-                      </p>
-                      <p className="flex items-start gap-2">
-                        <Info className="w-3 h-3 mt-1 text-primary flex-shrink-0" />
-                        <span>All four metrics are pulled directly from your <code className="bg-muted px-1 rounded">user_cognitive_metrics</code> table: <code className="bg-muted px-1 rounded">reasoning_accuracy</code>, <code className="bg-muted px-1 rounded">focus_stability</code>, <code className="bg-muted px-1 rounded">decision_quality</code>, <code className="bg-muted px-1 rounded">creativity</code>.</span>
-                      </p>
+                    {/* Component 1: Cognitive Performance */}
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                      <p className="font-semibold text-foreground text-xs mb-2">📊 Cognitive Performance (CP) — 50% weight</p>
+                      <div className="font-mono text-[10px] bg-muted/30 p-2 rounded mb-2">
+                        CP = (0.25 × Reasoning) + (0.25 × Focus) + (0.20 × Decision Quality) + (0.15 × Creativity) + (0.15 × Dual-Process Balance)
+                      </div>
+                      <p className="text-[11px] mb-2"><strong>Dual-Process Balance</strong> = 100 - |FastScore - SlowScore|</p>
+                      <p className="text-[11px] text-muted-foreground">Measures your raw cognitive abilities and the integration between fast (intuitive) and slow (deliberate) thinking systems. Based on Kahneman's dual-process theory.</p>
                     </div>
                     
+                    {/* Component 2: Behavioral Engagement */}
+                    <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                      <p className="font-semibold text-foreground text-xs mb-2">🎯 Behavioral Engagement (BE) — 30% weight</p>
+                      <div className="font-mono text-[10px] bg-muted/30 p-2 rounded mb-2">
+                        BE = (0.50 × Games) + (0.30 × Tasks) + (0.20 × Session Consistency)
+                      </div>
+                      <ul className="text-[11px] space-y-1 mb-2">
+                        <li>• <strong>Games Engagement</strong> = min(100, weekly_games_xp / games_target × 100)</li>
+                        <li>• <strong>Tasks Engagement</strong> = min(100, weekly_tasks_xp / tasks_target × 100)</li>
+                        <li>• <strong>Session Consistency</strong> = sessions_completed / sessions_required × 100</li>
+                      </ul>
+                      <p className="text-[11px] text-muted-foreground">Reflects cognitive reserve building through active engagement. Based on Cognitive Reserve Theory (Stern 2002, Medaglia et al. 2017).</p>
+                    </div>
+                    
+                    {/* Component 3: Recovery Factor */}
+                    <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                      <p className="font-semibold text-foreground text-xs mb-2">🧘 Recovery Factor (RF) — 20% weight</p>
+                      <div className="font-mono text-[10px] bg-muted/30 p-2 rounded mb-2">
+                        RF = min(100, weekly_detox_minutes / detox_target × 100)
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">Digital detox contributes to neural recovery and stress reduction. Based on Attention Restoration Theory (Kaplan 1995) and recent research on cognitive restoration.</p>
+                    </div>
+                    
+                    {/* Example Calculation */}
+                    <div className="p-3 rounded-lg bg-card border border-border/50">
+                      <p className="font-semibold text-foreground text-xs mb-2">📝 Example Calculation:</p>
+                      <div className="space-y-1 text-[11px]">
+                        <p>• Cognitive Performance (CP): <strong>72</strong> → 0.50 × 72 = <strong>36</strong></p>
+                        <p>• Behavioral Engagement (BE): <strong>60</strong> → 0.30 × 60 = <strong>18</strong></p>
+                        <p>• Recovery Factor (RF): <strong>80</strong> → 0.20 × 80 = <strong>16</strong></p>
+                        <p className="pt-2 border-t border-border/30 mt-2 text-primary font-semibold">SCI = 36 + 18 + 16 = <strong>70</strong> (High strategic clarity)</p>
+                      </div>
+                    </div>
+                    
+                    {/* Status Thresholds */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">80+: Elite performance</div>
-                      <div className="p-2 rounded bg-primary/10 border border-primary/30 text-primary">60-79: Strong performance</div>
-                      <div className="p-2 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400">40-59: Building foundation</div>
-                      <div className="p-2 rounded bg-muted/30 border border-border/50">{"<40"}: Early training stage</div>
+                      <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">80+: Elite cognitive integration</div>
+                      <div className="p-2 rounded bg-primary/10 border border-primary/30 text-primary">65-79: High strategic clarity</div>
+                      <div className="p-2 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400">50-64: Developing capacity</div>
+                      <div className="p-2 rounded bg-muted/30 border border-border/50">{"<50"}: Building foundation</div>
+                    </div>
+                    
+                    {/* Scientific References */}
+                    <div className="p-3 rounded-lg bg-muted/20 border border-border/30 text-[10px] text-muted-foreground">
+                      <p className="font-semibold text-foreground mb-1">Scientific References:</p>
+                      <ul className="space-y-0.5">
+                        <li>• Stern, Y. (2002). What is cognitive reserve? <em>Journal of the International Neuropsychological Society</em></li>
+                        <li>• Medaglia et al. (2017). Brain and Cognitive Reserve: Translation via Network Control Theory. <em>Neuroscience & Biobehavioral Reviews</em></li>
+                        <li>• Gronchi, G. (2018). Dual Process Theory of Thought and Default Mode Network. <em>Frontiers in Psychology</em></li>
+                        <li>• Kaplan, S. (1995). The restorative benefits of nature. <em>Journal of Environmental Psychology</em></li>
+                      </ul>
                     </div>
                   </div>
                 </AccordionContent>
