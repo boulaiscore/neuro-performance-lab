@@ -162,20 +162,13 @@ export default function NeuroLab() {
               Train your brain with games, tasks, and digital detox challenges.
             </p>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setShowTutorial(true)}
-                className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                aria-label="Replay tutorial"
-              >
-                <HelpCircle className="w-5 h-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>Replay Tutorial</p>
-            </TooltipContent>
-          </Tooltip>
+          <button
+            onClick={() => setShowTutorial(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-primary text-xs font-medium shrink-0"
+          >
+            <HelpCircle className="w-4 h-4" />
+            Tour
+          </button>
         </motion.div>
 
         {/* Neuro Activation */}
