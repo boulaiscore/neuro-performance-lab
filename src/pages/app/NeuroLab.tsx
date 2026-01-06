@@ -6,7 +6,7 @@ import { NEURO_LAB_AREAS, NeuroLabArea } from "@/lib/neuroLab";
 import { CognitiveTasksSection, CognitiveTasksLegend, CognitiveLibrary } from "@/components/dashboard/CognitiveInputs";
 import { 
   Zap, ChevronRight, Crown, 
-  Gamepad2, BookMarked, Play, CheckCircle2, Library, Star, Smartphone, Ban
+  Gamepad2, BookMarked, Library, Smartphone, Ban
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -138,70 +138,6 @@ export default function NeuroLab() {
     <AppShell>
       <div className="px-5 py-5 max-w-md mx-auto">
 
-        {/* Current Session Banner - Shows what to do based on plan */}
-        {!isWeekComplete && nextSession ? (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-primary/15 via-primary/10 to-transparent border border-primary/30"
-          >
-            <div className="flex items-center gap-1.5 mb-2">
-              <Star className="w-3 h-3 text-primary" />
-              <span className="text-[10px] text-primary font-medium uppercase tracking-wide">
-                Today's Session
-              </span>
-            </div>
-            
-            <h2 className="text-[15px] font-semibold text-foreground mb-1">
-              {nextSession.name}
-            </h2>
-            <p className="text-[11px] text-muted-foreground mb-3">
-              {nextSession.description} • {nextSession.duration}
-            </p>
-            
-            {/* Recommended Areas */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[10px] text-muted-foreground">Train:</span>
-              {recommendedAreas.slice(0, 2).map((areaId) => {
-                const area = NEURO_LAB_AREAS.find(a => a.id === areaId);
-                return (
-                  <span 
-                    key={areaId}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
-                  >
-                    {area?.title || areaId}
-                  </span>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={handleStartRecommended}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary/90 active:scale-[0.98] transition-all"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              Start Session
-            </button>
-          </motion.div>
-        ) : isWeekComplete ? (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-5 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div>
-                <h3 className="text-[14px] font-semibold text-emerald-400">Week Complete!</h3>
-                <p className="text-[11px] text-muted-foreground">
-                  All {sessionsRequired} sessions done. Free training unlocked.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        ) : null}
 
         {/* Neuro Activation */}
         <button
