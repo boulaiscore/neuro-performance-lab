@@ -284,12 +284,12 @@ export function TrainingPlanSelector({ selectedPlan, onSelectPlan, showDetails =
                             <Smartphone className="w-3 h-3 text-green-400" />
                           </div>
                           <span className="text-[11px] font-semibold text-green-400">
-                            {Math.round(plan.detox.weeklyMinutes / 60)}h / settimana
+                            {Math.round(plan.detox.weeklyMinutes / 60)}h / week
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-[10px]">
                           <div>
-                            <span className="text-muted-foreground">Sessione min:</span>
+                            <span className="text-muted-foreground">Min session:</span>
                             <span className="ml-1 text-foreground">{plan.detox.minSessionMinutes} min</span>
                           </div>
                           <div>
@@ -298,7 +298,7 @@ export function TrainingPlanSelector({ selectedPlan, onSelectPlan, showDetails =
                           </div>
                         </div>
                         <div className="mt-1.5 text-[10px]">
-                          <span className="text-muted-foreground">Bonus obiettivo:</span>
+                          <span className="text-muted-foreground">Goal bonus:</span>
                           <span className="ml-1 text-amber-400">+{plan.detox.bonusXP} XP</span>
                         </div>
                       </div>
