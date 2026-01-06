@@ -159,7 +159,7 @@ export default function NeuroLab() {
           <div>
             <h1 className="text-2xl font-bold mb-1">Lab</h1>
             <p className="text-sm text-muted-foreground">
-              Train your brain with games, tasks, and digital detox challenges.
+              Earn XP and complete your weekly training goals.
             </p>
           </div>
           <button
