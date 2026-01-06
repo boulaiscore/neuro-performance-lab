@@ -1,14 +1,14 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, LayoutDashboard, User, Bell, BellOff, Dumbbell, BookOpen, Sun, Moon } from "lucide-react";
+import { Home, LayoutDashboard, User, Bell, BellOff, Dumbbell, BookOpen, Sun, Moon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useTheme } from "@/hooks/useTheme";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AppShellProps {
   children: ReactNode;
 }
-
 const navItems = [
   { to: "/app", icon: Home, label: "Home" },
   { to: "/neuro-lab", icon: Dumbbell, label: "Lab" },
@@ -27,6 +27,8 @@ export function AppShell({ children }: AppShellProps) {
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [swipeProgress, setSwipeProgress] = useState(0);
   
   const minSwipeDistance = 80;
 
@@ -42,6 +44,18 @@ export function AppShell({ children }: AppShellProps) {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.targetTouches[0].clientX;
+    
+    if (touchStartX.current && touchEndX.current) {
+      const distance = touchStartX.current - touchEndX.current;
+      const progress = Math.min(Math.abs(distance) / minSwipeDistance, 1);
+      setSwipeProgress(progress);
+      
+      if (Math.abs(distance) > 20) {
+        setSwipeDirection(distance > 0 ? 'left' : 'right');
+      } else {
+        setSwipeDirection(null);
+      }
+    }
   };
 
   const handleTouchEnd = () => {
@@ -72,6 +86,8 @@ export function AppShell({ children }: AppShellProps) {
     touchStartX.current = null;
     touchEndX.current = null;
     setIsSwiping(false);
+    setSwipeDirection(null);
+    setSwipeProgress(0);
   };
 
   // Check for reminders on mount
@@ -123,12 +139,84 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Main content with swipe support */}
       <main 
-        className="flex-1 pb-20 touch-pan-y"
+        className="flex-1 pb-20 touch-pan-y relative"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         {children}
+        
+        {/* Swipe indicator overlay */}
+        <AnimatePresence>
+          {isSwiping && swipeDirection && swipeProgress > 0.3 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 pointer-events-none z-40 flex items-center justify-center"
+            >
+              {/* Direction indicator */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: swipeProgress }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2 px-4 py-2 bg-background/90 backdrop-blur-md rounded-full border border-border/50 shadow-lg"
+                style={{
+                  left: swipeDirection === 'right' ? '16px' : 'auto',
+                  right: swipeDirection === 'left' ? '16px' : 'auto',
+                }}
+              >
+                {swipeDirection === 'right' && getCurrentIndex() > 0 && (
+                  <>
+                    <ChevronLeft className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-foreground">
+                      {navItems[getCurrentIndex() - 1]?.label}
+                    </span>
+                  </>
+                )}
+                {swipeDirection === 'left' && getCurrentIndex() < navItems.length - 1 && (
+                  <>
+                    <span className="text-xs font-medium text-foreground">
+                      {navItems[getCurrentIndex() + 1]?.label}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-primary" />
+                  </>
+                )}
+              </motion.div>
+
+              {/* Tab dots indicator */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="absolute bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-2 bg-background/90 backdrop-blur-md rounded-full border border-border/50"
+              >
+                {navItems.map((item, index) => {
+                  const currentIdx = getCurrentIndex();
+                  const isActive = index === currentIdx;
+                  const isTarget = 
+                    (swipeDirection === 'left' && index === currentIdx + 1) ||
+                    (swipeDirection === 'right' && index === currentIdx - 1);
+                  
+                  return (
+                    <motion.div
+                      key={item.to}
+                      className={cn(
+                        "w-2 h-2 rounded-full transition-all duration-200",
+                        isActive && "bg-primary w-4",
+                        isTarget && "bg-primary/60 scale-125",
+                        !isActive && !isTarget && "bg-muted-foreground/30"
+                      )}
+                      animate={{
+                        scale: isTarget ? 1.3 : isActive ? 1.1 : 1,
+                      }}
+                    />
+                  );
+                })}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Bottom navigation */}
