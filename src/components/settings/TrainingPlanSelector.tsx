@@ -60,11 +60,13 @@ export function TrainingPlanSelector({ selectedPlan, onSelectPlan, showDetails =
         const isSelected = selectedPlan === planId;
         const isExpanded = expandedPlan === planId;
 
-        // Calculate XP targets for games, tasks and detox
-        const split = PLAN_XP_SPLIT[planId];
-        const gamesXPTarget = Math.round(plan.weeklyXPTarget * split.gamesPercent);
-        const tasksXPTarget = Math.round(plan.weeklyXPTarget * split.tasksPercent);
+        // Calculate XP targets matching WeeklyGoalCard logic
+        // Detox XP is INCLUDED in weeklyXPTarget, so we calculate it first, then split the remainder
         const detoxXPTarget = plan.detox ? Math.round(plan.detox.weeklyMinutes * plan.detox.xpPerMinute) : 0;
+        const nonDetoxTarget = Math.max(0, plan.weeklyXPTarget - detoxXPTarget);
+        const split = PLAN_XP_SPLIT[planId];
+        const gamesXPTarget = Math.round(nonDetoxTarget * split.gamesPercent);
+        const tasksXPTarget = Math.max(0, nonDetoxTarget - gamesXPTarget);
 
         return (
           <motion.div
