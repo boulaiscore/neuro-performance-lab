@@ -317,7 +317,7 @@ const Home = () => {
           className="pt-4"
         >
           <motion.button
-            onClick={() => navigate('/app/neuro-lab')}
+            onClick={() => navigate('/neuro-lab')}
             className={cn(
               "w-full py-4 rounded-xl",
               "bg-primary text-primary-foreground",
