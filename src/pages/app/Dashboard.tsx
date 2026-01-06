@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Info, Loader2, Activity, BarChart3, Play, BookOpen, FileText, Gamepad2, BookMarked, Smartphone, Ban } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserMetrics } from "@/hooks/useExercises";
+import { useCognitiveNetworkScore } from "@/hooks/useCognitiveNetworkScore";
 import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
@@ -92,15 +93,8 @@ const Dashboard = () => {
     };
   }, [metrics]);
   
-  // Overall score for neural animation
-  const overallScore = useMemo(() => {
-    return Math.round(
-      ((metrics?.reasoning_accuracy || 50) + 
-       (metrics?.focus_stability || 50) + 
-       (metrics?.decision_quality || 50) + 
-       (metrics?.creativity || 50)) / 4
-    );
-  }, [metrics]);
+  // Synthesized Cognitive Index (SCI) for neural animation
+  const { sci, statusText: sciStatusText, isLoading: sciLoading } = useCognitiveNetworkScore();
 
   if (metricsLoading) {
     return (
@@ -168,10 +162,12 @@ const Dashboard = () => {
               chronologicalAge={cognitiveAgeData.chronologicalAge}
             />
 
-            {/* Neural Growth Animation */}
+            {/* Neural Growth Animation - powered by SCI */}
             <NeuralGrowthAnimation
               cognitiveAgeDelta={-cognitiveAgeData.delta}
-              overallCognitiveScore={overallScore}
+              overallCognitiveScore={sci?.total ?? 50}
+              sciBreakdown={sci}
+              statusText={sciStatusText}
             />
 
             {/* Thinking Systems Overview */}
