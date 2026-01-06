@@ -14,6 +14,7 @@ interface ThinkingSystemSourcesProps {
   currentFocus: number;
   currentReasoning: number;
   currentCreativity: number;
+  hasTrainingSessions?: boolean;
 }
 
 const DeltaIndicator = ({ delta }: { delta: number }) => {
@@ -29,6 +30,7 @@ export function ThinkingSystemSources({
   currentFocus,
   currentReasoning,
   currentCreativity,
+  hasTrainingSessions = true,
 }: ThinkingSystemSourcesProps) {
   // Map area names to their scores
   const areaScores: Record<string, { baseline: number; current: number }> = {
@@ -36,6 +38,23 @@ export function ThinkingSystemSources({
     "Critical Reasoning": { baseline: baselineReasoning, current: currentReasoning },
     "Creativity Hub": { baseline: baselineCreativity, current: currentCreativity },
   };
+
+  // Show message when no training sessions
+  if (!hasTrainingSessions) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-medium text-foreground uppercase tracking-wider">
+            Strategic Training Domains
+          </h3>
+        </div>
+        <div className="p-6 rounded-xl bg-card/50 border border-border/30 text-center">
+          <p className="text-sm text-muted-foreground">No training sessions yet</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">Complete NeuroLab sessions to see your domain progress</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
