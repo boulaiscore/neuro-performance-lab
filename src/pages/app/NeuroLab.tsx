@@ -164,6 +164,7 @@ export default function NeuroLab() {
         {/* Neuro Activation */}
         <button
           onClick={handleNeuroActivation}
+          data-tutorial="neuro-activation"
           className={cn(
             "w-full p-4 rounded-xl border transition-all duration-200 mb-5",
             "bg-gradient-to-br from-primary/12 to-transparent",
@@ -199,15 +200,15 @@ export default function NeuroLab() {
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-3 mb-4">
-            <TabsTrigger value="games" className="flex items-center gap-1.5 text-xs">
+            <TabsTrigger value="games" data-tutorial="games-tab" className="flex items-center gap-1.5 text-xs">
               <Gamepad2 className="w-3.5 h-3.5" />
               Games
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="flex items-center gap-1.5 text-xs">
+            <TabsTrigger value="tasks" data-tutorial="tasks-tab" className="flex items-center gap-1.5 text-xs">
               <BookMarked className="w-3.5 h-3.5" />
               Tasks
             </TabsTrigger>
-            <TabsTrigger value="detox" className="flex items-center gap-1.5 text-xs">
+            <TabsTrigger value="detox" data-tutorial="detox-tab" className="flex items-center gap-1.5 text-xs">
               <div className="relative w-3.5 h-3.5">
                 <Smartphone className="w-3.5 h-3.5" />
                 <Ban className="w-3.5 h-3.5 absolute inset-0" />
