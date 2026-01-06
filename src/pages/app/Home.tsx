@@ -316,7 +316,7 @@ const Home = () => {
           transition={{ delay: 0.25 }}
           className="pt-4"
         >
-          <button
+          <motion.button
             onClick={() => navigate('/app/neuro-lab')}
             className={cn(
               "w-full py-4 rounded-xl",
@@ -324,12 +324,26 @@ const Home = () => {
               "text-base font-semibold",
               "shadow-button",
               "active:scale-[0.98] transition-transform",
-              "flex items-center justify-center gap-2"
+              "flex items-center justify-center gap-2 group"
             )}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <Brain className="w-5 h-5" />
+            <motion.div
+              animate={{ 
+                rotate: [0, 5, -5, 0],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                repeatDelay: 1
+              }}
+            >
+              <Brain className="w-5 h-5" />
+            </motion.div>
             Go to Lab
-          </button>
+          </motion.button>
         </motion.div>
 
       </main>
