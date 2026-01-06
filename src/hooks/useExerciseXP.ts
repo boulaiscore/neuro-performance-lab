@@ -72,7 +72,8 @@ export function useRecordExerciseCompletion() {
     }) => {
       if (!user?.id) throw new Error("User not authenticated");
 
-      const xpEarned = getExerciseXP(difficulty);
+      // XP is now proportional to score
+      const xpEarned = getExerciseXP(difficulty, score);
       const weekStart = getCurrentWeekStart();
 
       const { data, error } = await supabase
