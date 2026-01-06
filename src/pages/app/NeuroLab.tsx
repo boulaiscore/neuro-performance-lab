@@ -137,7 +137,18 @@ export default function NeuroLab() {
   return (
     <AppShell>
       <div className="px-5 py-5 max-w-md mx-auto">
-
+        
+        {/* Page Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <h1 className="text-2xl font-bold mb-1">Lab</h1>
+          <p className="text-sm text-muted-foreground">
+            Train your brain with games, tasks, and digital detox challenges.
+          </p>
+        </motion.div>
 
         {/* Neuro Activation */}
         <button
