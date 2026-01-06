@@ -55,9 +55,10 @@ export default function NeuroLabSessionRunner() {
   
   const [sessionExercises, setSessionExercises] = useState<CognitiveExercise[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [responses, setResponses] = useState<Map<string, { score: number; correct: number }>>(new Map());
-  const responsesRef = useRef<Map<string, { score: number; correct: number }>>(new Map());
+  const [responses, setResponses] = useState<Map<string, { score: number; correct: number; total?: number }>>(new Map());
+  const responsesRef = useRef<Map<string, { score: number; correct: number; total?: number }>>(new Map());
   const [isComplete, setIsComplete] = useState(false);
+  const [sessionXPEarned, setSessionXPEarned] = useState(0);
   const [sessionScore, setSessionScore] = useState({ score: 0, correctAnswers: 0, totalQuestions: 0 });
   const [earnedXP, setEarnedXP] = useState(0);
   const [newBadges, setNewBadges] = useState<Badge[]>([]);
@@ -137,7 +138,8 @@ export default function NeuroLabSessionRunner() {
           correct: result.correct,
           total: totalQuestions,
         });
-        // Show XP earned toast immediately
+        // Show XP earned toast immediately and update session total
+        setSessionXPEarned(prev => prev + xpEarned);
         toast.success(`+${xpEarned} XP earned!`, { 
           id: `xp-${currentExercise.id}`,
           duration: 2000,
@@ -440,17 +442,29 @@ export default function NeuroLabSessionRunner() {
                 </span>
               )}
             </div>
-            <span className="text-xs text-muted-foreground">
-              {currentIndex + 1}/{sessionExercises.length}
-            </span>
+            <div className="flex items-center gap-3">
+              {/* XP Indicator */}
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+                <Star className="w-3 h-3 text-amber-400" />
+                <span className="text-xs font-medium text-amber-400">{sessionXPEarned} XP</span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {currentIndex + 1}/{sessionExercises.length}
+              </span>
+            </div>
           </div>
           
-          {/* Progress Bar */}
-          <div className="h-1 bg-border/30 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
+          {/* Progress Bar with XP potential indicator */}
+          <div className="flex items-center gap-2 mb-1">
+            <div className="flex-1 h-1 bg-border/30 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-amber-400/70">
+              +{getExerciseXP((currentExercise?.difficulty as "easy" | "medium" | "hard") || "medium", 1, 1)} XP max
+            </span>
           </div>
         </header>
 
