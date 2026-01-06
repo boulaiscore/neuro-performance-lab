@@ -33,9 +33,9 @@ export interface DailyDetoxSettings {
 export const DETOX_SLOT_OPTIONS = [
   { value: 30, label: "30 min" },
   { value: 45, label: "45 min" },
-  { value: 60, label: "1 ora" },
+  { value: 60, label: "1 hour" },
   { value: 90, label: "1h 30m" },
-  { value: 120, label: "2 ore" },
+  { value: 120, label: "2 hours" },
 ];
 
 // XP per minute of detox (0.05 XP/min)

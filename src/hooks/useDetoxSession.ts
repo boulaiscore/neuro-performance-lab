@@ -118,8 +118,8 @@ export function useDetoxSession() {
     
     // Show toast about the reset
     toast({
-      title: `⚠️ Timer azzerato!`,
-      description: `Hai aperto ${event.appName}. Violazione #${event.violationCount}`,
+      title: `⚠️ Timer Reset!`,
+      description: `You opened ${event.appName}. Violation #${event.violationCount}`,
       variant: "destructive",
     });
   }, [activeSession, toast]);
@@ -153,8 +153,8 @@ export function useDetoxSession() {
   ): Promise<boolean> => {
     if (!user?.id) {
       toast({
-        title: "Errore",
-        description: "Devi essere autenticato per iniziare una sessione detox",
+        title: "Error",
+        description: "You must be logged in to start a detox session",
         variant: "destructive",
       });
       return false;
@@ -198,16 +198,16 @@ export function useDetoxSession() {
       scheduleDetoxEndNotification(data.id, endTime.toISOString(), durationMinutes);
 
       toast({
-        title: "Detox iniziato",
-        description: `Sessione di ${durationMinutes} minuti avviata. Riceverai una notifica a fine sessione.`,
+        title: "Detox Started",
+        description: `${durationMinutes}-minute session started. You'll be notified when it ends.`,
       });
 
       return true;
     } catch (error) {
       console.error('[useDetoxSession] Error starting session:', error);
       toast({
-        title: "Errore",
-        description: "Impossibile avviare la sessione detox",
+        title: "Error",
+        description: "Failed to start detox session",
         variant: "destructive",
       });
       return false;
@@ -268,10 +268,10 @@ export function useDetoxSession() {
       }
 
       toast({
-        title: "Detox completato! 🎉",
+        title: "Detox Complete! 🎉",
         description: actualMinutes >= 30 
-          ? `Hai guadagnato ${xpEarned} XP (${actualMinutes} min effettivi)`
-          : `Sessione troppo breve per XP (${actualMinutes} min, min 30)`,
+          ? `You earned ${xpEarned} XP (${actualMinutes} min actual)`
+          : `Session too short for XP (${actualMinutes} min, min 30)`,
       });
 
       return true;
@@ -309,8 +309,8 @@ export function useDetoxSession() {
       }
 
       toast({
-        title: "Detox annullato",
-        description: "La sessione è stata interrotta",
+        title: "Detox Cancelled",
+        description: "The session has been interrupted",
       });
 
       return true;
