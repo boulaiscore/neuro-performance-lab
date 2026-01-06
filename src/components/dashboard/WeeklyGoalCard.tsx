@@ -4,13 +4,18 @@ import { Star, Gamepad2, BookMarked, Target, CheckCircle2, Smartphone, Ban, Gift
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 import { useWeeklyDetoxXP } from "@/hooks/useDetoxProgress";
 import { XPCelebration } from "@/components/app/XPCelebration";
+import { XP_VALUES, TRAINING_PLANS, TrainingPlanId } from "@/lib/trainingPlans";
 
-// Estimated XP split for non-detox work based on plan structure
-const PLAN_XP_SPLIT: Record<string, { gamesPercent: number; tasksPercent: number }> = {
-  light: { gamesPercent: 0.75, tasksPercent: 0.25 },      // ~75 games, ~25 tasks
-  expert: { gamesPercent: 0.60, tasksPercent: 0.40 },     // ~90 games, ~60 tasks
-  superhuman: { gamesPercent: 0.58, tasksPercent: 0.42 }, // ~145 games, ~105 tasks
-};
+// Calculate tasks XP target based on plan's contentPerWeek
+function calculateTasksXPTarget(planId: TrainingPlanId): number {
+  const plan = TRAINING_PLANS[planId];
+  if (!plan) return 0;
+  
+  // Average XP per content piece: (podcast 8 + reading 10 + book 12) / 3 ≈ 10
+  // But we use actual values based on typical content mix
+  const avgXPPerContent = (XP_VALUES.podcastComplete + XP_VALUES.readingComplete + XP_VALUES.bookChapterComplete) / 3;
+  return Math.round(plan.contentPerWeek * avgXPPerContent);
+}
 
 function safeProgress(value: number, target: number) {
   if (target <= 0) return 0;
@@ -42,12 +47,12 @@ export function WeeklyGoalCard() {
 
   // Derive an explicit detox target from the plan (base XP only, bonus is extra when goal is hit).
   const detoxXPTarget = Math.round(plan.detox.weeklyMinutes * plan.detox.xpPerMinute);
-  const nonDetoxTarget = Math.max(0, totalXPTarget - detoxXPTarget);
-
-  // Calculate XP targets for games and tasks from the non-detox target
-  const split = PLAN_XP_SPLIT[plan.id] || PLAN_XP_SPLIT.light;
-  const gamesXPTarget = Math.round(nonDetoxTarget * split.gamesPercent);
-  const tasksXPTarget = Math.max(0, nonDetoxTarget - gamesXPTarget);
+  
+  // Calculate tasks XP target based on plan's actual contentPerWeek
+  const tasksXPTarget = calculateTasksXPTarget(plan.id as TrainingPlanId);
+  
+  // Games XP target = total target - detox target - tasks target
+  const gamesXPTarget = Math.max(0, totalXPTarget - detoxXPTarget - tasksXPTarget);
 
   // Progress percentages
   const gamesProgress = safeProgress(weeklyGamesXP, gamesXPTarget);
@@ -120,7 +125,7 @@ export function WeeklyGoalCard() {
                 {gamesComplete && (
                   <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">
                     <CheckCircle2 className="w-2.5 h-2.5" />
-                    Completato
+                    Complete
                   </span>
                 )}
               </div>
@@ -149,7 +154,7 @@ export function WeeklyGoalCard() {
                 {tasksComplete && (
                   <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">
                     <CheckCircle2 className="w-2.5 h-2.5" />
-                    Completato
+                    Complete
                   </span>
                 )}
               </div>
@@ -179,7 +184,7 @@ export function WeeklyGoalCard() {
                 {detoxComplete && (
                   <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">
                     <CheckCircle2 className="w-2.5 h-2.5" />
-                    Completato
+                    Complete
                   </span>
                 )}
               </div>
@@ -196,7 +201,7 @@ export function WeeklyGoalCard() {
               />
             </div>
             <p className="text-[9px] text-muted-foreground mt-1.5">
-              Detox contribuisce al target settimanale (come Games e Tasks)
+              Detox counts toward weekly target (like Games and Tasks)
             </p>
           </div>
         </div>
