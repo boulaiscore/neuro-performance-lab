@@ -222,7 +222,21 @@ export function useUpdateUserMetrics() {
         Object.entries(metricUpdates).forEach(([key, value]) => {
           const dbKey = mapMetricName(key) as keyof UserCognitiveMetrics;
           const currentValue = (existing[dbKey] as number) || 50;
-          // Gradual improvement with diminishing returns
+          
+          /**
+           * GRADUAL IMPROVEMENT FORMULA
+           * ===========================
+           * Formula: newValue = min(100, currentValue + earnedPoints × 0.5)
+           * 
+           * The 0.5 dampening factor ensures:
+           * 1. Scores don't inflate too quickly from single sessions
+           * 2. Consistent training over time is required for meaningful improvement
+           * 3. Maximum possible score is capped at 100
+           * 
+           * Example: If you score 80% on a medium exercise affecting reasoning_accuracy (currently 55):
+           * earnedPoints = 0.8 × 2 × 1 = 1.6
+           * newValue = 55 + 1.6 × 0.5 = 55.8
+           */
           const newValue = Math.min(100, currentValue + value * 0.5);
           updates[mapMetricName(key)] = Math.round(newValue * 10) / 10;
         });
