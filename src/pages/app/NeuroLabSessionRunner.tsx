@@ -171,20 +171,24 @@ export default function NeuroLabSessionRunner() {
       // Complete session - use ref for most up-to-date values
       let totalScore = 0;
       let totalCorrect = 0;
+      let totalQuestions = 0;
       
       responsesRef.current.forEach(response => {
         totalScore += response.score;
         totalCorrect += response.correct;
+        // Each exercise may have multiple questions
+        totalQuestions += response.total ?? 1;
       });
       
-      const averageScore = sessionExercises.length > 0 
-        ? Math.round(totalScore / sessionExercises.length) 
+      // Average score across all exercises (each exercise's score is already 0-100)
+      const averageScore = responsesRef.current.size > 0 
+        ? Math.round(totalScore / responsesRef.current.size) 
         : 0;
       
       setSessionScore({ 
         score: averageScore, 
         correctAnswers: totalCorrect, 
-        totalQuestions: sessionExercises.length 
+        totalQuestions: totalQuestions
       });
       setIsComplete(true);
       
@@ -198,7 +202,7 @@ export default function NeuroLabSessionRunner() {
             exercises_used: sessionExercises.map(e => e.id),
             score: averageScore,
             correct_answers: totalCorrect,
-            total_questions: sessionExercises.length,
+            total_questions: totalQuestions,
             completed_at: new Date().toISOString(),
             is_daily_training: isDailyTraining,
           });

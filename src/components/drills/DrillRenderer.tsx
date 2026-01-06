@@ -32,7 +32,7 @@ import {
 
 interface DrillRendererProps {
   exercise: CognitiveExercise;
-  onComplete: (result: { score: number; correct: number; avgReactionTime?: number }) => void;
+  onComplete: (result: { score: number; correct: number; total?: number; avgReactionTime?: number }) => void;
 }
 
 export function DrillRenderer({ exercise, onComplete }: DrillRendererProps) {
@@ -81,13 +81,14 @@ export function DrillRenderer({ exercise, onComplete }: DrillRendererProps) {
     }
       
     const correct = result.correct ?? result.hits ?? result.totalCorrect ?? result.maxSpan ?? result.maxLevel ?? 0;
+    const total = result.total ?? 1;
     
     const avgReactionTime = result.avgReactionTime ?? 
       (result.reactionTimes && result.reactionTimes.length > 0 
         ? result.reactionTimes.reduce((a, b) => a + b, 0) / result.reactionTimes.length 
         : undefined);
 
-    onComplete({ score, correct, avgReactionTime });
+    onComplete({ score, correct, total, avgReactionTime });
   };
 
   switch (drillType) {
@@ -494,7 +495,8 @@ export function DrillRenderer({ exercise, onComplete }: DrillRendererProps) {
           exerciseCount={1}
           onComplete={(r) => handleComplete({ 
             score: r.score, 
-            correct: r.correct ? 1 : 0
+            correct: r.correct,
+            total: r.total
           })}
         />
       );
