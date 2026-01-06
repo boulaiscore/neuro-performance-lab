@@ -23,6 +23,7 @@ import { ContentDifficulty } from "@/lib/contentLibrary";
 import { TrainHeader } from "@/components/app/TrainHeader";
 import { WeeklyGoalCard } from "@/components/dashboard/WeeklyGoalCard";
 import { DetoxChallengeTab } from "@/components/app/DetoxChallengeTab";
+import { LabOnboardingTutorial } from "@/components/app/LabOnboardingTutorial";
 
 // Map session types to recommended game areas
 const SESSION_TO_AREAS: Record<string, NeuroLabArea[]> = {
@@ -60,6 +61,16 @@ export default function NeuroLab() {
   // Auto-open session picker if continuing session
   const continueSession = searchParams.get("continueSession") === "true";
   const [showSessionPicker, setShowSessionPicker] = useState(continueSession);
+  
+  // Lab onboarding tutorial - show on first visit
+  const [showTutorial, setShowTutorial] = useState(() => {
+    return !localStorage.getItem("lab-tutorial-completed");
+  });
+  
+  const handleTutorialComplete = () => {
+    localStorage.setItem("lab-tutorial-completed", "true");
+    setShowTutorial(false);
+  };
 
   const trainingPlan = (user?.trainingPlan || "light") as TrainingPlanId;
   const nextSession = getNextSession();
@@ -307,6 +318,11 @@ export default function NeuroLab() {
         contentDifficulty={sessionDifficulty}
         weeklyXPTarget={weeklyXPTarget}
         weeklyXPEarned={weeklyXPEarned}
+      />
+
+      <LabOnboardingTutorial
+        open={showTutorial}
+        onComplete={handleTutorialComplete}
       />
     </AppShell>
   );
