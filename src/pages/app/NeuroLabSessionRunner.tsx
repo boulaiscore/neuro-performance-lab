@@ -121,15 +121,16 @@ export default function NeuroLabSessionRunner() {
     responsesRef.current = updated;
     setResponses(updated);
     
-    // Record individual exercise completion with XP
+    // Record individual exercise completion with XP (proportional to score)
     if (user?.id && currentExercise.gym_area) {
       try {
-        const xpEarned = getExerciseXP((currentExercise.difficulty as "easy" | "medium" | "hard") || "medium");
+        const difficulty = (currentExercise.difficulty as "easy" | "medium" | "hard") || "medium";
+        const xpEarned = getExerciseXP(difficulty, result.score);
         await recordExerciseCompletion.mutateAsync({
           exerciseId: currentExercise.id,
           gymArea: currentExercise.gym_area,
           thinkingMode: currentExercise.thinking_mode || null,
-          difficulty: (currentExercise.difficulty as "easy" | "medium" | "hard") || "medium",
+          difficulty,
           score: result.score,
         });
         // Show XP earned toast immediately

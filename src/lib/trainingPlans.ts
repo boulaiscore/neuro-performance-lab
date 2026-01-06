@@ -69,14 +69,18 @@ export const XP_VALUES = {
   detoxWeeklyBonus: 5,       // Average bonus for hitting weekly target
 } as const;
 
-// Helper to get XP for exercise difficulty
-export function getExerciseXP(difficulty: "easy" | "medium" | "hard"): number {
+// Helper to get XP for exercise difficulty - proportional to score
+export function getExerciseXP(difficulty: "easy" | "medium" | "hard", score: number = 100): number {
+  let baseXP: number;
   switch (difficulty) {
-    case "easy": return XP_VALUES.exerciseEasy;
-    case "medium": return XP_VALUES.exerciseMedium;
-    case "hard": return XP_VALUES.exerciseHard;
-    default: return XP_VALUES.exerciseMedium;
+    case "easy": baseXP = XP_VALUES.exerciseEasy; break;
+    case "medium": baseXP = XP_VALUES.exerciseMedium; break;
+    case "hard": baseXP = XP_VALUES.exerciseHard; break;
+    default: baseXP = XP_VALUES.exerciseMedium;
   }
+  // Scale XP by score (0-100) with minimum 10% to reward participation
+  const scaledScore = Math.max(10, Math.min(100, score));
+  return Math.round(baseXP * (scaledScore / 100));
 }
 
 export const TRAINING_PLANS: Record<TrainingPlanId, TrainingPlan> = {
