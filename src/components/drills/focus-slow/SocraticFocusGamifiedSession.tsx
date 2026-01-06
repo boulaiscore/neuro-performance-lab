@@ -144,7 +144,7 @@ const SOCRATIC_FOCUS_EXERCISES = [
 
 interface Props {
   exerciseCount?: number;
-  onComplete: (result: { score: number; correct: boolean }) => void;
+  onComplete: (result: { score: number; correct: number; total: number }) => void;
 }
 
 export const SocraticFocusGamifiedSession = ({ exerciseCount = 1, onComplete }: Props) => {
@@ -165,8 +165,9 @@ export const SocraticFocusGamifiedSession = ({ exerciseCount = 1, onComplete }: 
     const newScores = [...scores, result.score];
     setScores(newScores);
     
+    const newCorrectCount = correctCount + (result.correct ? 1 : 0);
     if (result.correct) {
-      setCorrectCount(prev => prev + 1);
+      setCorrectCount(newCorrectCount);
     }
 
     if (isLastExercise) {
@@ -174,7 +175,8 @@ export const SocraticFocusGamifiedSession = ({ exerciseCount = 1, onComplete }: 
       const avgScore = Math.round(newScores.reduce((a, b) => a + b, 0) / newScores.length);
       onComplete({ 
         score: avgScore, 
-        correct: correctCount + (result.correct ? 1 : 0) > selectedExercises.length / 2 
+        correct: newCorrectCount,
+        total: selectedExercises.length
       });
     } else {
       // Move to next exercise immediately (user already clicked Next button)

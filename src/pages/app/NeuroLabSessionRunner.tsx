@@ -112,7 +112,7 @@ export default function NeuroLabSessionRunner() {
   const currentExercise = sessionExercises[currentIndex];
   const progress = sessionExercises.length > 0 ? ((currentIndex + 1) / sessionExercises.length) * 100 : 0;
 
-  const handleExerciseComplete = useCallback(async (result: { score: number; correct: number }) => {
+  const handleExerciseComplete = useCallback(async (result: { score: number; correct: number; total?: number }) => {
     if (!currentExercise) return;
     
     // Update both state and ref (ref is used for immediate access in handleNext)
@@ -121,17 +121,21 @@ export default function NeuroLabSessionRunner() {
     responsesRef.current = updated;
     setResponses(updated);
     
-    // Record individual exercise completion with XP (proportional to score)
+    // Record individual exercise completion with XP (proportional to correct/total)
     if (user?.id && currentExercise.gym_area) {
       try {
         const difficulty = (currentExercise.difficulty as "easy" | "medium" | "hard") || "medium";
-        const xpEarned = getExerciseXP(difficulty, result.score);
+        // Use correct answers and total questions for XP calculation
+        const totalQuestions = result.total ?? 1;
+        const xpEarned = getExerciseXP(difficulty, result.correct, totalQuestions);
         await recordExerciseCompletion.mutateAsync({
           exerciseId: currentExercise.id,
           gymArea: currentExercise.gym_area,
           thinkingMode: currentExercise.thinking_mode || null,
           difficulty,
           score: result.score,
+          correct: result.correct,
+          total: totalQuestions,
         });
         // Show XP earned toast immediately
         toast.success(`+${xpEarned} XP earned!`, { 

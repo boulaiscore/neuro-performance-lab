@@ -63,17 +63,21 @@ export function useRecordExerciseCompletion() {
       thinkingMode,
       difficulty,
       score,
+      correct = 1,
+      total = 1,
     }: {
       exerciseId: string;
       gymArea: string;
       thinkingMode: string | null;
       difficulty: "easy" | "medium" | "hard";
       score: number;
+      correct?: number;
+      total?: number;
     }) => {
       if (!user?.id) throw new Error("User not authenticated");
 
-      // XP is now proportional to score
-      const xpEarned = getExerciseXP(difficulty, score);
+      // XP is proportional to correct answers / total questions
+      const xpEarned = getExerciseXP(difficulty, correct, total);
       const weekStart = getCurrentWeekStart();
 
       const { data, error } = await supabase
