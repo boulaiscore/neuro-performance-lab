@@ -328,7 +328,7 @@ const Home = () => {
             )}
           >
             <Brain className="w-5 h-5" />
-            Go to NeuroLab
+            Go to Lab
           </button>
         </motion.div>
 
