@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/app/AppShell";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronRight, Check, Leaf, Target, Flame, Star, Gamepad2, BookMarked, Smartphone } from "lucide-react";
+import { ChevronRight, Check, Leaf, Target, Flame, Star, Gamepad2, BookMarked, Smartphone, Brain } from "lucide-react";
 import { useWeeklyProgress } from "@/hooks/useWeeklyProgress";
 import { useWeeklyDetoxXP } from "@/hooks/useDetoxProgress";
 import { useCognitiveReadiness } from "@/hooks/useCognitiveReadiness";
@@ -308,6 +308,29 @@ const Home = () => {
             </div>
           </div>
         </motion.section>
+
+        {/* Go to NeuroLab CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="pt-4"
+        >
+          <button
+            onClick={() => navigate('/app/neuro-lab')}
+            className={cn(
+              "w-full py-4 rounded-xl",
+              "bg-primary text-primary-foreground",
+              "text-base font-semibold",
+              "shadow-button",
+              "active:scale-[0.98] transition-transform",
+              "flex items-center justify-center gap-2"
+            )}
+          >
+            <Brain className="w-5 h-5" />
+            Go to NeuroLab
+          </button>
+        </motion.div>
 
       </main>
 
